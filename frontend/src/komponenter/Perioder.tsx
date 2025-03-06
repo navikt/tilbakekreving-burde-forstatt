@@ -45,7 +45,7 @@ const PeriodeInput = ({
   });
 
   return (
-    <DatePicker {...datepickerProps}>
+    <DatePicker {...datepickerProps} dropdownCaption>
       <div className="flex gap-4">
         <DatePicker.Input
           {...fromInputProps}
