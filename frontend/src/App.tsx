@@ -20,9 +20,21 @@ function App() {
   const [fodselsnummer, setFodselsnummer] = useState("");
   const [simulertBeløp, setSimulertBeløp] = useState("");
   const [kravgrunnlagBeløp, setKravgrunnlagBeløp] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitted(true);
+
+    // Sjekk om alle påkrevde felter er fylt ut
+    const harAllePerioder = perioder.every(
+      (periode) => periode.fraDato && periode.tilDato
+    );
+
+    if (!harAllePerioder) {
+      return; // Stopp innsending hvis ikke alle perioder er fylt ut
+    }
+
     console.log({
       perioder,
       ytelse: valgtYtelse,
@@ -41,7 +53,11 @@ function App() {
       <p>Laget i hackatonet 2025 🌞</p>
       <form onSubmit={handleSubmit}>
         <VStack gap="4">
-          <Perioder perioder={perioder} setPerioder={setPerioder} />
+          <Perioder
+            perioder={perioder}
+            setPerioder={setPerioder}
+            isSubmitted={isSubmitted}
+          />
           <Ytelser valgtYtelse={valgtYtelse} setValgtYtelse={setValgtYtelse} />
 
           <TextField
@@ -50,7 +66,7 @@ function App() {
             onChange={(e) => setFodselsnummer(e.target.value)}
             pattern="[0-9]{11}"
             error={
-              fodselsnummer && !/^[0-9]{11}$/.test(fodselsnummer)
+              isSubmitted && fodselsnummer && !/^[0-9]{11}$/.test(fodselsnummer)
                 ? "Ugyldig fødselsnummer"
                 : undefined
             }
@@ -62,7 +78,7 @@ function App() {
             onChange={(e) => setSimulertBeløp(e.target.value)}
             type="text"
             inputMode="text"
-            error={validerBeløp(simulertBeløp)}
+            error={isSubmitted ? validerBeløp(simulertBeløp) : undefined}
           />
 
           <TextField
@@ -71,7 +87,7 @@ function App() {
             onChange={(e) => setKravgrunnlagBeløp(e.target.value)}
             type="text"
             inputMode="text"
-            error={validerBeløp(kravgrunnlagBeløp)}
+            error={isSubmitted ? validerBeløp(kravgrunnlagBeløp) : undefined}
           />
 
           <Button type="submit" variant="primary">

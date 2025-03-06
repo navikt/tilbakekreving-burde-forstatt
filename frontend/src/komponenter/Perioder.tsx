@@ -1,7 +1,10 @@
 import { PlusIcon } from "@navikt/aksel-icons";
-
-import { DatePicker, HStack, Button } from "@navikt/ds-react";
-
+import {
+  DatePicker,
+  HStack,
+  Button,
+  useRangeDatepicker,
+} from "@navikt/ds-react";
 import { VStack } from "@navikt/ds-react";
 import { Periode } from "../typer/periode";
 import { TrashIcon } from "@navikt/aksel-icons";
@@ -9,9 +12,61 @@ import { TrashIcon } from "@navikt/aksel-icons";
 interface Props {
   perioder: Periode[];
   setPerioder: (perioder: Periode[]) => void;
+  isSubmitted?: boolean;
 }
 
-const Perioder = ({ perioder, setPerioder }: Props) => {
+type DateRange = {
+  from: Date;
+  to: Date;
+};
+
+const PeriodeInput = ({
+  periode,
+  isSubmitted,
+  onRangeChange,
+}: {
+  periode: Periode;
+  isSubmitted: boolean;
+  onRangeChange: (range: DateRange | undefined) => void;
+}) => {
+  const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
+    fromDate: new Date("2020-01-01"),
+    defaultSelected:
+      periode.fraDato && periode.tilDato
+        ? { from: periode.fraDato, to: periode.tilDato }
+        : undefined,
+    onRangeChange: (range) => {
+      if (range?.from && range?.to) {
+        onRangeChange({ from: range.from, to: range.to });
+      } else {
+        onRangeChange(undefined);
+      }
+    },
+  });
+
+  return (
+    <DatePicker {...datepickerProps}>
+      <div className="flex gap-4">
+        <DatePicker.Input
+          {...fromInputProps}
+          label="Fra dato*"
+          error={
+            isSubmitted && !periode.fraDato ? "Fra dato er påkrevd" : undefined
+          }
+        />
+        <DatePicker.Input
+          {...toInputProps}
+          label="Til dato*"
+          error={
+            isSubmitted && !periode.tilDato ? "Til dato er påkrevd" : undefined
+          }
+        />
+      </div>
+    </DatePicker>
+  );
+};
+
+const Perioder = ({ perioder, setPerioder, isSubmitted = false }: Props) => {
   const leggTilPeriode = () => {
     setPerioder([
       ...perioder,
@@ -25,42 +80,27 @@ const Perioder = ({ perioder, setPerioder }: Props) => {
     }
   };
 
-  const oppdaterPeriode = (
-    id: string,
-    felt: "fraDato" | "tilDato",
-    verdi: Date | undefined
-  ) => {
+  const oppdaterPeriode = (id: string, range: DateRange | undefined) => {
     setPerioder(
       perioder.map((periode) =>
-        periode.id === id ? { ...periode, [felt]: verdi } : periode
+        periode.id === id
+          ? { ...periode, fraDato: range?.from, tilDato: range?.to }
+          : periode
       )
     );
   };
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Perioder</h2>
       <VStack gap="4">
         {perioder.map((periode) => (
           <HStack key={periode.id} gap="4" align="center">
-            <DatePicker
-              selected={periode.fraDato}
-              onSelect={(date) => {
-                console.log("Fra dato: ", date);
-                oppdaterPeriode(periode.id, "fraDato", date);
-              }}
-              toDate={periode.tilDato}
-              max={new Date(new Date().setHours(12, 0, 0, 0)).getTime()}
-            >
-              <DatePicker.Input label="Fra dato" />
-            </DatePicker>
-
-            <DatePicker
-              selected={periode.tilDato}
-              onSelect={(date) => oppdaterPeriode(periode.id, "tilDato", date)}
-              fromDate={periode.fraDato || new Date("2020-01-01")}
-            >
-              <DatePicker.Input label="Til dato" />
-            </DatePicker>
+            <PeriodeInput
+              periode={periode}
+              isSubmitted={isSubmitted}
+              onRangeChange={(range) => oppdaterPeriode(periode.id, range)}
+            />
 
             {perioder.length > 1 && (
               <Button
