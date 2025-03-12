@@ -1,0 +1,15 @@
+application:
+  name: burde-forstatt
+
+tilbakekreving:
+  url: https://tilbakekreving-backend.intern.nav.no/api/behandling/v1
+
+local.mq:
+  queuemanager: QM1
+  kravgrunnlag: QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG
+  channel: DEV.APP.SVRCONN
+  hostname: localhost
+  port: 1414
+  enabled: true
+
+

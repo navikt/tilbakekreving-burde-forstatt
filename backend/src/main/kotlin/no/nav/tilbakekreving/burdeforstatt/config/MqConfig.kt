@@ -1,0 +1,30 @@
+package no.nav.tilbakekreving.burdeforstatt.config
+
+import com.ibm.mq.constants.CMQC
+import com.ibm.mq.jakarta.jms.MQQueueConnectionFactory
+import com.ibm.msg.client.jakarta.jms.JmsConnectionFactory
+import com.ibm.msg.client.jakarta.jms.JmsConstants
+import com.ibm.msg.client.jakarta.jms.JmsFactoryFactory
+import com.ibm.msg.client.jakarta.wmq.WMQConstants
+import jakarta.jms.Connection
+
+data class MqConfig(
+    val host: String,
+    val port: Int,
+    val channel: String,
+    val queueManager: String,
+    val queue: String
+){
+    fun createConnection(): Connection {
+        val ff: JmsFactoryFactory = JmsFactoryFactory.getInstance(JmsConstants.JAKARTA_WMQ_PROVIDER)
+        val factory: JmsConnectionFactory = ff.createConnectionFactory()
+
+        factory.setStringProperty(WMQConstants.WMQ_HOST_NAME, host)
+        factory.setIntProperty(WMQConstants.WMQ_PORT, port)
+        factory.setStringProperty(WMQConstants.WMQ_CHANNEL, channel)
+        factory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, queueManager)
+        factory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT)
+
+        return factory.createConnection()
+    }
+}
