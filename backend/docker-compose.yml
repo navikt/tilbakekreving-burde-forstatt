@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  ibm-mq:
+    image: ibmcom/mq
+    container_name: ibm-mq
+    restart: unless-stopped
+    environment:
+      LICENSE: "accept"
+      MQ_QMGR_NAME: "QM1"
+      MQ_ADMIN_PASSWORD: "passw0rd"
+    ports:
+      - "1414:1414"
+      - "9443:9443"
+    volumes:
+      - mqdata:/var/mqm
+volumes:
+  mqdata:
+    driver: local

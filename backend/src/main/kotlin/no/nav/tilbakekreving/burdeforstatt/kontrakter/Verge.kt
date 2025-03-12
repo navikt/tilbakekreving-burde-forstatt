@@ -1,6 +1,8 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Verge(
     val vergetype: Vergetype,
     val navn: String,

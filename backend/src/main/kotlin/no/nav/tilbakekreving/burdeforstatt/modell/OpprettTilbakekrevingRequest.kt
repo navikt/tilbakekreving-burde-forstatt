@@ -1,8 +1,11 @@
-package no.nav.tilbakekreving.burdeforstatt.kontrakter
+package no.nav.tilbakekreving.burdeforstatt.modell
 
 
+import kotlinx.serialization.Serializable
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
 import java.time.LocalDate
 
+@Serializable
 data class OpprettTilbakekrevingRequest(
     val fagsystem: Fagsystem,
     val regelverk: Regelverk? = null,

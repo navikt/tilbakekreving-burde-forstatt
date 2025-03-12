@@ -6,17 +6,21 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.reflect.*
 import no.nav.tilbakekreving.burdeforstatt.auth.AuthClient
 import no.nav.tilbakekreving.burdeforstatt.auth.TexasAuthenticationProvider
 import no.nav.tilbakekreving.burdeforstatt.auth.TexasPrincipal
+import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
+import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
+import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
+import no.nav.tilbakekreving.burdeforstatt.modell.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.burdeforstatt.service.SendTilTilbakekreving
 import java.time.LocalDate
 
 fun main() {
-    println("Hello world!")
     val request = OpprettTilbakekrevingRequest(
         fagsystem = Fagsystem.BA,
         ytelsestype = Ytelsestype.BARNETRYGD,
@@ -37,26 +41,40 @@ fun main() {
     )
 
     val httpClient = defaultHttpClient()
-    val config = Config(
+    val appConfig = AppConfig(
         tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT"),
         tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
         tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT")
     )
 
+    val mqConfig = MqConfig(
+        host = "b27apvl220.preprod.local",
+        port = 1413,
+        channel = "Q1_FAMILIE_TILBAKE",
+        queueManager = "MQLS02",
+        queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
+        user = System.getenv("CREDENTIAL_USERNAME"),
+        password = System.getenv("CREDENTIAL_PASSWORD"),
+    )
+
+    val mqService = MQService(mqConfig)
+
     embeddedServer(Netty, port = 8080) {
-        registerApiRoutes(config, httpClient)
+        registerApiRoutes(appConfig, httpClient, mqService)
     }.start(wait = true)
 
 }
 
-private fun Application.registerApiRoutes(config: Config, httpClient: HttpClient) {
+private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: HttpClient, mqService: MQService) {
     val authClient = AuthClient(
-        config = config,
+        appConfig = appConfig,
         httpClient = httpClient
     )
     authentication {
         register(TexasAuthenticationProvider(TexasAuthenticationProvider.Config("azuread", authClient)))
     }
+
+    var tilbakekrevingUrl = "http://tilbakekreving-backend"
 
     routing {
         get("/liveness") {
@@ -65,13 +83,19 @@ private fun Application.registerApiRoutes(config: Config, httpClient: HttpClient
         get("/readiness") {
             call.respondText("OK")
         }
+
         authenticate("azuread") {
             route("/api") {
                 get("/me") {
                     call.respondText(call.principal<TexasPrincipal>()!!.claims.toString())
                 }
+                post("/behandling") {
+                    val opprettTilbakekrevingRequest = call.receive<OpprettTilbakekrevingRequest>()
+                    val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl)
+                    sendTilTilbakekreving.process(opprettTilbakekrevingRequest)
+                    call.respond(HttpStatusCode.OK, "Behandling og MQ prosess igangsatt")
+                }
             }
         }
-
     }
 }

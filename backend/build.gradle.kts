@@ -19,10 +19,14 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-apache5:$ktorVersion")
+    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.2.0")
+    implementation("org.messaginghub:pooled-jms:3.1.7")
+    implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:junit-jupiter:5.12.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.18.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

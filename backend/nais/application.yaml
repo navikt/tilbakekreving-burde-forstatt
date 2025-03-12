@@ -11,6 +11,8 @@ metadata:
   labels:
     team: tilbake
 spec:
+  envFrom:
+    - secret: burde-forstatt
   image: {{ image }}
   port: 8080
   liveness:

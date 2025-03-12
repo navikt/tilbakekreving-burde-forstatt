@@ -1,5 +1,8 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Faktainfo(
     val revurderingsårsak: String,
     val revurderingsresultat: String,
