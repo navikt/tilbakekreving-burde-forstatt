@@ -1,6 +1,9 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import kotlinx.serialization.Serializable
 
+
+@Serializable
 data class Brevmottaker(
     val type: MottakerType,
     val vergetype: Vergetype? = null,
