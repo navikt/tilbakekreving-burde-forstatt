@@ -5,14 +5,15 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.PeriodeMedBelop
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
 import no.nav.tilbakekreving.burdeforstatt.modell.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
 import no.nav.tilbakekreving.burdeforstatt.modell.kravgrunnlag.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.burdeforstatt.modell.kravgrunnlag.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.burdeforstatt.modell.kravgrunnlag.DetaljertKravgrunnlagPeriodeDto
 import no.nav.tilbakekreving.burdeforstatt.modell.kravgrunnlag.PeriodeDto
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 class SendTilTilbakekreving(
     private val httpClient: HttpClient,
@@ -21,9 +22,10 @@ class SendTilTilbakekreving(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun process(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest) {
+    suspend fun process(requestFraBurdeForstatt: RequestFraBurdeForstatt) {
 
-        val behandlingSuccess = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest)
+        val opprettTilbakekrevingRequest = getOpprettTilbakekrevingRequest(requestFraBurdeForstatt)
+        val behandlingSuccess = opprettBehandlingITilbakekreving(requestFraBurdeForstatt)
 
         if (behandlingSuccess.status == Ressurs.Status.SUKSESS) {
             val opprettDummyKravgrunnlag = opprettDummyKravgrunnlag(opprettTilbakekrevingRequest)
@@ -33,7 +35,52 @@ class SendTilTilbakekreving(
         }
     }
 
-    private suspend fun opprettBehandlingITilbakekreving(request: OpprettTilbakekrevingRequest): Ressurs<String> =
+    private fun getOpprettTilbakekrevingRequest(requestFraBurdeForstatt: RequestFraBurdeForstatt): OpprettTilbakekrevingRequest {
+
+        val varsel = Varsel(
+            varseltekst = "Varsel tekst",
+            sumFeilutbetaling = requestFraBurdeForstatt.simulertBelop,
+            perioder = requestFraBurdeForstatt.perioder
+        )
+        val faktainfo = Faktainfo(
+            revurderingsårsak = "Norsk",
+            revurderingsresultat = "Test",
+        )
+        return OpprettTilbakekrevingRequest(
+            fagsystem = getFagsystem(requestFraBurdeForstatt.ytelse),
+            ytelsestype = getYtelsesType(requestFraBurdeForstatt.ytelse),
+            personIdent = requestFraBurdeForstatt.personIdent,
+            manueltOpprettet = false,
+            enhetId = "0106",
+            enhetsnavn = "NAV Fredrikstad",
+            saksbehandlerIdent = "0106",
+            revurderingsvedtaksdato = LocalDate.now(),
+            varsel = varsel,
+            begrunnelseForTilbakekreving = "begrunnelse",
+            faktainfo = faktainfo
+        )
+
+    }
+
+    private fun getFagsystem(ytelseFraRequest: String): Fagsystem {
+        return when (ytelseFraRequest) {
+            "Barnetrygd" -> Fagsystem.BA
+            "Kontantstøtte" -> Fagsystem.KONT
+            "Overgangstønad" -> Fagsystem.EF
+            else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
+        }
+    }
+
+    private fun getYtelsesType(ytelseFraRequest: String): Ytelsestype {
+        return when (ytelseFraRequest) {
+            "Barnetrygd" -> Ytelsestype.BARNETRYGD
+            "Kontantstøtte" -> Ytelsestype.KONTANTSTØTTE
+            "Overgangstønad" -> Ytelsestype.OVERGANGSSTØNAD
+            else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
+        }
+    }
+
+    private suspend fun opprettBehandlingITilbakekreving(request: RequestFraBurdeForstatt): Ressurs<String> =
         try {
             val response: HttpResponse = httpClient.post(tilbakekrevingUrl) {
                 contentType(ContentType.Application.Json)

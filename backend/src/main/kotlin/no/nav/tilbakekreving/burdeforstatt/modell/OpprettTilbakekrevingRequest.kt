@@ -4,16 +4,17 @@ package no.nav.tilbakekreving.burdeforstatt.modell
 import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
 import java.time.LocalDate
+import java.util.UUID
 
-@Serializable
+
 data class OpprettTilbakekrevingRequest(
     val fagsystem: Fagsystem,
     val regelverk: Regelverk? = null,
     val ytelsestype: Ytelsestype,
-    val eksternFagsakId: String,
+    val eksternFagsakId: String? = UUID.randomUUID().toString(),
     val personIdent: String,
     // Fagsystemreferanse til behandlingen, må være samme id som brukes mot datavarehus og økonomi
-    val eksternId: String,
+    val eksternId: String? = UUID.randomUUID().toString(),
     val behandlingstype: Behandlingstype? = Behandlingstype.TILBAKEKREVING,
     val manueltOpprettet: Boolean,
     val språkkode: Språkkode = Språkkode.NB,

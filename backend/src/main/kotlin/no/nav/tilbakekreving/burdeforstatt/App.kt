@@ -17,6 +17,7 @@ import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
 import no.nav.tilbakekreving.burdeforstatt.modell.OpprettTilbakekrevingRequest
+import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
 import no.nav.tilbakekreving.burdeforstatt.service.SendTilTilbakekreving
 import java.time.LocalDate
 
@@ -90,9 +91,9 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
                     call.respondText(call.principal<TexasPrincipal>()!!.claims.toString())
                 }
                 post("/behandling") {
-                    val opprettTilbakekrevingRequest = call.receive<OpprettTilbakekrevingRequest>()
+                    val requestFraBurdeForstatt = call.receive<RequestFraBurdeForstatt>()
                     val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl)
-                    sendTilTilbakekreving.process(opprettTilbakekrevingRequest)
+                    sendTilTilbakekreving.process(requestFraBurdeForstatt)
                     call.respond(HttpStatusCode.OK, "Behandling og MQ prosess igangsatt")
                 }
             }
