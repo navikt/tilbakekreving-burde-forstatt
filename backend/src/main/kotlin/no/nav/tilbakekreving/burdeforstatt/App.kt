@@ -1,17 +1,25 @@
 package no.nav.tilbakekreving.burdeforstatt
 
+import com.fasterxml.jackson.core.util.DefaultIndenter
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tilbakekreving.burdeforstatt.auth.AuthClient
 import no.nav.tilbakekreving.burdeforstatt.auth.TexasAuthenticationProvider
 import no.nav.tilbakekreving.burdeforstatt.auth.TexasPrincipal
+import no.nav.tilbakekreving.burdeforstatt.auth.TokenResponse
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
@@ -61,6 +69,17 @@ fun main() {
     val mqService = MQService(mqConfig)
 
     embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) {
+            jackson {
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                configure(SerializationFeature.INDENT_OUTPUT, true)
+                setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
+                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                    indentObjectsWith(DefaultIndenter("  ", "\n"))
+                })
+                registerModule(JavaTimeModule())  // support java.time.* types
+            }
+        }
         registerApiRoutes(appConfig, httpClient, mqService)
     }.start(wait = true)
 
@@ -76,6 +95,7 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
     }
 
     var tilbakekrevingUrl = "http://tilbakekreving-backend"
+    val scope = "api://dev-gcp.tilbake.tilbakekreving-backend/.default"
 
     routing {
         get("/liveness") {
@@ -89,10 +109,20 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
             route("/api") {
                 get("/me") {
                     call.respondText(call.principal<TexasPrincipal>()!!.claims.toString())
+
                 }
                 post("/behandling") {
+                    val tokenResponse = authClient.token(scope)
+                    val accessToken = when (tokenResponse) {
+                        is TokenResponse.Success -> tokenResponse.accessToken
+                        is TokenResponse.Error -> {
+                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
+                            null
+                        }
+                    }
+
                     val requestFraBurdeForstatt = call.receive<RequestFraBurdeForstatt>()
-                    val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl)
+                    val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl, accessToken)
                     sendTilTilbakekreving.process(requestFraBurdeForstatt)
                     call.respond(HttpStatusCode.OK, "Behandling og MQ prosess igangsatt")
                 }

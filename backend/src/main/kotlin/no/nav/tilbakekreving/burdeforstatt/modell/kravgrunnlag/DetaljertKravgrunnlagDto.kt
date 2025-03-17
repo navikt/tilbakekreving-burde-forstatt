@@ -1,30 +1,31 @@
 package no.nav.tilbakekreving.burdeforstatt.modell.kravgrunnlag
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.time.LocalDate
 
 data class DetaljertKravgrunnlagDto(
-    var kravgrunnlagId: BigInteger? = randomBigInteger(),
-    protected var vedtakId: BigInteger? = randomBigInteger(),
-    protected var kodeStatusKrav: String? = null,
-    protected var kodeFagomraade: String? = null,
-    protected var fagsystemId: String? = null,
-    protected var datoVedtakFagsystem: LocalDate? = null,
-    protected var vedtakIdOmgjort: BigInteger? = null,
-    protected var vedtakGjelderId: String? = null,
-    protected var typeGjelderId: TypeGjelderDto? = null,
-    protected var utbetalesTilId: String? = null,
-    protected var typeUtbetId: TypeGjelderDto? = null,
-    protected var kodeHjemmel: String? = null,
-    protected var renterBeregnes: JaNeiDto? = null,
-    protected var enhetAnsvarlig: String? = null,
-    protected var enhetBosted: String? = null,
-    protected var enhetBehandl: String? = null,
-    protected var kontrollfelt: String? = null,
-    protected var saksbehId: String? = null,
-    protected var referanse: String? = null,
-    var tilbakekrevingsPeriode: List<DetaljertKravgrunnlagPeriodeDto>? = null,
+    @JsonProperty("kravgrunnlagId") var kravgrunnlagId: BigInteger? = randomBigInteger(),
+    @JsonProperty("vedtakId") var vedtakId: BigInteger? = randomBigInteger(),
+    @JsonProperty("kodeStatusKrav") var kodeStatusKrav: String? = null,
+    @JsonProperty("kodeFagomraade") var kodeFagomraade: String? = null,
+    @JsonProperty("fagsystemId") var fagsystemId: String? = null,
+    @JsonProperty("datoVedtakFagsystem") var datoVedtakFagsystem: LocalDate? = null,
+    @JsonProperty("vedtakIdOmgjort") var vedtakIdOmgjort: BigInteger? = null,
+    @JsonProperty("vedtakGjelderId") var vedtakGjelderId: String? = null,
+    @JsonProperty("typeGjelderId") var typeGjelderId: TypeGjelderDto? = null,
+    @JsonProperty("utbetalesTilId") var utbetalesTilId: String? = null,
+    @JsonProperty("typeUtbetId") var typeUtbetId: TypeGjelderDto? = null,
+    @JsonProperty("kodeHjemmel") var kodeHjemmel: String? = null,
+    @JsonProperty("renterBeregnes") var renterBeregnes: JaNeiDto? = null,
+    @JsonProperty("enhetAnsvarlig") var enhetAnsvarlig: String? = null,
+    @JsonProperty("enhetBosted") var enhetBosted: String? = null,
+    @JsonProperty("enhetBehandl") var enhetBehandl: String? = null,
+    @JsonProperty("kontrollfelt") var kontrollfelt: String? = null,
+    @JsonProperty("saksbehId") var saksbehId: String? = null,
+    @JsonProperty("referanse") var referanse: String? = null,
+    @JsonProperty("tilbakekrevingsPeriode") var tilbakekrevingsPeriode: List<DetaljertKravgrunnlagPeriodeDto>? = null,
 )
 
 private fun randomBigInteger(numBits: Int = 64): BigInteger {

@@ -1,16 +1,15 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
 
-@Serializable
 data class Brevmottaker(
-    val type: MottakerType,
-    val vergetype: Vergetype? = null,
-    val navn: String,
-    val organisasjonsnummer: String? = null,
-    val personIdent: String? = null,
-    val manuellAdresseInfo: ManuellAdresseInfo? = null,
+    @JsonProperty("type") val type: MottakerType,
+    @JsonProperty("vergetype") val vergetype: Vergetype? = null,
+    @JsonProperty("navn") val navn: String,
+    @JsonProperty("organisasjonsnummer") val organisasjonsnummer: String? = null,
+    @JsonProperty("personIdent") val personIdent: String? = null,
+    @JsonProperty("manuellAdresseInfo") val manuellAdresseInfo: ManuellAdresseInfo? = null,
 ) {
     init {
         check(!(manuellAdresseInfo == null && personIdent.isNullOrBlank() && organisasjonsnummer.isNullOrBlank())) {
@@ -34,9 +33,9 @@ enum class MottakerType(
 }
 
 data class ManuellAdresseInfo(
-    val adresselinje1: String,
-    val adresselinje2: String? = null,
-    val postnummer: String,
-    val poststed: String,
-    val landkode: String,
+    @JsonProperty("adresselinje1") val adresselinje1: String,
+    @JsonProperty("adresselinje2") val adresselinje2: String? = null,
+    @JsonProperty("postnummer") val postnummer: String,
+    @JsonProperty("poststed") val poststed: String,
+    @JsonProperty("landkode") val landkode: String,
 )

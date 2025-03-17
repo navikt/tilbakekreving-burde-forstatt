@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.burdeforstatt.auth
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

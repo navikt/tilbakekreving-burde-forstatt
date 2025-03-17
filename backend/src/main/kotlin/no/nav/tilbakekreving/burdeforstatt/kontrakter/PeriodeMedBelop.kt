@@ -1,12 +1,13 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 import java.time.LocalDate
 
 data class PeriodeMedBelop(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val belop: BigDecimal?,
-    val avregnetBelop: BigDecimal? = null
+    @JsonProperty("fom") val fom: LocalDate,
+    @JsonProperty("tom") val tom: LocalDate,
+    @JsonProperty("belop") val belop: BigDecimal?,
+    @JsonProperty("avregnetBelop") val avregnetBelop: BigDecimal? = null
 )
 

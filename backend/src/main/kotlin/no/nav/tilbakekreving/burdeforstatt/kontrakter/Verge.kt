@@ -1,13 +1,12 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@Serializable
 data class Verge(
-    val vergetype: Vergetype,
-    val navn: String,
-    val organisasjonsnummer: String? = null,
-    val personIdent: String? = null,
+    @JsonProperty("vergetype") val vergetype: Vergetype,
+    @JsonProperty("navn") val navn: String,
+    @JsonProperty("organisasjonsnummer") val organisasjonsnummer: String? = null,
+    @JsonProperty("personIdent") val personIdent: String? = null,
 )
 
 enum class Vergetype(

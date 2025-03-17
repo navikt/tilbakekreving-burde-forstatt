@@ -1,8 +1,7 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@Serializable
 data class Institusjon(
-    val organisasjonsnummer: String,
+    @JsonProperty("organisasjonsnummer") val organisasjonsnummer: String,
 )

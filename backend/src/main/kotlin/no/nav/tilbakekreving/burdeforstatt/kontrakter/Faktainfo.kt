@@ -1,13 +1,12 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@Serializable
 data class Faktainfo(
-    val revurderingsårsak: String,
-    val revurderingsresultat: String,
-    val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
-    val konsekvensForYtelser: Set<String> = emptySet(),
+   @JsonProperty("revurderingsårsak") val revurderingsårsak: String,
+   @JsonProperty("revurderingsresultat") val revurderingsresultat: String,
+   @JsonProperty("tilbakekrevingsvalg") val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
+   @JsonProperty("konsekvensForYtelser") val konsekvensForYtelser: Set<String> = emptySet(),
 )
 
 enum class Tilbakekrevingsvalg {

@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -14,11 +15,11 @@ import java.io.StringWriter
  * @param stacktrace stacktrace fra feil som kan være nyttig til debugging i familie-prosessering
  */
 data class Ressurs<T>(
-    val data: T?,
-    val status: Status,
-    val melding: String,
-    val frontendFeilmelding: String? = null,
-    val stacktrace: String?,
+   @JsonProperty("data") val data: T?,
+    @JsonProperty("status") val status: Status,
+    @JsonProperty("melding") val melding: String,
+    @JsonProperty("frontendFeilmelding") val frontendFeilmelding: String? = null,
+    @JsonProperty("stacktrace") val stacktrace: String?,
 ) {
     enum class Status {
         SUKSESS,
