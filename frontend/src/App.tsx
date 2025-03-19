@@ -13,6 +13,7 @@ import { Periode } from "./typer/periode";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { Alert } from "@navikt/ds-react/Alert";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Header } from "./komponenter/Header";
 
 const postTilbakekreving = async (
   data: TilbakeFormDataRequest
@@ -99,102 +100,111 @@ function App() {
   };
 
   return (
-    <VStack gap="4" className="max-w-2xl mx-auto p-4">
-      <h1 className="text-9xl font-bold text-pink-500">Burde forstått 🤔</h1>
-      <h2 className="text-xl font-bold">Opprett testdata for tilbakekreving</h2>
-      <p>Laget i hackatonet 2025 🌞</p>
+    <>
+      <Header />
+      <VStack gap="4" className="max-w-2xl mx-auto p-4">
+        <h2 className="text-9xl font-bold text-pink-500">Burde forstått 🤔</h2>
+        <h3 className="text-xl font-bold">
+          Opprett testdata for tilbakekreving
+        </h3>
+        <p>Laget i hackatonet 2025 🌞</p>
 
-      {mutation.isSuccess && (
-        <Alert variant="success" className="mb-4">
-          <h2>Suksess!</h2>
-          <p>Tilbakekreving er opprettet.</p>
-        </Alert>
-      )}
+        {mutation.isSuccess && (
+          <Alert variant="success" className="mb-4">
+            <h3>Suksess!</h3>
+            <p>Tilbakekreving er opprettet.</p>
+          </Alert>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <VStack gap="4">
-          <Controller
-            name="perioder"
-            control={control}
-            render={({ field }) => (
-              <Perioder
-                perioder={field.value.map((periode: Periode) => ({
-                  fom: periode.fom,
-                  tom: periode.tom,
-                  id: crypto.randomUUID(),
-                }))}
-                setPerioder={(nyePerioder) => field.onChange(nyePerioder)}
-                feilMelding={errors.perioder}
-              />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <VStack gap="4">
+            <Controller
+              name="perioder"
+              control={control}
+              render={({ field }) => (
+                <Perioder
+                  perioder={field.value.map((periode: Periode) => ({
+                    fom: periode.fom,
+                    tom: periode.tom,
+                    id: crypto.randomUUID(),
+                  }))}
+                  setPerioder={(nyePerioder) => field.onChange(nyePerioder)}
+                  feilMelding={errors.perioder}
+                />
+              )}
+            />
+            <Controller
+              name="ytelse"
+              control={control}
+              render={({ field }) => (
+                <Ytelser
+                  valgtYtelse={field.value}
+                  setValgtYtelse={(nyYtelse) => field.onChange(nyYtelse)}
+                  feilMelding={errors.ytelse?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="personIdent"
+              control={control}
+              rules={{ pattern: /^[0-9]{11}$/ }}
+              render={({ field }) => (
+                <TextField
+                  label="Fødselsnummer eller D-nummer"
+                  {...field}
+                  pattern="[0-9]{11}"
+                  error={errors.personIdent?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="simulertBeløp"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  label="Simulert feilutbetalt beløp"
+                  {...field}
+                  type="text"
+                  inputMode="text"
+                  error={errors.simulertBeløp?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="kravgrunnlagBeløp"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  label="Kravgrunnlag feilutbetalt beløp (faktisk beløp)"
+                  {...field}
+                  type="text"
+                  inputMode="text"
+                  error={errors.kravgrunnlagBeløp?.message}
+                />
+              )}
+            />
+
+            {mutation.isError && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+                <p className="font-bold">Feil ved innsending:</p>
+                <p>{String(mutation.error)}</p>
+              </div>
             )}
-          />
-          <Controller
-            name="ytelse"
-            control={control}
-            render={({ field }) => (
-              <Ytelser
-                valgtYtelse={field.value}
-                setValgtYtelse={(nyYtelse) => field.onChange(nyYtelse)}
-                feilMelding={errors.ytelse?.message}
-              />
-            )}
-          />
 
-          <Controller
-            name="personIdent"
-            control={control}
-            rules={{ pattern: /^[0-9]{11}$/ }}
-            render={({ field }) => (
-              <TextField
-                label="Fødselsnummer eller D-nummer"
-                {...field}
-                pattern="[0-9]{11}"
-                error={errors.personIdent?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="simulertBeløp"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                label="Simulert feilutbetalt beløp"
-                {...field}
-                type="text"
-                inputMode="text"
-                error={errors.simulertBeløp?.message}
-              />
-            )}
-          />
-
-          <Controller
-            name="kravgrunnlagBeløp"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                label="Kravgrunnlag feilutbetalt beløp (faktisk beløp)"
-                {...field}
-                type="text"
-                inputMode="text"
-                error={errors.kravgrunnlagBeløp?.message}
-              />
-            )}
-          />
-
-          {mutation.isError && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded">
-              <p className="font-bold">Feil ved innsending:</p>
-              <p>{String(mutation.error)}</p>
-            </div>
-          )}
-
-          <Button type="submit" variant="primary" loading={mutation.isPending}>
-            Oppretter tilbakekreving
-          </Button>
-        </VStack>
-      </form>
-    </VStack>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={mutation.isPending}
+            >
+              Oppretter tilbakekreving
+            </Button>
+          </VStack>
+        </form>
+      </VStack>
+    </>
   );
 }
 
