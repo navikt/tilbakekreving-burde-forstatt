@@ -11,7 +11,6 @@ class MQService (private val mqConfig: MqConfig) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun sendMessage(dto: DetaljertKravgrunnlagDto) {
-        log.info("Sender kravgrunnlag med id {} til MQ", dto.kravgrunnlagId)
         try {
             val connection = mqConfig.createConnection()
             val session: Session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
@@ -22,15 +21,14 @@ class MQService (private val mqConfig: MqConfig) {
             val message: TextMessage = session.createTextMessage(dtoXml)
 
             producer.send(message)
-            log.info("Kravgrunnlag med id {} sendt til MQ", dto.kravgrunnlagId)
             connection.close()
         } catch (e: JMSException) {
-            log.info("Kunne ikke sende kravgrunnlag med id {} til MQ", dto.kravgrunnlagId)
-            log.warn("JMSException occurred: {}", e.message)
+            log.warn("Kunne ikke sende kravgrunnlag med id {} til MQ", dto.kravgrunnlagId)
+            log.error("JMSException occurred: {}", e.message)
             e.printStackTrace()
         } catch (e: Exception) {
-            log.info("Kunne ikke sende kravgrunnlag med id {} til MQ", dto.kravgrunnlagId)
-            log.warn("An unexpected error occurred: {}", e.message)
+            log.warn("Kunne ikke sende kravgrunnlag med id {} til MQ", dto.kravgrunnlagId)
+            log.error("An unexpected error occurred: {}", e.message)
             e.printStackTrace()
         }
     }

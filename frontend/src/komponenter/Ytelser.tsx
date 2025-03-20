@@ -2,27 +2,26 @@ import { Select } from "@navikt/ds-react";
 import { Ytelse, ytelseGrupper } from "../typer/ytelse";
 
 interface Props {
-  valgtYtelse: Ytelse | null;
-  setValgtYtelse: (ytelse: Ytelse | null) => void;
+  valgtYtelse: Ytelse | undefined;
+  feilMelding?: string;
+  setValgtYtelse: (ytelse: Ytelse | undefined) => void;
 }
 
-const Ytelser = ({ valgtYtelse, setValgtYtelse }: Props) => {
+const Ytelser = ({ valgtYtelse, setValgtYtelse, feilMelding }: Props) => {
   return (
     <Select
       label="Ytelser"
-      value={
-        valgtYtelse ? `${valgtYtelse.fagsystem}:${valgtYtelse.ytelse}` : ""
-      }
+      value={valgtYtelse}
       onChange={(e) => {
-        const [fagsystem, ytelse] = e.target.value.split(":");
-        setValgtYtelse(e.target.value ? { fagsystem, ytelse } : null);
+        setValgtYtelse(e.target.value as Ytelse);
       }}
+      error={feilMelding}
     >
       <option value="">Velg ytelse</option>
       {ytelseGrupper.map((gruppe) => (
         <optgroup key={gruppe.fagsystem} label={gruppe.fagsystem}>
           {gruppe.ytelser.map((ytelse) => (
-            <option key={`${gruppe}:${ytelse}`} value={`${gruppe}:${ytelse}`}>
+            <option key={`${gruppe}:${ytelse}`} value={ytelse}>
               {ytelse}
             </option>
           ))}

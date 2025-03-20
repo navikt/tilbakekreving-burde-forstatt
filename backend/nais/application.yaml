@@ -39,9 +39,18 @@ spec:
       enabled: true
       tenant: trygdeetaten.no
       allowAllUsers: true
+      replyURLs:
+        - http://localhost:4000/api/oauth2/callback
     sidecar:
       enabled: true
   accessPolicy:
     outbound:
       rules:
         - application: tilbakekreving-backend
+      external:
+        - host: b27apvl220.preprod.local
+          ports:
+            - port: 1413
+  env:
+    - name: POST_LOGIN_REDIRECT_URL
+      value: /

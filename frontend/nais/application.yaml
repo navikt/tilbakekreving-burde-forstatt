@@ -1,0 +1,33 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+
+metadata:
+  name: burde-forstatt-frontend
+  namespace: tilbake
+  annotations:
+    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+  labels:
+    team: tilbake
+spec:
+  image: { { image } }
+  port: 8080
+  liveness:
+    path: /
+    initialDelay: 10
+    failureThreshold: 10
+  readiness:
+    path: /
+    initialDelay: 10
+    failureThreshold: 10
+  replicas:
+    min: 1
+    max: 2
+  resources:
+    limits:
+      memory: 128Mi
+    requests:
+      memory: 128Mi
+      cpu: 25m
+  ingresses:
+    - https://burde-forstatt.intern.dev.nav.no

@@ -6,71 +6,93 @@ import {
   useRangeDatepicker,
 } from "@navikt/ds-react";
 import { VStack } from "@navikt/ds-react";
-import { Periode } from "../typer/periode";
 import { TrashIcon } from "@navikt/aksel-icons";
+import { KomponentPeriode } from "../typer/periode";
+import { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";
+
+type PeriodeFeilmelding =
+  | Merge<
+      FieldError,
+      (
+        | Merge<
+            FieldError,
+            FieldErrorsImpl<{
+              fom: Date;
+              tom: Date;
+            }>
+          >
+        | undefined
+      )[]
+    >
+  | undefined;
 
 interface Props {
-  perioder: Periode[];
-  setPerioder: (perioder: Periode[]) => void;
-  isSubmitted?: boolean;
+  perioder: KomponentPeriode[];
+  setPerioder: (perioder: KomponentPeriode[]) => void;
+  feilMelding?: PeriodeFeilmelding;
 }
 
 type DateRange = {
-  from: Date;
-  to: Date;
+  fom: Date;
+  tom: Date;
 };
+
+interface PeriodeInputProps {
+  periode: KomponentPeriode;
+  indeks: number;
+  onRangeChange: (range: DateRange | undefined) => void;
+  feilMelding?: PeriodeFeilmelding;
+}
 
 const PeriodeInput = ({
   periode,
-  isSubmitted,
   onRangeChange,
-}: {
-  periode: Periode;
-  isSubmitted: boolean;
-  onRangeChange: (range: DateRange | undefined) => void;
-}) => {
+  indeks,
+  feilMelding,
+}: PeriodeInputProps) => {
   const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
     fromDate: new Date("2020-01-01"),
     defaultSelected:
-      periode.fraDato && periode.tilDato
-        ? { from: periode.fraDato, to: periode.tilDato }
+      periode.fom && periode.tom
+        ? { from: periode.fom, to: periode.tom }
         : undefined,
     onRangeChange: (range) => {
       if (range?.from && range?.to) {
-        onRangeChange({ from: range.from, to: range.to });
+        onRangeChange({ fom: range.from, tom: range.to });
       } else {
         onRangeChange(undefined);
       }
     },
   });
 
+  const fomFeilMelding =
+    feilMelding && feilMelding[indeks] && feilMelding[indeks].fom?.message;
+
+  const tomFeilMelding =
+    feilMelding && feilMelding[indeks] && feilMelding[indeks].tom?.message;
   return (
     <DatePicker {...datepickerProps} dropdownCaption>
       <div className="flex gap-4">
         <DatePicker.Input
           {...fromInputProps}
-          label="Fra dato*"
-          error={
-            isSubmitted && !periode.fraDato ? "Fra dato er påkrevd" : undefined
-          }
+          label="Fra dato"
+          error={fomFeilMelding}
         />
         <DatePicker.Input
           {...toInputProps}
-          label="Til dato*"
-          error={
-            isSubmitted && !periode.tilDato ? "Til dato er påkrevd" : undefined
-          }
+          label="Til dato"
+          error={tomFeilMelding}
         />
       </div>
     </DatePicker>
   );
 };
 
-const Perioder = ({ perioder, setPerioder, isSubmitted = false }: Props) => {
+const Perioder = ({ perioder, setPerioder, feilMelding }: Props) => {
   const leggTilPeriode = () => {
     setPerioder([
       ...perioder,
-      { fraDato: undefined, tilDato: undefined, id: crypto.randomUUID() },
+      { fom: undefined, tom: undefined, id: crypto.randomUUID() },
     ]);
   };
 
@@ -84,7 +106,7 @@ const Perioder = ({ perioder, setPerioder, isSubmitted = false }: Props) => {
     setPerioder(
       perioder.map((periode) =>
         periode.id === id
-          ? { ...periode, fraDato: range?.from, tilDato: range?.to }
+          ? { ...periode, fom: range?.fom, tom: range?.tom }
           : periode
       )
     );
@@ -98,8 +120,9 @@ const Perioder = ({ perioder, setPerioder, isSubmitted = false }: Props) => {
           <HStack key={periode.id} gap="4" align="center">
             <PeriodeInput
               periode={periode}
-              isSubmitted={isSubmitted}
+              indeks={perioder.indexOf(periode)}
               onRangeChange={(range) => oppdaterPeriode(periode.id, range)}
+              feilMelding={feilMelding}
             />
 
             {perioder.length > 1 && (

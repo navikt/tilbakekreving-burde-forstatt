@@ -5,28 +5,30 @@ import java.math.BigInteger
 import java.security.SecureRandom
 import java.time.LocalDate
 
+import jakarta.xml.bind.annotation.*
+
+@XmlRootElement(name = "DetaljertKravgrunnlag")
+@XmlAccessorType(XmlAccessType.FIELD)
 data class DetaljertKravgrunnlagDto(
-    @JsonProperty("kravgrunnlagId") var kravgrunnlagId: BigInteger? = randomBigInteger(),
-    @JsonProperty("vedtakId") var vedtakId: BigInteger? = randomBigInteger(),
-    @JsonProperty("kodeStatusKrav") var kodeStatusKrav: String? = null,
-    @JsonProperty("kodeFagomraade") var kodeFagomraade: String? = null,
-    @JsonProperty("fagsystemId") var fagsystemId: String? = null,
-    @JsonProperty("datoVedtakFagsystem") var datoVedtakFagsystem: LocalDate? = null,
-    @JsonProperty("vedtakIdOmgjort") var vedtakIdOmgjort: BigInteger? = null,
-    @JsonProperty("vedtakGjelderId") var vedtakGjelderId: String? = null,
-    @JsonProperty("typeGjelderId") var typeGjelderId: TypeGjelderDto? = null,
-    @JsonProperty("utbetalesTilId") var utbetalesTilId: String? = null,
-    @JsonProperty("typeUtbetId") var typeUtbetId: TypeGjelderDto? = null,
-    @JsonProperty("kodeHjemmel") var kodeHjemmel: String? = null,
-    @JsonProperty("renterBeregnes") var renterBeregnes: JaNeiDto? = null,
-    @JsonProperty("enhetAnsvarlig") var enhetAnsvarlig: String? = null,
-    @JsonProperty("enhetBosted") var enhetBosted: String? = null,
-    @JsonProperty("enhetBehandl") var enhetBehandl: String? = null,
-    @JsonProperty("kontrollfelt") var kontrollfelt: String? = null,
-    @JsonProperty("saksbehId") var saksbehId: String? = null,
-    @JsonProperty("referanse") var referanse: String? = null,
-    @JsonProperty("tilbakekrevingsPeriode") var tilbakekrevingsPeriode: List<DetaljertKravgrunnlagPeriodeDto>? = null,
+    @XmlElement(name = "kravgrunnlagId") @JsonProperty("kravgrunnlagId")
+    var kravgrunnlagId: BigInteger? = randomBigInteger(),
+
+    @XmlElement(name = "vedtakId") @JsonProperty("vedtakId")
+    var vedtakId: BigInteger? = randomBigInteger(),
+
+    @XmlElement(name = "kodeStatusKrav") @JsonProperty("kodeStatusKrav")
+    var kodeStatusKrav: String? = null,
+
+    @XmlElement(name = "kodeFagomraade") @JsonProperty("kodeFagomraade")
+    var kodeFagomraade: String? = null,
+
+    @XmlElement(name = "datoVedtakFagsystem") @JsonProperty("datoVedtakFagsystem")
+    var datoVedtakFagsystem: LocalDate? = null,
+
+    @XmlElement(name = "tilbakekrevingsPeriode") @JsonProperty("tilbakekrevingsPeriode")
+    var tilbakekrevingsPeriode: List<DetaljertKravgrunnlagPeriodeDto>? = null
 )
+
 
 private fun randomBigInteger(numBits: Int = 64): BigInteger {
     return BigInteger(numBits, SecureRandom())

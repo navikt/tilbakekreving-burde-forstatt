@@ -20,7 +20,7 @@ object Marshaller {
         marshaller.marshal(dto, stringWriter)
         stringWriter.toString()
     } catch (e: JAXBException) {
-        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}", dto.kravgrunnlagId)
+        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}: {}", dto.kravgrunnlagId, e.message)
         throw (e)
     }
 
