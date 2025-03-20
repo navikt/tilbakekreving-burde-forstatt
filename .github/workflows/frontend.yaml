@@ -2,6 +2,8 @@ name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
   push:
+    include:
+      - frontend/**
     branches:
       - main
 
@@ -27,7 +29,7 @@ jobs:
           cache: 'pnpm'
       - name: Installere dependencies
         working-directory: frontend
-        run: pnpm install --frozend-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Bygg app
         working-directory: frontend
         run: pnpm run build
