@@ -1,10 +1,10 @@
 import { useState, useEffect, ReactNode } from "react";
 import { AuthContext } from "./useAuth";
+import { appConfig } from "../config/config.ts";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [erAutentisert, setErAutentisert] = useState(false);
   const [bruker, setBruker] = useState({ navn: "", enhet: "" });
-  const baseUrl = "https://burde-forstatt.intern.dev.nav.no";
 
   useEffect(() => {
     const sjekkAuth = async () => {
@@ -25,10 +25,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     sjekkAuth();
   }, []);
-  console.log("Href", window.location.href);
 
   const loggInn = () => {
-    window.location.href = `${baseUrl}/api/oauth2/login`;
+    window.location.href = appConfig.loginUrl;
   };
 
   const loggUt = () => setErAutentisert(false);

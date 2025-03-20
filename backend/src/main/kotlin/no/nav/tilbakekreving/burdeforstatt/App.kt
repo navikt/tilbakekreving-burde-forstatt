@@ -38,9 +38,10 @@ fun main() {
 
     val httpClient = defaultHttpClient()
     val config = Config(
-        tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT"),
-        tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
-        tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT")
+        tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT") ?: "http://localhost:4001/api/v1/token",
+        tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT") ?: "http://localhost:4001/api/v1/token/exchange",
+        tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT") ?: "http://localhost:4001/api/v1/introspect",
+        loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:5173/",
     )
 
     embeddedServer(Netty, port = 8080) {
@@ -69,6 +70,9 @@ private fun Application.registerApiRoutes(config: Config, httpClient: HttpClient
             route("/api") {
                 get("/me") {
                     call.respondText(call.principal<TexasPrincipal>()!!.claims.toString())
+                }
+                get("/redirect") {
+                    call.respondRedirect(config.loginRedirectUrl)
                 }
             }
         }

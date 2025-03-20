@@ -45,3 +45,6 @@ spec:
     outbound:
       rules:
         - application: tilbakekreving-backend
+  env:
+    - name: POST_LOGIN_REDIRECT_URL
+      value: /
