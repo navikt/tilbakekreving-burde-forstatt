@@ -10,7 +10,7 @@ metadata:
   labels:
     team: tilbake
 spec:
-  image: { { image } }
+  image: {{ image }}
   port: 8080
   liveness:
     path: /
