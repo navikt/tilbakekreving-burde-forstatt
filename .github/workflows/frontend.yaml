@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
-      package: "read"
+      packages: "read"
     steps:
       - uses: actions/checkout@v4
         with:
