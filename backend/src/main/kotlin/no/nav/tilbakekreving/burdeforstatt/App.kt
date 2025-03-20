@@ -24,47 +24,30 @@ import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
-import no.nav.tilbakekreving.burdeforstatt.modell.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
 import no.nav.tilbakekreving.burdeforstatt.service.SendTilTilbakekreving
-import java.time.LocalDate
 
 fun main() {
-    val request = OpprettTilbakekrevingRequest(
-        fagsystem = Fagsystem.BA,
-        ytelsestype = Ytelsestype.BARNETRYGD,
-        personIdent = "123",
-        eksternId = "123",
-        eksternFagsakId = "123",
-        manueltOpprettet = true,
-        enhetId = "123",
-        enhetsnavn = "enhetsnavn",
-        saksbehandlerIdent = "saksbehandlerIdent",
-        revurderingsvedtaksdato = LocalDate.now(),
-        varsel = null,
-        begrunnelseForTilbakekreving = "begrunnelse",
-        faktainfo = Faktainfo(
-            revurderingsårsak = "årsak",
-            revurderingsresultat = ""
-        )
-    )
 
     val httpClient = defaultHttpClient()
-    val appConfig = AppConfig(
-        tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT"),
-        tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
-        tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT")
-    )
 
-    val mqConfig = MqConfig(
-        host = "b27apvl220.preprod.local",
-        port = 1413,
-        channel = "Q1_FAMILIE_TILBAKE",
-        queueManager = "MQLS02",
-        queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
-        user = System.getenv("CREDENTIAL_USERNAME"),
-        password = System.getenv("CREDENTIAL_PASSWORD"),
-    )
+
+       val appConfig = AppConfig(
+            tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT") ?: "http://localhost:4001/api/v1/token",
+            tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT") ?: "http://localhost:4001/api/v1/token/exchange",
+            tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT") ?: "http://localhost:4001/api/v1/introspect",
+            loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:5173/",
+        )
+
+        val mqConfig = MqConfig(
+            host = "b27apvl220.preprod.local",
+            port = 1413,
+            channel = "Q1_FAMILIE_TILBAKE",
+            queueManager = "MQLS02",
+            queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
+            user = System.getenv("CREDENTIAL_USERNAME"),
+            password = System.getenv("CREDENTIAL_PASSWORD"),
+        )
 
     val mqService = MQService(mqConfig)
 
@@ -98,6 +81,7 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
     val scope = "api://dev-gcp.tilbake.tilbakekreving-backend/.default"
 
     routing {
+
         get("/liveness") {
             call.respondText("OK")
         }
@@ -111,7 +95,11 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
                     call.respondText(call.principal<TexasPrincipal>()!!.claims.toString())
 
                 }
-                post("/behandling") {
+                post("/tilbakekreving") {
+                    val principal = call.principal<TexasPrincipal>()
+                    val claims = principal?.claims
+                    val navIdent: String = (claims?.get("NAVident") ?: "Claim not found").toString()
+
                     val tokenResponse = authClient.token(scope)
                     val accessToken = when (tokenResponse) {
                         is TokenResponse.Success -> tokenResponse.accessToken
@@ -122,9 +110,22 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
                     }
 
                     val requestFraBurdeForstatt = call.receive<RequestFraBurdeForstatt>()
-                    val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl, accessToken)
-                    sendTilTilbakekreving.process(requestFraBurdeForstatt)
-                    call.respond(HttpStatusCode.OK, "Behandling og MQ prosess igangsatt")
+                    val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl, accessToken, navIdent)
+                    val respons = sendTilTilbakekreving.process(requestFraBurdeForstatt)
+                    if (respons.status == Ressurs.Status.SUKSESS) {
+                        call.respond(
+                            HttpStatusCode.OK,
+                            respons
+                        )
+                    } else {
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            respons
+                        )
+                    }
+                }
+                get("/redirect") {
+                    call.respondRedirect(appConfig.loginRedirectUrl)
                 }
             }
         }

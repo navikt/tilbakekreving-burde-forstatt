@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 data class PeriodeIRequest(
      @JsonProperty("fom")
-      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
      val fom: LocalDate,
      @JsonProperty("tom")
      @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

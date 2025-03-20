@@ -1,7 +1,10 @@
-name: Build-Deploy-Preprod
+name: Build-Deploy-Preprod-Backend
 on:
   workflow_dispatch:
   push:
+    paths:
+      - backend/**
+      - .github/workflows/backend.yaml
     branches:
       - main
 
@@ -23,6 +26,8 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       - name: Bygg med gradle u/test
+        env:
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
         working-directory: backend
         run: ./gradlew shadowJar
       - uses: nais/docker-build-push@v0

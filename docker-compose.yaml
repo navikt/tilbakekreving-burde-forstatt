@@ -1,0 +1,36 @@
+services:
+  redis:
+    image: redis:7
+  wonderwall:
+    image: ghcr.io/nais/wonderwall:latest
+    env_file:
+      - .login.env
+    environment:
+      WONDERWALL_OPENID_PROVIDER: "azure"
+      WONDERWALL_UPSTREAM_HOST: host.docker.internal:8080
+      WONDERWALL_REDIS_URI: redis://redis:6379
+      WONDERWALL_LOG_LEVEL: info
+      WONDERWALL_LOG_FORMAT: text
+      WONDERWALL_INGRESS: http://localhost:4000/api
+      WONDERWALL_BIND_ADDRESS: 0.0.0.0:4000
+    dns:
+      - 8.8.8.8
+    ports:
+      - "4000:4000"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+  texas:
+    image: ghcr.io/nais/texas:latest
+    ports:
+      - "4001:4001"
+    env_file:
+      - .login.env
+    environment:
+      # bind to all interfaces to allow wonderwalled to reach the service
+      # DO NOT DO THIS IN PRODUCTION
+      AZURE_ENABLED: "true"
+      BIND_ADDRESS: "0.0.0.0:4001"
+      DOWNSTREAM_APP_NAME: tilbakekreving
+      DOWNSTREAM_APP_NAMESPACE: tilbake
+      DOWNSTREAM_APP_CLUSTER: dev-gcp
+      NAIS_POD_NAME: tilbakekreving-frontend-1337

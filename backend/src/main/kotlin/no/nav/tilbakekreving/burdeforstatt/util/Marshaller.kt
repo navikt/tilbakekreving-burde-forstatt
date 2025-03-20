@@ -3,24 +3,33 @@ package no.nav.tilbakekreving.burdeforstatt.util
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBException
 import jakarta.xml.bind.Marshaller
-import no.nav.tilbakekreving.burdeforstatt.modell.kravgrunnlag.DetaljertKravgrunnlagDto
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import org.slf4j.LoggerFactory
 import java.io.StringWriter
 
+
 object Marshaller {
     val log = LoggerFactory.getLogger(Marshaller::class.java)
-    val jaxbContext = JAXBContext.newInstance(DetaljertKravgrunnlagDto::class.java)
+    val jaxbContext = JAXBContext.newInstance(
+        DetaljertKravgrunnlagMelding::class.java,
+    )
 
     fun marshall(
-        dto: DetaljertKravgrunnlagDto
+        detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding
     ): String = try {
-        val marshaller = jaxbContext.createMarshaller()
+        val marshaller: Marshaller = jaxbContext.createMarshaller()
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+        try {
+            marshaller.setProperty("org.glassfish.jaxb.namespacePrefixMapper", CustomNamespacePrefixMapper())
+        } catch (e: Exception) {
+            println("Namespace prefix mapper is not supported: ${e.message}")
+        }
+
         val stringWriter = StringWriter()
-        marshaller.marshal(dto, stringWriter)
+        marshaller.marshal(detaljertKravgrunnlagMelding, stringWriter)
         stringWriter.toString()
     } catch (e: JAXBException) {
-        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}", dto.kravgrunnlagId)
+        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}: {}", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e.message)
         throw (e)
     }
 

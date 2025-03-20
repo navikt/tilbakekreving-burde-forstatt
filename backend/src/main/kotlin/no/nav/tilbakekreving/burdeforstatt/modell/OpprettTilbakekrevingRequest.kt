@@ -12,7 +12,7 @@ data class OpprettTilbakekrevingRequest(
    @JsonProperty("fagsystem") val fagsystem: Fagsystem,
     @JsonProperty("regelverk") val regelverk: Regelverk? = null,
     @JsonProperty("ytelsestype") val ytelsestype: Ytelsestype,
-    @JsonProperty("eksternFagsakId") val eksternFagsakId: String? = UUID.randomUUID().toString(),
+    @JsonProperty("eksternFagsakId") val eksternFagsakId: String = "BF${UUID.randomUUID().toString().take(8) }",
     @JsonProperty("personIdent") val personIdent: String,
     // Fagsystemreferanse til behandlingen, må være samme id som brukes mot datavarehus og økonomi
     @JsonProperty("eksternId") val eksternId: String? = UUID.randomUUID().toString(),
@@ -35,4 +35,5 @@ data class OpprettTilbakekrevingRequest(
             require(varsel == null) { "Kan ikke opprette manuelt behandling med varsel" }
         }
     }
+
 }
