@@ -1,4 +1,4 @@
-name: Build-Deploy-Preprod
+name: Build-Deploy-Preprod-Backend
 on:
   workflow_dispatch:
   push:
