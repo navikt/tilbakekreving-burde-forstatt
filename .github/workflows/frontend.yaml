@@ -1,0 +1,59 @@
+name: Build-Deploy-Preprod
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-frontend-docker:
+    #    if: github.event.pull_request.draft == false
+    name: Bygg app/image, push til github
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Installere dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Bygg app
+        working-directory: frontend
+        run: npm run build
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: tilbake
+          image_suffix: frontend
+          push_image: true
+          tag: ${{ github.sha }}
+          docker_context: ./frontend
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
+
+  deploy-to-dev:
+    name: Deploy til dev-gcp
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    needs: [ build-frontend-docker ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Deploy til dev-gcp
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: frontend/nais/application.yaml
+          VAR: image=${{ needs.build-frontend-docker.outputs.image }}
+          ENVIRONMENT: dev-gcp:tilbake
+
