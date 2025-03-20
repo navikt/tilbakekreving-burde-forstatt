@@ -2,7 +2,7 @@ name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
   push:
-    include:
+    paths:
       - frontend/**
     branches:
       - main

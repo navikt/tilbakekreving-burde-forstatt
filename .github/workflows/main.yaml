@@ -2,6 +2,8 @@ name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
   push:
+    paths:
+      - backend/**
     branches:
       - main
 
