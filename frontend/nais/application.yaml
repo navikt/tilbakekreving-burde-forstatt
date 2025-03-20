@@ -5,8 +5,8 @@ metadata:
   name: burde-forstatt-frontend
   namespace: tilbake
   annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-group: "101"
+    nais.io/run-as-user: "101"
   labels:
     team: tilbake
 spec:
