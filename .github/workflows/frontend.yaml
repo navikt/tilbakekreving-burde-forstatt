@@ -27,7 +27,7 @@ jobs:
           cache: 'pnpm'
       - name: Installere dependencies
         working-directory: frontend
-        run: pnpm ci
+        run: pnpm install --frozend-lockfile
       - name: Bygg app
         working-directory: frontend
         run: pnpm run build
