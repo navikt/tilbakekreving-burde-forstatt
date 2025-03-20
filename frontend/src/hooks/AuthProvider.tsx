@@ -10,12 +10,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const sjekkAuth = async () => {
       try {
         const response = await fetch("/api/me");
-        console.log("Response", response);
 
         if (response.ok) {
           const data = await response.json();
           setBruker({ navn: data.navn, enhet: data.enhet });
           setErAutentisert(true);
+        } else {
+          loggInn();
         }
       } catch (error) {
         console.error("Feil med auth-validering:", error);
