@@ -37,6 +37,8 @@ spec:
       enabled: true
       tenant: trygdeetaten.no
       allowAllUsers: true
+      replyURLs:
+        - http://localhost:4000/api/oauth2/callback
     sidecar:
       enabled: true
   accessPolicy:

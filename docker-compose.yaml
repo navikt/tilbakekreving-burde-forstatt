@@ -11,7 +11,7 @@ services:
       WONDERWALL_REDIS_URI: redis://redis:6379
       WONDERWALL_LOG_LEVEL: info
       WONDERWALL_LOG_FORMAT: text
-      WONDERWALL_INGRESS: http://localhost:4000
+      WONDERWALL_INGRESS: http://localhost:4000/api
       WONDERWALL_BIND_ADDRESS: 0.0.0.0:4000
     dns:
       - 8.8.8.8
