@@ -29,5 +29,12 @@ spec:
     requests:
       memory: 128Mi
       cpu: 25m
+  filesFrom:
+    - mountPath: /var/cache/nginx
+      emptyDir:
+        medium: Memory
+    - mountPath: /var/run
+      emptyDir:
+        medium: Memory
   ingresses:
     - https://burde-forstatt.intern.dev.nav.no
