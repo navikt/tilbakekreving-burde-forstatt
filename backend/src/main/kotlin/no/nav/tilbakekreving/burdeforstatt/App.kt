@@ -50,10 +50,12 @@ fun main() {
     )
 
     val httpClient = defaultHttpClient()
+
     val appConfig = AppConfig(
-        tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT"),
-        tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT"),
-        tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT")
+        tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT") ?: "http://localhost:4001/api/v1/token",
+        tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT") ?: "http://localhost:4001/api/v1/token/exchange",
+        tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT") ?: "http://localhost:4001/api/v1/introspect",
+        loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:5173/",
     )
 
     val mqConfig = MqConfig(
@@ -125,6 +127,9 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
                     val sendTilTilbakekreving = SendTilTilbakekreving(httpClient, mqService, tilbakekrevingUrl, accessToken)
                     sendTilTilbakekreving.process(requestFraBurdeForstatt)
                     call.respond(HttpStatusCode.OK, "Behandling og MQ prosess igangsatt")
+                }
+                get("/redirect") {
+                    call.respondRedirect(appConfig.loginRedirectUrl)
                 }
             }
         }

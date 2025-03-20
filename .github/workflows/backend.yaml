@@ -1,7 +1,10 @@
-name: Build-Deploy-Preprod
+name: Build-Deploy-Preprod-Backend
 on:
   workflow_dispatch:
   push:
+    paths:
+      - backend/**
+      - .github/workflows/backend.yaml
     branches:
       - main
 
