@@ -26,11 +26,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          scope: '@navikt'
+          registry-url: https://npm.pkg.github.com/
           cache-dependency-path: frontend
           cache: 'pnpm'
       - name: Installere dependencies
         working-directory: frontend
         run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Bygg app
         working-directory: frontend
         run: pnpm run build
