@@ -18,9 +18,11 @@ import { useState } from "react";
 import { Link } from "@navikt/ds-react";
 
 type TilbakekrevingResponse = {
-  status: string;
+  data: string;
+  frontendFeilmelding: string;
   melding: string;
-  statusTekst: string;
+  stacktrace: string;
+  status: string;
 };
 
 const formatDateToYYYYMMDD = (date: Date): string => {
@@ -160,12 +162,18 @@ function App() {
         </form>
         {mutation.isSuccess && (
           <Alert variant="success" className="mb-4">
-            <h3>Suksess!</h3>
+            <h3>Suksess! 🎉</h3>
             <p>
-              Tilbakekreving er opprettet:{" "}
-              <Link href={mutation.data?.melding}>
-                {mutation.data?.melding}
+              {mutation.data.melding}:{" "}
+              <Link className="" href={mutation.data.data}>
+                her
               </Link>
+            </p>
+            <p>
+              Med dataen:
+              <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
+                {JSON.stringify(sisteSendtInnData, null, 2)}
+              </pre>
             </p>
           </Alert>
         )}
