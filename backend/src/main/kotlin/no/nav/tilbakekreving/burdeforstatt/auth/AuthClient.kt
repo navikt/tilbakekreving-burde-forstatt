@@ -84,6 +84,11 @@ data class TokenIntrospectionResponse(
     val active: Boolean,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val error: String?,
+    @JsonProperty("NAVident")
+    val navIdent: String,
+    @JsonProperty("preferred_username")
+    val preferredUsername: String,
+    val name: String,
     @JsonAnySetter @get:JsonAnyGetter
     val other: Map<String, Any?> = mutableMapOf(),
 )

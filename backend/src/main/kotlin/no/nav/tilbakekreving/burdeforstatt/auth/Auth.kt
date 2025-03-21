@@ -47,6 +47,11 @@ class TexasAuthenticationProvider(
         context.principal(
             TexasPrincipal(
                 claims = introspectResponse.other,
+                userinfo = TexasPrincipal.Userinfo(
+                    email = introspectResponse.preferredUsername,
+                    name = introspectResponse.name,
+                    ident = introspectResponse.navIdent,
+                ),
                 token = token,
             ),
         )
@@ -62,8 +67,15 @@ class TexasAuthenticationProvider(
 
 data class TexasPrincipal(
     val claims: Map<String, Any?>,
+    val userinfo: Userinfo,
     val token: String,
-)
+) {
+    data class Userinfo(
+        val email: String,
+        val name: String,
+        val ident: String,
+    )
+}
 
 fun ApplicationCall.bearerToken(): String? =
     request

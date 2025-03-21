@@ -1,5 +1,6 @@
 package no.nav.tilbakekreving.burdeforstatt
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -41,7 +42,7 @@ fun main() {
         tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT") ?: "http://localhost:4001/api/v1/token",
         tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT") ?: "http://localhost:4001/api/v1/token/exchange",
         tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT") ?: "http://localhost:4001/api/v1/introspect",
-        loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:5173/",
+        loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:4000/",
     )
 
     embeddedServer(Netty, port = 8080) {
@@ -69,7 +70,7 @@ private fun Application.registerApiRoutes(config: Config, httpClient: HttpClient
         authenticate("azuread") {
             route("/api") {
                 get("/me") {
-                    call.respondText(call.principal<TexasPrincipal>()!!.claims.toString())
+                    call.respond(jacksonObjectMapper().writeValueAsString(call.principal<TexasPrincipal>()!!.userinfo))
                 }
                 get("/redirect") {
                     call.respondRedirect(config.loginRedirectUrl)

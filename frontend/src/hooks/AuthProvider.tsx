@@ -9,11 +9,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const sjekkAuth = async () => {
       try {
-        const response = await fetch("/api/me");
+        const response = await fetch("/api/me", {
+          headers: {
+            Accept: 'application/json'
+          }
+        });
 
         if (response.ok) {
           const data = await response.json();
-          setBruker({ navn: data.navn, enhet: data.enhet });
+          setBruker({ navn: data.name, enhet: data.enhet });
           setErAutentisert(true);
         } else {
           loggInn();
