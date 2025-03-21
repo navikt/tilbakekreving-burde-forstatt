@@ -35,7 +35,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     window.location.href = appConfig.loginUrl;
   };
 
-  const loggUt = () => setErAutentisert(false);
+  const loggUt = () => {
+    // TODO: Legg til backend-endepunkt for å logge ut
+    setErAutentisert(false);
+  };
 
   return (
     <AuthContext.Provider value={{ erAutentisert, bruker, loggInn, loggUt }}>
