@@ -6,18 +6,30 @@ import Perioder from "./komponenter/Perioder";
 import Ytelser from "./komponenter/Ytelser";
 import { useMutation } from "@tanstack/react-query";
 import {
-  TilbakeFormDataRequest,
-  tilbakeFormDataRequestSchema,
+  TilbakeFormData,
+  tilbakeFormDataSchema,
+  TilbakeRequest,
 } from "./typer/formData";
 import { useForm, Controller } from "react-hook-form";
 import { Alert } from "@navikt/ds-react/Alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Header } from "./komponenter/Header";
 import { useState } from "react";
+import { Link } from "@navikt/ds-react";
+
+type TilbakekrevingResponse = {
+  status: string;
+  melding: string;
+  statusTekst: string;
+};
+
+const formatDateToYYYYMMDD = (date: Date): string => {
+  return date.toISOString().split("T")[0];
+};
 
 const postTilbakekreving = async (
-  data: TilbakeFormDataRequest
-): Promise<null> => {
+  data: TilbakeRequest
+): Promise<TilbakekrevingResponse> => {
   const response = await fetch("/api/tilbakekreving", {
     method: "POST",
     headers: {
@@ -25,45 +37,64 @@ const postTilbakekreving = async (
     },
     body: JSON.stringify(data),
   });
-
   if (!response.ok) {
     //backend feilmelding goes here
     throw new Error("Noe gikk galt ved opprettelse av tilbakekreving");
   }
 
-  return response.json();
+  const responseData: TilbakekrevingResponse = await response.json();
+
+  return responseData;
 };
 
 function App() {
-  const [sisteSendtInnData, setSisteSendtInnData] =
-    useState<TilbakeFormDataRequest | null>(null);
+  const [sisteSendtInnData, setSisteSendtInnData] = useState<
+    TilbakeRequest | undefined
+  >(undefined);
   const {
-    getValues,
     control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<TilbakeFormDataRequest>({
+  } = useForm<TilbakeFormData>({
     defaultValues: {
       perioder: [
         {
           fom: undefined,
           tom: undefined,
-          simulertBeløp: "",
-          kravgrunnlagBeløp: "",
+          simulertBelop: "",
+          kravgrunnlagBelop: "",
         },
       ],
       ytelse: undefined,
       personIdent: "",
     },
     mode: "onChange",
-    resolver: zodResolver(tilbakeFormDataRequestSchema),
+    resolver: zodResolver(tilbakeFormDataSchema),
   });
 
   const mutation = useMutation({
-    mutationFn: postTilbakekreving,
+    mutationFn: (formData: TilbakeFormData) => {
+      const requestObject = {
+        ...formData,
+        perioder: formData.perioder.map((periode) => {
+          const periodeUtenId = {
+            fom: periode.fom,
+            tom: periode.tom,
+            simulertBelop: Number(periode.simulertBelop),
+            kravgrunnlagBelop: Number(periode.kravgrunnlagBelop),
+          };
+          return {
+            ...periodeUtenId,
+            fom: formatDateToYYYYMMDD(periode.fom),
+            tom: formatDateToYYYYMMDD(periode.tom),
+          };
+        }),
+      };
+      setSisteSendtInnData(requestObject);
+      return postTilbakekreving(requestObject);
+    },
     onSuccess: () => reset(),
-    onError: () => setSisteSendtInnData(getValues()),
   });
 
   return (
@@ -75,14 +106,6 @@ function App() {
           Opprett testdata for tilbakekreving
         </h3>
         <p>Laget i hackatonet 2025 🌞</p>
-
-        {mutation.isSuccess && (
-          <Alert variant="success" className="mb-4">
-            <h3>Suksess!</h3>
-            <p>Tilbakekreving er opprettet.</p>
-          </Alert>
-        )}
-
         <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
           <VStack gap="4">
             <Perioder feilMelding={errors.perioder} control={control} />
@@ -135,6 +158,17 @@ function App() {
             </Button>
           </VStack>
         </form>
+        {mutation.isSuccess && (
+          <Alert variant="success" className="mb-4">
+            <h3>Suksess!</h3>
+            <p>
+              Tilbakekreving er opprettet:{" "}
+              <Link href={mutation.data?.melding}>
+                {mutation.data?.melding}
+              </Link>
+            </p>
+          </Alert>
+        )}
       </VStack>
     </>
   );

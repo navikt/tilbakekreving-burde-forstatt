@@ -2,12 +2,12 @@ import { LeaveIcon } from "@navikt/aksel-icons";
 import { Dropdown } from "@navikt/ds-react/Dropdown";
 import { InternalHeader } from "@navikt/ds-react/InternalHeader";
 import { Spacer } from "@navikt/ds-react/Stack";
-import { BodyShort, Detail } from "@navikt/ds-react/Typography";
+import { BodyShort } from "@navikt/ds-react/Typography";
 import { useAuth } from "../hooks/useAuth";
 import { EnterIcon } from "@navikt/aksel-icons";
 
 export const Header = () => {
-  const { erAutentisert: isAuthenticated, bruker, loggInn, loggUt } = useAuth();
+  const { bruker, loggInn, loggUt } = useAuth();
 
   return (
     <header>
@@ -17,17 +17,15 @@ export const Header = () => {
         <Dropdown defaultOpen>
           <InternalHeader.UserButton
             as={Dropdown.Toggle}
-            name={isAuthenticated ? bruker.navn : "Ikke logget inn"}
-            description={isAuthenticated ? `Enhet: ${bruker.enhet}` : ""}
+            name={bruker.navn ?? "Ikke logget inn"}
           />
           <Dropdown.Menu>
-            {isAuthenticated ? (
+            {bruker.navn ? (
               <>
                 <dl>
                   <BodyShort as="dt" size="small">
                     {bruker.navn}
                   </BodyShort>
-                  <Detail as="dd">{bruker.enhet}</Detail>
                 </dl>
                 <Dropdown.Menu.Divider />
                 <Dropdown.Menu.List>

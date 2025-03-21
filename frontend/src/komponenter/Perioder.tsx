@@ -14,9 +14,9 @@ import {
   FieldArrayWithId,
   useFieldArray,
 } from "react-hook-form";
-import { TilbakeFormDataRequest } from "../typer/formData";
+import { TilbakeFormData } from "../typer/formData";
 
-type TilbakekrevingControl = Control<TilbakeFormDataRequest>;
+type TilbakekrevingControl = Control<TilbakeFormData>;
 type PeriodeFeilmelding =
   | {
       message?: string;
@@ -82,7 +82,7 @@ const PeriodeInput = ({ indeks, feilMelding, control }: PeriodeInputProps) => {
       </DatePicker>
 
       <Controller
-        name={`perioder.${indeks}.simulertBeløp`}
+        name={`perioder.${indeks}.simulertBelop`}
         control={control}
         render={({ field }) => (
           <TextField
@@ -97,7 +97,7 @@ const PeriodeInput = ({ indeks, feilMelding, control }: PeriodeInputProps) => {
         )}
       />
       <Controller
-        name={`perioder.${indeks}.kravgrunnlagBeløp`}
+        name={`perioder.${indeks}.kravgrunnlagBelop`}
         control={control}
         render={({ field }) => (
           <TextField
@@ -130,8 +130,8 @@ const Perioder = ({ feilMelding, control }: Props) => {
     append({
       fom: new Date(),
       tom: new Date(),
-      simulertBeløp: "",
-      kravgrunnlagBeløp: "",
+      simulertBelop: "",
+      kravgrunnlagBelop: "",
     });
   };
 

@@ -3,28 +3,25 @@ import { AuthContext } from "./useAuth";
 import { appConfig } from "../config/config.ts";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [erAutentisert, setErAutentisert] = useState(false);
-  const [bruker, setBruker] = useState({ navn: "", enhet: "" });
+  const [bruker, setBruker] = useState({ navn: "" });
 
   useEffect(() => {
     const sjekkAuth = async () => {
       try {
         const response = await fetch("/api/me", {
           headers: {
-            Accept: 'application/json'
-          }
+            Accept: "application/json",
+          },
         });
 
         if (response.ok) {
           const data = await response.json();
-          setBruker({ navn: data.name, enhet: data.enhet });
-          setErAutentisert(true);
+          setBruker({ navn: data.name });
         } else {
           loggInn();
         }
       } catch (error) {
         console.error("Feil med auth-validering:", error);
-        setErAutentisert(false);
       }
     };
 
@@ -37,11 +34,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loggUt = () => {
     // TODO: Legg til backend-endepunkt for å logge ut
-    setErAutentisert(false);
   };
 
   return (
-    <AuthContext.Provider value={{ erAutentisert, bruker, loggInn, loggUt }}>
+    <AuthContext.Provider value={{ bruker, loggInn, loggUt }}>
       {children}
     </AuthContext.Provider>
   );
