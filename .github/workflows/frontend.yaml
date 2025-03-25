@@ -14,32 +14,37 @@ jobs:
     name: Bygg app/image, push til github
     runs-on: ubuntu-latest
     permissions:
-      contents: "read"
-      id-token: "write"
-      packages: "read"
+      contents: read
+      id-token: write
+      packages: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
+
+      - name: Sette opp pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Sette opp node
+        uses: actions/setup-node@v4
         with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          scope: '@navikt'
+          node-version: 22
+          scope: "@navikt"
           registry-url: https://npm.pkg.github.com/
-          cache-dependency-path: frontend
-          cache: 'pnpm'
+
       - name: Installere dependencies
         working-directory: frontend
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bygg app
         working-directory: frontend
         run: pnpm run build
-      - uses: nais/docker-build-push@v0
+
+      - name: Bygg og push docker image
+        uses: nais/docker-build-push@v0
         id: docker-push
         with:
           team: tilbake
@@ -56,7 +61,7 @@ jobs:
       contents: "read"
       id-token: "write"
     runs-on: ubuntu-latest
-    needs: [ build-frontend-docker ]
+    needs: [build-frontend-docker]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,4 +73,3 @@ jobs:
           RESOURCE: frontend/nais/application.yaml
           VAR: image=${{ needs.build-frontend-docker.outputs.image }}
           ENVIRONMENT: dev-gcp:tilbake
-
