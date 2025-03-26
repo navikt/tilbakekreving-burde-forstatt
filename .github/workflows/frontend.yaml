@@ -18,27 +18,26 @@ jobs:
       id-token: "write"
       packages: "read"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Sette opp pnpm
+      - name: Setter opp pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          package_json_file: frontend/package.json
 
-      - name: Sette opp node
+      - name: Setter opp node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "22"
           scope: "@navikt"
           registry-url: https://npm.pkg.github.com/
-          cache-dependency-path: frontend
-          cache: "pnpm"
 
-      - name: Installere dependencies
+      - name: Install dependencies
         working-directory: frontend
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
