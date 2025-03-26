@@ -3,10 +3,15 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'frontend/**'
+      - frontend/**
       - .github/workflows/frontend.yaml
     branches:
       - main
+
+defaults:
+  run:
+    shell: bash
+    working-directory: frontend
 
 jobs:
   build-frontend-docker:
