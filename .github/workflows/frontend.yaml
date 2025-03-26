@@ -38,10 +38,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          version: 10.6.5
+          package_json_file: frontend/package.json
           run_install: |
-            - working_directory: frontend
-              args: [--frozen-lockfile, --prefer-offline]
+            - args: [--frozen-lockfile, --prefer-offline]
 
       - name: Bygg app
         run: pnpm run build
