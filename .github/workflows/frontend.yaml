@@ -40,8 +40,8 @@ jobs:
         with:
           version: 10.6.5
           run_install: |
-            - args: [--frozen-lockfile, --prefer-offline]
-              working_directory: frontend
+            - working_directory: frontend
+              args: [--frozen-lockfile, --prefer-offline]
 
       - name: Bygg app
         run: pnpm run build
