@@ -8,16 +8,14 @@ on:
     branches:
       - main
 
-defaults:
-  run:
-    shell: bash
-    working-directory: frontend
-
 jobs:
   build-frontend-docker:
     #    if: github.event.pull_request.draft == false
     name: Bygg app/image, push til github
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     permissions:
       contents: "read"
       id-token: "write"
