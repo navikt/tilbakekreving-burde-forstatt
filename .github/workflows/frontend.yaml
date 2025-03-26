@@ -36,6 +36,7 @@ jobs:
       - name: Install dependencies
         uses: pnpm/action-setup@v4
         env:
+          working-directory: frontend
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: 10.6.5
