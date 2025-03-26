@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: frontend
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: pnpm install --prefer-offline
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
