@@ -23,6 +23,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setter opp pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
       - name: Setter opp node
         uses: actions/setup-node@v4
         with:
@@ -31,13 +36,10 @@ jobs:
           registry-url: https://npm.pkg.github.com/
 
       - name: Install dependencies
-        uses: pnpm/action-setup@v4
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile --prefer-offline
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          package_json_file: frontend/package.json
-          run_install: |
-            - args: [--frozen-lockfile, --prefer-offline]
 
       - name: Bygg app
         working-directory: frontend
