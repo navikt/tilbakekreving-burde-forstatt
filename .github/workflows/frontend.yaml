@@ -22,25 +22,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Sette opp pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Sette opp node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "22"
           scope: "@navikt"
           registry-url: https://npm.pkg.github.com/
-          cache-dependency-path: frontend
-          cache: "pnpm"
 
       - name: Installere dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: |
+            cd frontend
+            - args: [--frozen-lockfile, --prefer-offline]
 
       - name: Bygg app
         working-directory: frontend
