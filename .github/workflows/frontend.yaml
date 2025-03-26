@@ -34,7 +34,6 @@ jobs:
           node-version: "22"
           scope: "@navikt"
           registry-url: https://npm.pkg.github.com/
-          cache: "pnpm"
 
       - name: Install dependencies
         uses: pnpm/action-setup@v4
