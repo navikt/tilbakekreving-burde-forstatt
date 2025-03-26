@@ -28,9 +28,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setter opp pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setter opp node
         uses: actions/setup-node@v4
         with:
