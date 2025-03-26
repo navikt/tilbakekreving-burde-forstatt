@@ -36,12 +36,12 @@ jobs:
       - name: Install dependencies
         uses: pnpm/action-setup@v4
         env:
-          working-directory: frontend
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: 10.6.5
           run_install: |
             - args: [--frozen-lockfile, --prefer-offline]
+              working_directory: frontend
 
       - name: Bygg app
         run: pnpm run build
