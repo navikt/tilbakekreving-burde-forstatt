@@ -22,6 +22,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
       - name: Sette opp node
         uses: actions/setup-node@v4
         with:
@@ -29,14 +34,15 @@ jobs:
           scope: "@navikt"
           registry-url: https://npm.pkg.github.com/
 
-      - name: Installere dependencies
+      - name: Install dependencies for client
+        working-directory: frontend
+        run: |
+          pnpm config set //npm.pkg.github.com/:_authToken $NODE_AUTH_TOKEN
+          pnpm config set engine-strict true
+          pnpm config set @navikt:registry https://npm.pkg.github.com
+          pnpm install --frozen-lockfile --prefer-offline
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: |
-            - cd frontend  
-              args: [--frozen-lockfile, --prefer-offline]
 
       - name: Bygg app
         working-directory: frontend
