@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Header } from "./komponenter/Header";
 import { useState } from "react";
 import { Link } from "@navikt/ds-react";
+import { format } from "date-fns";
 
 type TilbakekrevingResponse = {
   data: string;
@@ -25,9 +26,7 @@ type TilbakekrevingResponse = {
   status: string;
 };
 
-const formatDateToYYYYMMDD = (date: Date): string => {
-  return date.toISOString().split("T")[0];
-};
+const formatterTilYYYYMMDD = (date: Date): string => format(date, "yyyy-MM-dd");
 
 const postTilbakekreving = async (
   data: TilbakeRequest
@@ -87,8 +86,8 @@ function App() {
           };
           return {
             ...periodeUtenId,
-            fom: formatDateToYYYYMMDD(periode.fom),
-            tom: formatDateToYYYYMMDD(periode.tom),
+            fom: formatterTilYYYYMMDD(periode.fom),
+            tom: formatterTilYYYYMMDD(periode.tom),
           };
         }),
       };

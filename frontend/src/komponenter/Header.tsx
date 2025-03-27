@@ -37,6 +37,12 @@ export const Header = () => {
               </>
             ) : (
               <>
+                <dl>
+                  <BodyShort as="dt" size="small">
+                    Ikke logget inn
+                  </BodyShort>
+                </dl>
+                <Dropdown.Menu.Divider />
                 <Dropdown.Menu.List>
                   <Dropdown.Menu.List.Item onClick={loggInn}>
                     Logg inn <Spacer />{" "}

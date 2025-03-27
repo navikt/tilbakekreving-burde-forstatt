@@ -26,6 +26,9 @@ importers:
       '@tanstack/react-query-devtools':
         specifier: 5.68.0
         version: 5.68.0(@tanstack/react-query@5.68.0(react@19.0.0))(react@19.0.0)
+      date-fns:
+        specifier: 4.1.0
+        version: 4.1.0
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -444,6 +447,9 @@ packages:
     peerDependencies:
       '@types/react': '>=17.0.30'
       react: '>=17.0.0 || >19.0.0-rc'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   '@navikt/ds-tokens@7.17.4':
     resolution: {integrity: sha512-0Zo+BseqvDLvdxqWzqjcc+rMnS+mydCWk/j5LXg87mSRnQKQaoEQ8ol8l6FDWC6nAIEsUMNwEhzF2LYvkaux8A==, tarball: https://npm.pkg.github.com/download/@navikt/ds-tokens/7.17.4/869463e1c2cbe3e084589f5a0a57d1c0ad9bff53}
@@ -1795,11 +1801,12 @@ snapshots:
       '@floating-ui/react-dom': 2.1.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@navikt/aksel-icons': 7.17.3
       '@navikt/ds-tokens': 7.17.4
-      '@types/react': 19.0.10
       clsx: 2.1.1
       date-fns: 4.1.0
       react: 19.0.0
       react-day-picker: 9.6.1(react@19.0.0)
+    optionalDependencies:
+      '@types/react': 19.0.10
     transitivePeerDependencies:
       - react-dom
 
