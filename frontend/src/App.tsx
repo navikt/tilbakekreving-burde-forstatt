@@ -56,7 +56,6 @@ function App() {
   const {
     control,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<TilbakeFormData>({
     defaultValues: {
@@ -96,7 +95,6 @@ function App() {
       setSisteSendtInnData(requestObject);
       return postTilbakekreving(requestObject);
     },
-    onSuccess: () => reset(),
   });
 
   return (
