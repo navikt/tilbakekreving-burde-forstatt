@@ -38,6 +38,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.2")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
     implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250103091213_2eaa779")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

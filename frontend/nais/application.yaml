@@ -5,12 +5,12 @@ metadata:
   name: burde-forstatt-frontend
   namespace: tilbake
   annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-group: "101"
+    nais.io/run-as-user: "101"
   labels:
     team: tilbake
 spec:
-  image: { { image } }
+  image: {{ image }}
   port: 8080
   liveness:
     path: /
@@ -29,5 +29,12 @@ spec:
     requests:
       memory: 128Mi
       cpu: 25m
+  filesFrom:
+    - mountPath: /var/cache/nginx
+      emptyDir:
+        medium: Memory
+    - mountPath: /var/run
+      emptyDir:
+        medium: Memory
   ingresses:
     - https://burde-forstatt.intern.dev.nav.no

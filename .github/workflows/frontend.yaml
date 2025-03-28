@@ -16,24 +16,35 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+      packages: "read"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
+
+      - name: Setter opp pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 10
-      - uses: actions/setup-node@v4
+          package_json_file: frontend/package.json
+
+      - name: Setter opp node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache-dependency-path: frontend
-          cache: 'pnpm'
-      - name: Installere dependencies
+          node-version: "22"
+          scope: "@navikt"
+          registry-url: https://npm.pkg.github.com/
+
+      - name: Install dependencies
         working-directory: frontend
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bygg app
         working-directory: frontend
         run: pnpm run build
+
       - uses: nais/docker-build-push@v0
         id: docker-push
         with:
@@ -51,7 +62,7 @@ jobs:
       contents: "read"
       id-token: "write"
     runs-on: ubuntu-latest
-    needs: [ build-frontend-docker ]
+    needs: [build-frontend-docker]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,4 +74,3 @@ jobs:
           RESOURCE: frontend/nais/application.yaml
           VAR: image=${{ needs.build-frontend-docker.outputs.image }}
           ENVIRONMENT: dev-gcp:tilbake
-

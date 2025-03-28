@@ -54,3 +54,5 @@ spec:
   env:
     - name: POST_LOGIN_REDIRECT_URL
       value: /
+    - name: LOG_FORMAT
+      value: JSON

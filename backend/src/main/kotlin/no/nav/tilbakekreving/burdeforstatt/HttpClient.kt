@@ -17,8 +17,7 @@ fun defaultHttpClient() =
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                registerModule(JavaTimeModule()) // Ensure this is registered properly
+                registerModule(JavaTimeModule())
             }
         }
-
     }

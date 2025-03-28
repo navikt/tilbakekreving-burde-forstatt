@@ -6,25 +6,31 @@ import Perioder from "./komponenter/Perioder";
 import Ytelser from "./komponenter/Ytelser";
 import { useMutation } from "@tanstack/react-query";
 import {
-  TilbakeFormDataRequest,
-  tilbakeFormDataRequestSchema,
+  TilbakeFormData,
+  tilbakeFormDataSchema,
+  TilbakeRequest,
 } from "./typer/formData";
-import { Periode } from "./typer/periode";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Alert } from "@navikt/ds-react/Alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Header } from "./komponenter/Header";
+import { useState } from "react";
+import { Link } from "@navikt/ds-react";
+import { format } from "date-fns";
+
+type TilbakekrevingResponse = {
+  data: string;
+  frontendFeilmelding: string;
+  melding: string;
+  stacktrace: string;
+  status: string;
+};
+
+const formatterTilYYYYMMDD = (date: Date): string => format(date, "yyyy-MM-dd");
 
 const postTilbakekreving = async (
-  data: TilbakeFormDataRequest
-): Promise<null> => {
-  const validation = tilbakeFormDataRequestSchema.safeParse(data);
-  if (!validation.success) {
-    throw new Error(
-      "Validering feilet: " + JSON.stringify(validation.error.errors)
-    );
-  }
-
+  data: TilbakeRequest
+): Promise<TilbakekrevingResponse> => {
   const response = await fetch("/api/tilbakekreving", {
     method: "POST",
     headers: {
@@ -32,72 +38,63 @@ const postTilbakekreving = async (
     },
     body: JSON.stringify(data),
   });
-
   if (!response.ok) {
     //backend feilmelding goes here
     throw new Error("Noe gikk galt ved opprettelse av tilbakekreving");
   }
 
-  return response.json();
+  const responseData: TilbakekrevingResponse = await response.json();
+
+  return responseData;
 };
 
 function App() {
+  const [sisteSendtInnData, setSisteSendtInnData] = useState<
+    TilbakeRequest | undefined
+  >(undefined);
   const {
     control,
     handleSubmit,
-    reset,
-    // watch,
-    formState: { errors },
-  } = useForm<TilbakeFormDataRequest>({
+    formState: { errors, isSubmitting },
+  } = useForm<TilbakeFormData>({
     defaultValues: {
-      perioder: [{ fom: undefined, tom: undefined }],
+      perioder: [
+        {
+          fom: undefined,
+          tom: undefined,
+          simulertBelop: "",
+          kravgrunnlagBelop: "",
+        },
+      ],
       ytelse: undefined,
       personIdent: "",
-      simulertBeløp: "",
-      kravgrunnlagBeløp: "",
     },
-    resolver: zodResolver(tilbakeFormDataRequestSchema),
+    mode: "onChange",
+    resolver: zodResolver(tilbakeFormDataSchema),
   });
 
   const mutation = useMutation({
-    mutationFn: postTilbakekreving,
-    onSuccess: (data) => {
-      console.log("Tilbakekreving opprettet:", data);
-      reset();
-    },
-    onError: (error) => {
-      console.error("Feil ved opprettelse av tilbakekreving:", error);
+    mutationFn: (formData: TilbakeFormData) => {
+      const requestObject = {
+        ...formData,
+        perioder: formData.perioder.map((periode) => {
+          const periodeUtenId = {
+            fom: periode.fom,
+            tom: periode.tom,
+            simulertBelop: Number(periode.simulertBelop),
+            kravgrunnlagBelop: Number(periode.kravgrunnlagBelop),
+          };
+          return {
+            ...periodeUtenId,
+            fom: formatterTilYYYYMMDD(periode.fom),
+            tom: formatterTilYYYYMMDD(periode.tom),
+          };
+        }),
+      };
+      setSisteSendtInnData(requestObject);
+      return postTilbakekreving(requestObject);
     },
   });
-
-  const onSubmit: SubmitHandler<TilbakeFormDataRequest> = (data) => {
-    const harAllePerioderGyldigDato = data.perioder.every(
-      (periode) => periode.fom && periode.tom
-    );
-
-    if (!harAllePerioderGyldigDato || !data.ytelse) {
-      console.error("Alle felt må fylles ut før innsending.");
-      return; // Stopp innsending hvis ikke alle perioder er fylt ut
-    }
-
-    const periodeRequest = data.perioder
-      .map((periode) => {
-        return {
-          fom: periode.fom,
-          tom: periode.tom,
-        } as Periode;
-      })
-      .filter((periode) => periode.fom && periode.tom);
-
-    const tilbakeFormData: TilbakeFormDataRequest = {
-      perioder: periodeRequest,
-      ytelse: data.ytelse,
-      personIdent: data.personIdent,
-      simulertBeløp: data.simulertBeløp,
-      kravgrunnlagBeløp: data.kravgrunnlagBeløp,
-    };
-    mutation.mutate(tilbakeFormData);
-  };
 
   return (
     <>
@@ -108,31 +105,10 @@ function App() {
           Opprett testdata for tilbakekreving
         </h3>
         <p>Laget i hackatonet 2025 🌞</p>
-
-        {mutation.isSuccess && (
-          <Alert variant="success" className="mb-4">
-            <h3>Suksess!</h3>
-            <p>Tilbakekreving er opprettet.</p>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
           <VStack gap="4">
-            <Controller
-              name="perioder"
-              control={control}
-              render={({ field }) => (
-                <Perioder
-                  perioder={field.value.map((periode: Periode) => ({
-                    fom: periode.fom,
-                    tom: periode.tom,
-                    id: crypto.randomUUID(),
-                  }))}
-                  setPerioder={(nyePerioder) => field.onChange(nyePerioder)}
-                  feilMelding={errors.perioder}
-                />
-              )}
-            />
+            <Perioder feilMelding={errors.perioder} control={control} />
+
             <Controller
               name="ytelse"
               control={control}
@@ -159,50 +135,45 @@ function App() {
               )}
             />
 
-            <Controller
-              name="simulertBeløp"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Simulert feilutbetalt beløp"
-                  {...field}
-                  type="text"
-                  inputMode="text"
-                  error={errors.simulertBeløp?.message}
-                />
-              )}
-            />
-
-            <Controller
-              name="kravgrunnlagBeløp"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Kravgrunnlag feilutbetalt beløp (faktisk beløp)"
-                  {...field}
-                  type="text"
-                  inputMode="text"
-                  error={errors.kravgrunnlagBeløp?.message}
-                />
-              )}
-            />
-
             {mutation.isError && (
               <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded">
                 <p className="font-bold">Feil ved innsending:</p>
                 <p>{String(mutation.error)}</p>
+                <div className="mt-4">
+                  <p className="font-bold">Data som ble forsøkt sendt:</p>
+                  <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
+                    {JSON.stringify(sisteSendtInnData, null, 2)}
+                  </pre>
+                </div>
               </div>
             )}
 
             <Button
               type="submit"
               variant="primary"
-              loading={mutation.isPending}
+              loading={mutation.isPending || isSubmitting}
             >
               Oppretter tilbakekreving
             </Button>
           </VStack>
         </form>
+        {mutation.isSuccess && (
+          <Alert variant="success" className="mb-4">
+            <h3>Suksess! 🎉</h3>
+            <p>
+              {mutation.data.melding}:{" "}
+              <Link className="" href={mutation.data.data}>
+                her
+              </Link>
+            </p>
+            <p>
+              Med dataen:
+              <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
+                {JSON.stringify(sisteSendtInnData, null, 2)}
+              </pre>
+            </p>
+          </Alert>
+        )}
       </VStack>
     </>
   );

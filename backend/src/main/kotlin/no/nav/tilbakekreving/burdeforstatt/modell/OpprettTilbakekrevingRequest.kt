@@ -1,12 +1,9 @@
 package no.nav.tilbakekreving.burdeforstatt.modell
 
-
 import com.fasterxml.jackson.annotation.JsonProperty
-import kotlinx.serialization.Serializable
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
 import java.time.LocalDate
 import java.util.UUID
-
 
 data class OpprettTilbakekrevingRequest(
    @JsonProperty("fagsystem") val fagsystem: Fagsystem,
@@ -35,5 +32,4 @@ data class OpprettTilbakekrevingRequest(
             require(varsel == null) { "Kan ikke opprette manuelt behandling med varsel" }
         }
     }
-
 }

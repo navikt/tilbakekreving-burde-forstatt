@@ -1,10 +1,8 @@
 import { createContext, useContext } from "react";
 
 type AuthContextType = {
-  erAutentisert: boolean;
   bruker: {
     navn: string;
-    enhet: string;
   };
   loggInn: () => void;
   loggUt: () => void;
