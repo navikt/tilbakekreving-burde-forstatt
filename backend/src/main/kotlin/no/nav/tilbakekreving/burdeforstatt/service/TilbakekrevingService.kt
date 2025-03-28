@@ -21,47 +21,45 @@ import java.time.LocalDate
 import java.math.BigInteger
 import java.security.SecureRandom
 
-class SendTilTilbakekreving(
+class TilbakekrevingService(
     private val httpClient: HttpClient,
     private val mqService: MQService,
     private val tilbakekrevingUrl: String,
     private val token: String?,
     private val navIdent: String
 ) {
-
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun process(requestFraBurdeForstatt: RequestFraBurdeForstatt): Ressurs<out Any> {
+    suspend fun opprettBehandlingOgKravgrunnlagITilbakekreving(requestFraBurdeForstatt: RequestFraBurdeForstatt): Ressurs<String> {
 
-        val tilbakekrevingRequest = getOpprettTilbakekrevingRequest(requestFraBurdeForstatt)
-        val behandling = opprettBehandlingITilbakekreving(tilbakekrevingRequest)
-
+        val opprettTilbakekrevingRequest = hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt)
+        val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest)
         if (behandling.status != Ressurs.Status.SUKSESS){
             log.error("Kunne ikke opprette behandling i tilbakekreving-backend. Skipper sending av kravgrunnlag")
             return behandling
         }
-        val dummyKravgrunnlag = opprettDummyKravgrunnlag(requestFraBurdeForstatt, tilbakekrevingRequest)
+        val dummyKravgrunnlag = opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
         val detaljertKravgrunnlagMelding = DetaljertKravgrunnlagMelding().apply {
             detaljertKravgrunnlag = dummyKravgrunnlag
         }
-        mqService.sendMessage(detaljertKravgrunnlagMelding, tilbakekrevingRequest.eksternFagsakId, tilbakekrevingRequest.ytelsestype)
+        mqService.sendMessage(detaljertKravgrunnlagMelding, opprettTilbakekrevingRequest.eksternFagsakId, opprettTilbakekrevingRequest.ytelsestype)
         log.info("Kravgrunnlag med id {} er sendt til MQ", dummyKravgrunnlag.kravgrunnlagId)
 
         return Ressurs.success(
-            data = "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/${tilbakekrevingRequest.fagsystem}/fagsak/${tilbakekrevingRequest.eksternFagsakId}/behandling/${behandling.data}",
+            data = "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/${behandling.data}",
             melding = "Behandling og kravgrunnlag er sendt til tilbakekreving-backend"
         )
     }
 
-    private fun getOpprettTilbakekrevingRequest(requestFraBurdeForstatt: RequestFraBurdeForstatt): OpprettTilbakekrevingRequest {
+    private fun hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt: RequestFraBurdeForstatt): OpprettTilbakekrevingRequest {
 
         val faktainfo = Faktainfo(
             revurderingsårsak = "Test Årsak",
             revurderingsresultat = "Test",
         )
         return OpprettTilbakekrevingRequest(
-            fagsystem = getFagsystem(requestFraBurdeForstatt.ytelse),
-            ytelsestype = getYtelsesType(requestFraBurdeForstatt.ytelse),
+            fagsystem = hentFagsystem(requestFraBurdeForstatt.ytelse),
+            ytelsestype = hentYtelsesType(requestFraBurdeForstatt.ytelse),
             personIdent = requestFraBurdeForstatt.personIdent,
             manueltOpprettet = false,
             enhetId = "0106",
@@ -74,7 +72,7 @@ class SendTilTilbakekreving(
         )
     }
 
-    private fun getFagsystem(ytelseFraRequest: String): Fagsystem {
+    private fun hentFagsystem(ytelseFraRequest: String): Fagsystem {
         return when (ytelseFraRequest) {
             "Barnetrygd" -> Fagsystem.BA
             "Kontantstøtte" -> Fagsystem.KONT
@@ -83,7 +81,7 @@ class SendTilTilbakekreving(
         }
     }
 
-    private fun getYtelsesType(ytelseFraRequest: String): Ytelsestype {
+    private fun hentYtelsesType(ytelseFraRequest: String): Ytelsestype {
         return when (ytelseFraRequest) {
             "Barnetrygd" -> Ytelsestype.BARNETRYGD
             "Kontantstøtte" -> Ytelsestype.KONTANTSTØTTE
@@ -123,22 +121,22 @@ class SendTilTilbakekreving(
                 log.info("Behandling er sent til tilbakekreving med eksternBrukId: {}", eksternBrukId)
                 eksternBrukId
             } else {
-                log.warn("Kunne ikke opprette: {}", response.status)
+                log.warn("Kunne ikke opprette behandling i tilbakekreving: {}", response.status)
                 Ressurs(
                     data = null,
                     status = Ressurs.Status.FEILET,
                     melding = "Feil ved sending av behandling: ${response.status}",
-                    frontendFeilmelding = "Kunne ikke sende behandling.",
+                    frontendFeilmelding = "Kunne ikke opprette behandling i tilbakekreving",
                     stacktrace = null
                 )
             }
         } catch (e: Exception) {
-            log.error("Error sending REST request: {}", e.message)
+            log.error("Error sending REST request", e)
             Ressurs(
                 data = null,
                 status = Ressurs.Status.FEILET,
                 melding = "Exception: ${e.message}",
-                frontendFeilmelding = "En feil oppstod under behandling.",
+                frontendFeilmelding = "En feil oppstod under opprettign av behandling i tilbakekreving",
                 stacktrace = e.stackTraceToString()
             )
         }

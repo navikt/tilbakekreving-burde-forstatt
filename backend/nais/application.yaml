@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 
 metadata:
-  name: burde-forstatt
+  name: burde-forstatt-backend
   namespace: tilbake
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
@@ -54,3 +54,5 @@ spec:
   env:
     - name: POST_LOGIN_REDIRECT_URL
       value: /
+    - name: LOG_FORMAT
+      value: JSON

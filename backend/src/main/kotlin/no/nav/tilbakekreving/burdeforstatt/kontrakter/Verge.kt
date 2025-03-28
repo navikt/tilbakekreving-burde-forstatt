@@ -1,12 +1,10 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
 data class Verge(
-    @JsonProperty("vergetype") val vergetype: Vergetype,
-    @JsonProperty("navn") val navn: String,
-    @JsonProperty("organisasjonsnummer") val organisasjonsnummer: String? = null,
-    @JsonProperty("personIdent") val personIdent: String? = null,
+    val vergetype: Vergetype,
+    val navn: String,
+    val organisasjonsnummer: String? = null,
+    val personIdent: String? = null,
 )
 
 enum class Vergetype(

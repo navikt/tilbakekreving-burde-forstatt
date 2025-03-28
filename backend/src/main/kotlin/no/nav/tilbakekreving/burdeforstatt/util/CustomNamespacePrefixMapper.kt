@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.burdeforstatt.util
 
-import jdk.internal.vm.StackChunk.init
 import org.glassfish.jaxb.runtime.marshaller.NamespacePrefixMapper
 
 class CustomNamespacePrefixMapper : NamespacePrefixMapper() {

@@ -4,128 +4,154 @@ import {
   HStack,
   Button,
   useRangeDatepicker,
+  TextField,
 } from "@navikt/ds-react";
 import { VStack } from "@navikt/ds-react";
 import { TrashIcon } from "@navikt/aksel-icons";
-import { KomponentPeriode } from "../typer/periode";
-import { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";
+import {
+  Control,
+  Controller,
+  FieldArrayWithId,
+  useFieldArray,
+} from "react-hook-form";
+import { TilbakeFormData } from "../typer/formData";
 
+type TilbakekrevingControl = Control<TilbakeFormData>;
 type PeriodeFeilmelding =
-  | Merge<
-      FieldError,
-      (
-        | Merge<
-            FieldError,
-            FieldErrorsImpl<{
-              fom: Date;
-              tom: Date;
-            }>
-          >
-        | undefined
-      )[]
-    >
+  | {
+      message?: string;
+      [index: number]:
+        | {
+            fom?: { message?: string };
+            tom?: { message?: string };
+            simulertBeløp?: { message?: string };
+            kravgrunnlagBeløp?: { message?: string };
+          }
+        | undefined;
+    }
   | undefined;
 
-interface Props {
-  perioder: KomponentPeriode[];
-  setPerioder: (perioder: KomponentPeriode[]) => void;
-  feilMelding?: PeriodeFeilmelding;
-}
-
-type DateRange = {
-  fom: Date;
-  tom: Date;
-};
-
 interface PeriodeInputProps {
-  periode: KomponentPeriode;
   indeks: number;
-  onRangeChange: (range: DateRange | undefined) => void;
+  control: TilbakekrevingControl;
   feilMelding?: PeriodeFeilmelding;
 }
 
-const PeriodeInput = ({
-  periode,
-  onRangeChange,
-  indeks,
-  feilMelding,
-}: PeriodeInputProps) => {
+const PeriodeInput = ({ indeks, feilMelding, control }: PeriodeInputProps) => {
+  const { fields, update } = useFieldArray({ control, name: "perioder" });
   const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
-    fromDate: new Date("2020-01-01"),
-    defaultSelected:
-      periode.fom && periode.tom
-        ? { from: periode.fom, to: periode.tom }
-        : undefined,
     onRangeChange: (range) => {
-      if (range?.from && range?.to) {
-        onRangeChange({ fom: range.from, tom: range.to });
-      } else {
-        onRangeChange(undefined);
-      }
+      if (range?.from && range?.to)
+        update(indeks, { ...fields[indeks], fom: range.from, tom: range.to });
     },
   });
 
-  const fomFeilMelding =
-    feilMelding && feilMelding[indeks] && feilMelding[indeks].fom?.message;
-
-  const tomFeilMelding =
-    feilMelding && feilMelding[indeks] && feilMelding[indeks].tom?.message;
   return (
-    <DatePicker {...datepickerProps} dropdownCaption>
-      <div className="flex gap-4">
-        <DatePicker.Input
-          {...fromInputProps}
-          label="Fra dato"
-          error={fomFeilMelding}
-        />
-        <DatePicker.Input
-          {...toInputProps}
-          label="Til dato"
-          error={tomFeilMelding}
-        />
-      </div>
-    </DatePicker>
+    <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="4">
+      <h3 className="font-bold text-blue-700">Periode {indeks + 1}</h3>
+
+      <DatePicker {...datepickerProps} dropdownCaption>
+        <HStack gap="4">
+          <Controller
+            name={`perioder.${indeks}.fom`}
+            control={control}
+            render={({ field }) => (
+              <DatePicker.Input
+                {...fromInputProps}
+                label="Fra dato"
+                error={feilMelding?.[indeks]?.fom?.message}
+                ref={field.ref}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+          <Controller
+            name={`perioder.${indeks}.tom`}
+            control={control}
+            render={({ field }) => (
+              <DatePicker.Input
+                {...toInputProps}
+                label="Til dato"
+                error={feilMelding?.[indeks]?.tom?.message}
+                ref={field.ref}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+        </HStack>
+      </DatePicker>
+
+      <Controller
+        name={`perioder.${indeks}.simulertBelop`}
+        control={control}
+        render={({ field }) => (
+          <TextField
+            label="Simulert feilutbetalt beløp"
+            {...field}
+            type="text"
+            inputMode="text"
+            error={feilMelding?.[indeks]?.simulertBeløp?.message}
+            ref={field.ref}
+            onBlur={field.onBlur}
+          />
+        )}
+      />
+      <Controller
+        name={`perioder.${indeks}.kravgrunnlagBelop`}
+        control={control}
+        render={({ field }) => (
+          <TextField
+            label="Kravgrunnlag beløp"
+            {...field}
+            type="text"
+            inputMode="text"
+            error={feilMelding?.[indeks]?.kravgrunnlagBeløp?.message}
+            ref={field.ref}
+            onBlur={field.onBlur}
+          />
+        )}
+      />
+    </VStack>
   );
 };
 
-const Perioder = ({ perioder, setPerioder, feilMelding }: Props) => {
+interface Props {
+  feilMelding?: PeriodeFeilmelding;
+  control: TilbakekrevingControl;
+}
+
+const Perioder = ({ feilMelding, control }: Props) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "perioder",
+  });
+
   const leggTilPeriode = () => {
-    setPerioder([
-      ...perioder,
-      { fom: undefined, tom: undefined, id: crypto.randomUUID() },
-    ]);
+    append({
+      fom: new Date(),
+      tom: new Date(),
+      simulertBelop: "",
+      kravgrunnlagBelop: "",
+    });
   };
 
-  const fjernPeriode = (id: string) => {
-    if (perioder.length > 1) {
-      setPerioder(perioder.filter((periode) => periode.id !== id));
-    }
-  };
-
-  const oppdaterPeriode = (id: string, range: DateRange | undefined) => {
-    setPerioder(
-      perioder.map((periode) =>
-        periode.id === id
-          ? { ...periode, fom: range?.fom, tom: range?.tom }
-          : periode
-      )
-    );
+  const fjernPeriode = (id: FieldArrayWithId["id"]) => {
+    remove(fields.findIndex((periode) => periode.id === id));
   };
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Perioder</h2>
       <VStack gap="4">
-        {perioder.map((periode) => (
+        {fields.map((periode) => (
           <HStack key={periode.id} gap="4" align="center">
             <PeriodeInput
-              periode={periode}
-              indeks={perioder.indexOf(periode)}
-              onRangeChange={(range) => oppdaterPeriode(periode.id, range)}
+              indeks={fields.indexOf(periode)}
               feilMelding={feilMelding}
+              control={control}
             />
 
-            {perioder.length > 1 && (
+            {fields.length > 1 && (
               <Button
                 variant="tertiary"
                 size="small"

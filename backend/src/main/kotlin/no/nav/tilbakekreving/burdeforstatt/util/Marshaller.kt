@@ -7,7 +7,6 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import org.slf4j.LoggerFactory
 import java.io.StringWriter
 
-
 object Marshaller {
     val log = LoggerFactory.getLogger(Marshaller::class.java)
     val jaxbContext = JAXBContext.newInstance(
@@ -22,15 +21,15 @@ object Marshaller {
         try {
             marshaller.setProperty("org.glassfish.jaxb.namespacePrefixMapper", CustomNamespacePrefixMapper())
         } catch (e: Exception) {
-            println("Namespace prefix mapper is not supported: ${e.message}")
+            log.warn("Namespace prefix mapper er ikke støttet", e)
+            throw e
         }
 
         val stringWriter = StringWriter()
         marshaller.marshal(detaljertKravgrunnlagMelding, stringWriter)
         stringWriter.toString()
     } catch (e: JAXBException) {
-        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}: {}", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e.message)
-        throw (e)
+        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e)
+        throw e
     }
-
 }

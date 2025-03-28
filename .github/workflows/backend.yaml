@@ -34,6 +34,7 @@ jobs:
         id: docker-push
         with:
           team: tilbake
+          image_suffix: backend
           push_image: true
           tag: ${{ github.sha }}
           docker_context: ./backend

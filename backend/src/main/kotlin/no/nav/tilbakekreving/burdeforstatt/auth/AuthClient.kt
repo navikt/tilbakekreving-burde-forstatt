@@ -3,7 +3,6 @@ package no.nav.tilbakekreving.burdeforstatt.auth
 import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -62,9 +61,7 @@ class AuthClient(
 
 sealed class TokenResponse {
     data class Success(
-        @JsonProperty("access_token")
         val accessToken: String,
-        @JsonProperty("expires_in")
         val expiresInSeconds: Int,
     ) : TokenResponse()
 
@@ -76,7 +73,6 @@ sealed class TokenResponse {
 
 data class TokenErrorResponse(
     val error: String,
-    @JsonProperty("error_description")
     val errorDescription: String,
 )
 
@@ -84,6 +80,9 @@ data class TokenIntrospectionResponse(
     val active: Boolean,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val error: String?,
+    val navIdent: String,
+    val preferredUsername: String,
+    val name: String,
     @JsonAnySetter @get:JsonAnyGetter
     val other: Map<String, Any?> = mutableMapOf(),
 )

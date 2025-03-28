@@ -7,7 +7,7 @@ services:
       - .login.env
     environment:
       WONDERWALL_OPENID_PROVIDER: "azure"
-      WONDERWALL_UPSTREAM_HOST: host.docker.internal:8080
+      WONDERWALL_UPSTREAM_HOST: host.docker.internal:5173
       WONDERWALL_REDIS_URI: redis://redis:6379
       WONDERWALL_LOG_LEVEL: info
       WONDERWALL_LOG_FORMAT: text

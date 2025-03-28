@@ -18,19 +18,16 @@ class MQService (private val mqConfig: MqConfig) {
             val producer: MessageProducer = session.createProducer(queue)
 
             val dtoXml = Marshaller.marshall(detaljertKravgrunnlagMelding)
-
             val message: TextMessage = session.createTextMessage(dtoXml)
-
             producer.send(message)
+
             connection.close()
         } catch (e: JMSException) {
-            log.warn("Kunne ikke sende kravgrunnlag med id {} til MQ", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId)
-            log.error("JMSException occurred: {}", e.message)
-            e.printStackTrace()
+            log.warn("Kunne ikke sende kravgrunnlag med id {} til MQ", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e)
+            throw e
         } catch (e: Exception) {
-            log.warn("Kunne ikke sende kravgrunnlag med id {} til MQ", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId)
-            log.error("An unexpected error occurred: {}", e.message)
-            e.printStackTrace()
+            log.warn("Kunne ikke sende kravgrunnlag med id {} til MQ", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e)
+            throw e
         }
     }
 }

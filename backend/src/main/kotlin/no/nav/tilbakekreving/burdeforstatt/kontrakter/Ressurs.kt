@@ -1,6 +1,6 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-import com.fasterxml.jackson.annotation.JsonProperty
+
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -15,11 +15,11 @@ import java.io.StringWriter
  * @param stacktrace stacktrace fra feil som kan være nyttig til debugging i familie-prosessering
  */
 data class Ressurs<T>(
-   @JsonProperty("data") val data: T?,
-    @JsonProperty("status") val status: Status,
-    @JsonProperty("melding") val melding: String,
-    @JsonProperty("frontendFeilmelding") val frontendFeilmelding: String? = null,
-    @JsonProperty("stacktrace") val stacktrace: String?,
+   val data: T?,
+    val status: Status,
+    val melding: String,
+    val frontendFeilmelding: String? = null,
+    val stacktrace: String?,
 ) {
     enum class Status {
         SUKSESS,
@@ -30,14 +30,6 @@ data class Ressurs<T>(
     }
 
     companion object {
-        fun <T> success(data: T): Ressurs<T> =
-            Ressurs(
-                data = data,
-                status = Status.SUKSESS,
-                melding = "Innhenting av data var vellykket",
-                stacktrace = null,
-            )
-
         fun <T> success(
             data: T,
             melding: String?,
@@ -49,39 +41,6 @@ data class Ressurs<T>(
                 stacktrace = null,
             )
 
-        fun <T> failure(
-            errorMessage: String? = null,
-            frontendFeilmelding: String? = null,
-            error: Throwable? = null,
-        ): Ressurs<T> =
-            Ressurs(
-                data = null,
-                status = Status.FEILET,
-                melding = errorMessage ?: "En feil har oppstått: ${error?.message}",
-                frontendFeilmelding = frontendFeilmelding,
-                stacktrace = error?.textValue(),
-            )
-
-        fun <T> ikkeTilgang(melding: String): Ressurs<T> =
-            Ressurs(
-                data = null,
-                status = Status.IKKE_TILGANG,
-                melding = melding,
-                stacktrace = null,
-            )
-
-        fun <T> funksjonellFeil(
-            melding: String,
-            frontendFeilmelding: String? = null,
-        ): Ressurs<T> =
-            Ressurs(
-                data = null,
-                status = Status.FUNKSJONELL_FEIL,
-                melding = melding,
-                frontendFeilmelding = frontendFeilmelding,
-                stacktrace = null,
-            )
-
         private fun Throwable.textValue(): String {
             val sw = StringWriter()
             this.printStackTrace(PrintWriter(sw))
@@ -89,11 +48,7 @@ data class Ressurs<T>(
         }
     }
 
-    fun toJson(): String = objectMapper.writeValueAsString(this)
-
     override fun toString(): String = "Ressurs(status=$status, melding='$melding')"
-
-    fun toSecureString(): String = "Ressurs(status=$status, melding='$melding', frontendFeilmelding='$frontendFeilmelding')"
 }
 
 fun <T> Ressurs<T>.getDataOrThrow(): T =
