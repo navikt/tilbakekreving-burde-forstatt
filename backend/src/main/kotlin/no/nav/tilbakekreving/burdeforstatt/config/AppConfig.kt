@@ -1,6 +1,6 @@
-package no.nav.tilbakekreving.burdeforstatt
+package no.nav.tilbakekreving.burdeforstatt.config
 
-data class Config(
+data class AppConfig(
     val tokenEndpoint: String,
     val tokenExchangeEndpoint: String,
     val tokenIntrospectionEndpoint: String,

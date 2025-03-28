@@ -1,6 +1,7 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Institusjon(
-    val organisasjonsnummer: String,
+    @JsonProperty("organisasjonsnummer") val organisasjonsnummer: String,
 )

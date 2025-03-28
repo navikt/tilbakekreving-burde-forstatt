@@ -1,0 +1,23 @@
+<configuration>
+    <variable name="LOG_FORMAT" value="${LOG_FORMAT:-TEXT}"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36}.%M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" condition='${LOG_FORMAT} == "TEXT"'/>
+        <appender-ref ref="STDOUT_JSON" condition='${LOG_FORMAT} == "JSON"'/>
+    </root>
+
+    <logger name="no.nav.tilbakekreving" level="INFO"/>
+    <logger name="org.apache.cxf" level="WARN"/>
+    <logger name="org.apache.hc" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+</configuration>
