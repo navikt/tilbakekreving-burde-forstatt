@@ -16,8 +16,8 @@ data class MqConfig(
     val queue: String,
     val user: String,
     val password: String,
-    val enabled: Boolean = true
-){
+    val enabled: Boolean = true,
+) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun createConnection(): Connection {

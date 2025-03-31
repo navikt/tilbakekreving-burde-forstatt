@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -15,7 +14,7 @@ import java.io.StringWriter
  * @param stacktrace stacktrace fra feil som kan være nyttig til debugging i familie-prosessering
  */
 data class Ressurs<T>(
-   val data: T?,
+    val data: T?,
     val status: Status,
     val melding: String,
     val frontendFeilmelding: String? = null,
