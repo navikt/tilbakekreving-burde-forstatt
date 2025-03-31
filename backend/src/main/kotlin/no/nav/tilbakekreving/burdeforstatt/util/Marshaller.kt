@@ -9,27 +9,27 @@ import java.io.StringWriter
 
 object Marshaller {
     val log = LoggerFactory.getLogger(Marshaller::class.java)
-    val jaxbContext = JAXBContext.newInstance(
-        DetaljertKravgrunnlagMelding::class.java,
-    )
+    val jaxbContext =
+        JAXBContext.newInstance(
+            DetaljertKravgrunnlagMelding::class.java,
+        )
 
-    fun marshall(
-        detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding
-    ): String = try {
-        val marshaller: Marshaller = jaxbContext.createMarshaller()
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+    fun marshall(detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding): String =
         try {
-            marshaller.setProperty("org.glassfish.jaxb.namespacePrefixMapper", CustomNamespacePrefixMapper())
-        } catch (e: Exception) {
-            log.warn("Namespace prefix mapper er ikke støttet", e)
+            val marshaller: Marshaller = jaxbContext.createMarshaller()
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+            try {
+                marshaller.setProperty("org.glassfish.jaxb.namespacePrefixMapper", CustomNamespacePrefixMapper())
+            } catch (e: Exception) {
+                log.warn("Namespace prefix mapper er ikke støttet", e)
+                throw e
+            }
+
+            val stringWriter = StringWriter()
+            marshaller.marshal(detaljertKravgrunnlagMelding, stringWriter)
+            stringWriter.toString()
+        } catch (e: JAXBException) {
+            log.error("Kunne ikke marshalle Kravgrunnlag med id: {}", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e)
             throw e
         }
-
-        val stringWriter = StringWriter()
-        marshaller.marshal(detaljertKravgrunnlagMelding, stringWriter)
-        stringWriter.toString()
-    } catch (e: JAXBException) {
-        log.error("Kunne ikke marshalle Kravgrunnlag med id: {}", detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId, e)
-        throw e
-    }
 }

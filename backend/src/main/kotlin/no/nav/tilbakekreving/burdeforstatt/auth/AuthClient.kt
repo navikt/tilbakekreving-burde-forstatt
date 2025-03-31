@@ -4,19 +4,18 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.request.forms.submitForm
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.parameters
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
-
 
 class AuthClient(
     private val appConfig: AppConfig,
     private val httpClient: HttpClient,
-    ) {
-
+) {
     suspend fun token(target: String): TokenResponse =
         try {
             httpClient

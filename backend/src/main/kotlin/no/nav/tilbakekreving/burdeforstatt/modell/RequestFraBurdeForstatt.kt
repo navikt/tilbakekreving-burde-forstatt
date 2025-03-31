@@ -7,5 +7,3 @@ data class RequestFraBurdeForstatt(
     val ytelse: String,
     val personIdent: String,
 )
-
-

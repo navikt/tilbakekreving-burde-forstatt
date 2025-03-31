@@ -6,46 +6,62 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.client.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import no.nav.tilbakekreving.burdeforstatt.auth.*
+import io.ktor.client.HttpClient
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.install
+import io.ktor.server.application.log
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.principal
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import no.nav.tilbakekreving.burdeforstatt.auth.AuthClient
+import no.nav.tilbakekreving.burdeforstatt.auth.TexasAuthenticationProvider
+import no.nav.tilbakekreving.burdeforstatt.auth.TexasPrincipal
+import no.nav.tilbakekreving.burdeforstatt.auth.TokenResponse
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
-import no.nav.tilbakekreving.burdeforstatt.service.MQService
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
+import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.service.TilbakekrevingService
 
 fun main() {
-
     val httpClient = defaultHttpClient()
-    val appConfig = AppConfig(
-        tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT") ?: "http://localhost:4001/api/v1/token",
-        tokenExchangeEndpoint = System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT")
-            ?: "http://localhost:4001/api/v1/token/exchange",
-        tokenIntrospectionEndpoint = System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT")
-            ?: "http://localhost:4001/api/v1/introspect",
-        loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:5173/",
-    )
+    val appConfig =
+        AppConfig(
+            tokenEndpoint = System.getenv("NAIS_TOKEN_ENDPOINT") ?: "http://localhost:4001/api/v1/token",
+            tokenExchangeEndpoint =
+                System.getenv("NAIS_TOKEN_EXCHANGE_ENDPOINT")
+                    ?: "http://localhost:4001/api/v1/token/exchange",
+            tokenIntrospectionEndpoint =
+                System.getenv("NAIS_TOKEN_INTROSPECTION_ENDPOINT")
+                    ?: "http://localhost:4001/api/v1/introspect",
+            loginRedirectUrl = System.getenv("POST_LOGIN_REDIRECT_URL") ?: "http://localhost:5173/",
+        )
 
-    val mqConfig = MqConfig(
-        host = "b27apvl220.preprod.local",
-        port = 1413,
-        channel = "Q1_FAMILIE_TILBAKE",
-        queueManager = "MQLS02",
-        queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
-        user = System.getenv("CREDENTIAL_USERNAME"),
-        password = System.getenv("CREDENTIAL_PASSWORD"),
-    )
+    val mqConfig =
+        MqConfig(
+            host = "b27apvl220.preprod.local",
+            port = 1413,
+            channel = "Q1_FAMILIE_TILBAKE",
+            queueManager = "MQLS02",
+            queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
+            user = System.getenv("CREDENTIAL_USERNAME"),
+            password = System.getenv("CREDENTIAL_PASSWORD"),
+        )
 
     val mqService = MQService(mqConfig)
 
@@ -54,22 +70,29 @@ fun main() {
             jackson {
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 configure(SerializationFeature.INDENT_OUTPUT, true)
-                setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
-                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                    indentObjectsWith(DefaultIndenter("  ", "\n"))
-                })
-                registerModule(JavaTimeModule())  // support java.time.* types
+                setDefaultPrettyPrinter(
+                    DefaultPrettyPrinter().apply {
+                        indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                        indentObjectsWith(DefaultIndenter("  ", "\n"))
+                    },
+                )
+                registerModule(JavaTimeModule())
             }
         }
         registerApiRoutes(appConfig, httpClient, mqService)
     }.start(wait = true)
 }
 
-private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: HttpClient, mqService: MQService) {
-    val authClient = AuthClient(
-        appConfig = appConfig,
-        httpClient = httpClient
-    )
+private fun Application.registerApiRoutes(
+    appConfig: AppConfig,
+    httpClient: HttpClient,
+    mqService: MQService,
+) {
+    val authClient =
+        AuthClient(
+            appConfig = appConfig,
+            httpClient = httpClient,
+        )
     authentication {
         register(TexasAuthenticationProvider(TexasAuthenticationProvider.Config("azuread", authClient)))
     }
@@ -99,14 +122,15 @@ private fun Application.registerApiRoutes(appConfig: AppConfig, httpClient: Http
                     }
 
                     when (val tokenResponse = authClient.token(scope)) {
-                        is TokenResponse.Success -> handleSuccess(
-                            httpClient,
-                            mqService,
-                            tilbakekrevingUrl,
-                            call,
-                            tokenResponse.accessToken,
-                            navIdent
-                        )
+                        is TokenResponse.Success ->
+                            handleSuccess(
+                                httpClient,
+                                mqService,
+                                tilbakekrevingUrl,
+                                call,
+                                tokenResponse.accessToken,
+                                navIdent,
+                            )
                         is TokenResponse.Error -> {
                             log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
                             handleError(call, tokenResponse)
@@ -127,7 +151,7 @@ private suspend fun handleSuccess(
     tilbakekrevingUrl: String,
     call: ApplicationCall,
     accessToken: String,
-    navIdent: String
+    navIdent: String,
 ) {
     val requestFraBurdeForstatt = call.receive<RequestFraBurdeForstatt>()
     val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl, accessToken, navIdent)
@@ -137,6 +161,9 @@ private suspend fun handleSuccess(
     call.respond(status, respons)
 }
 
-private suspend fun handleError(call: ApplicationCall, tokenResponse: TokenResponse.Error){
+private suspend fun handleError(
+    call: ApplicationCall,
+    tokenResponse: TokenResponse.Error,
+) {
     call.respond(HttpStatusCode.Unauthorized, "Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
 }

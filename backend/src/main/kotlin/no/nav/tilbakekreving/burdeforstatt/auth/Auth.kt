@@ -1,10 +1,12 @@
 package no.nav.tilbakekreving.burdeforstatt.auth
 
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.auth.AuthenticationContext
+import io.ktor.server.auth.AuthenticationFailedCause
+import io.ktor.server.auth.AuthenticationProvider
+import io.ktor.server.request.authorization
+import io.ktor.server.response.respond
 import org.slf4j.LoggerFactory
 
 class TexasAuthenticationProvider(
@@ -12,8 +14,9 @@ class TexasAuthenticationProvider(
 ) : AuthenticationProvider(config) {
     class Config internal constructor(
         name: String?,
-        val client: AuthClient
+        val client: AuthClient,
     ) : AuthenticationProvider.Config(name)
+
     private val client = config.client
     private val logger = LoggerFactory.getLogger("auth")
 
@@ -47,11 +50,12 @@ class TexasAuthenticationProvider(
         context.principal(
             TexasPrincipal(
                 claims = introspectResponse.other,
-                userinfo = TexasPrincipal.Userinfo(
-                    email = introspectResponse.preferredUsername,
-                    name = introspectResponse.name,
-                    ident = introspectResponse.navIdent,
-                ),
+                userinfo =
+                    TexasPrincipal.Userinfo(
+                        email = introspectResponse.preferredUsername,
+                        name = introspectResponse.name,
+                        ident = introspectResponse.navIdent,
+                    ),
                 token = token,
             ),
         )
