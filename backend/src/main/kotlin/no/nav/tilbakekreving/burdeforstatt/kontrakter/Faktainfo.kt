@@ -3,7 +3,7 @@ package no.nav.tilbakekreving.burdeforstatt.kontrakter
 data class Faktainfo(
     val revurderingsårsak: String,
     val revurderingsresultat: String,
-    val tilbakekrevingsvalg: Tilbakekrevingsvalg? = null,
+    val tilbakekrevingsvalg: Tilbakekrevingsvalg? = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL,
     val konsekvensForYtelser: Set<String> = emptySet(),
 )
 

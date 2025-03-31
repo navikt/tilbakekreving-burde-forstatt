@@ -1,16 +1,17 @@
-package no.nav.tilbakekreving.burdeforstatt.kontrakter
+package no.nav.tilbakekreving.burdeforstatt.modell
 
-
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
 import java.time.LocalDate
+import java.util.UUID
 
 data class OpprettTilbakekrevingRequest(
-    val fagsystem: Fagsystem,
+   val fagsystem: Fagsystem,
     val regelverk: Regelverk? = null,
     val ytelsestype: Ytelsestype,
-    val eksternFagsakId: String,
+    val eksternFagsakId: String = "BF${UUID.randomUUID().toString().take(8) }",
     val personIdent: String,
     // Fagsystemreferanse til behandlingen, må være samme id som brukes mot datavarehus og økonomi
-    val eksternId: String,
+    val eksternId: String? = UUID.randomUUID().toString(),
     val behandlingstype: Behandlingstype? = Behandlingstype.TILBAKEKREVING,
     val manueltOpprettet: Boolean,
     val språkkode: Språkkode = Språkkode.NB,

@@ -11,6 +11,8 @@ metadata:
   labels:
     team: tilbake
 spec:
+  envFrom:
+    - secret: burde-forstatt
   image: {{ image }}
   port: 8080
   liveness:
@@ -45,6 +47,12 @@ spec:
     outbound:
       rules:
         - application: tilbakekreving-backend
+      external:
+        - host: b27apvl220.preprod.local
+          ports:
+            - port: 1413
   env:
     - name: POST_LOGIN_REDIRECT_URL
       value: /
+    - name: LOG_FORMAT
+      value: JSON

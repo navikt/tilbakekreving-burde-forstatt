@@ -9,11 +9,11 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
-import no.nav.tilbakekreving.burdeforstatt.Config
+import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
 
 
 class AuthClient(
-    private val config: Config,
+    private val appConfig: AppConfig,
     private val httpClient: HttpClient,
     ) {
 
@@ -21,7 +21,7 @@ class AuthClient(
         try {
             httpClient
                 .submitForm(
-                    config.tokenEndpoint,
+                    appConfig.tokenEndpoint,
                     parameters {
                         set("target", target)
                         set("identity_provider", "azuread")
@@ -38,7 +38,7 @@ class AuthClient(
         try {
             httpClient
                 .submitForm(
-                    config.tokenExchangeEndpoint,
+                    appConfig.tokenExchangeEndpoint,
                     parameters {
                         set("target", target)
                         set("user_token", userToken)
@@ -52,7 +52,7 @@ class AuthClient(
     suspend fun introspect(accessToken: String): TokenIntrospectionResponse =
         httpClient
             .submitForm(
-                config.tokenIntrospectionEndpoint,
+                appConfig.tokenIntrospectionEndpoint,
                 parameters {
                     set("token", accessToken)
                     set("identity_provider", "azuread")

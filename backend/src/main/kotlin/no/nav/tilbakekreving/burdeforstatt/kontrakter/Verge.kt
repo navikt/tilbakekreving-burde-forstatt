@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-
 data class Verge(
     val vergetype: Vergetype,
     val navn: String,

@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
-
 data class Brevmottaker(
     val type: MottakerType,
     val vergetype: Vergetype? = null,
