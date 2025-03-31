@@ -14,28 +14,38 @@ updates:
       timezone: Europe/Oslo
     open-pull-requests-limit: 20
     groups:
-      nav-packages:
+      navikt-dependencies:
           patterns:
-            - "@navikt/*"
-      react-deps:
+            - '@navikt/*'
+      react-dependencies:
         patterns:
-          - "react*"
-          - "@types/react*"
-      dev-deps:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+      minor-and-patch-dependencies:
         patterns:
-          - "*eslint*"
-          - "typescript*"
-          - "vite"
-      minor-patch:
+          - '*'
         update-types:
-          - "minor"
-          - "patch"
-        exclude-patterns:
-          - "@navikt/*"
-          - "react*"
+          - minor
+          - patch
+      major-dependencies:
+        patterns:
+          - '*'
+        update-types:
+          - major
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+      timezone: Europe/Oslo
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: daily
       time: '06:00'
       timezone: Europe/Oslo
+    open-pull-requests-limit: 10
