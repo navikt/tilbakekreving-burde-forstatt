@@ -2,7 +2,7 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 
 metadata:
-  name: burde-forstatt-backend
+  name: burde-forstatt
   namespace: tilbake
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
