@@ -6,7 +6,7 @@ registries:
     token: ${{ secrets.READER_TOKEN }}
 updates:
   - package-ecosystem: npm
-    directory: /
+    directory: /frontend
     registries: '*'
     schedule:
       interval: daily
