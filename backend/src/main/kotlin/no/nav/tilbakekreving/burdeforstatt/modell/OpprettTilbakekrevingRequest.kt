@@ -1,11 +1,20 @@
 package no.nav.tilbakekreving.burdeforstatt.modell
 
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.*
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingstype
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Brevmottaker
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Institusjon
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Regelverk
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Språkkode
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Varsel
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Verge
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ytelsestype
 import java.time.LocalDate
 import java.util.UUID
 
 data class OpprettTilbakekrevingRequest(
-   val fagsystem: Fagsystem,
+    val fagsystem: Fagsystem,
     val regelverk: Regelverk? = null,
     val ytelsestype: Ytelsestype,
     val eksternFagsakId: String = "BF${UUID.randomUUID().toString().take(8) }",

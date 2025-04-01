@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm") version "2.1.10"
     application
     id("com.gradleup.shadow") version "8.3.6"
+    id("org.jlleitschuh.gradle.ktlint") version "12.2.0"
 }
 
 repositories {
@@ -17,7 +18,6 @@ repositories {
         }
     }
 }
-
 
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
