@@ -3,8 +3,8 @@ import { Ytelse as TYtelse, ytelseGrupper } from "../typer/ytelse";
 
 interface Props {
   valgtYtelse: TYtelse | undefined;
-  feilMelding?: string;
   setValgtYtelse: (ytelse: TYtelse | undefined) => void;
+  feilMelding?: string;
 }
 
 const Ytelse = ({ valgtYtelse, setValgtYtelse, feilMelding }: Props) => {

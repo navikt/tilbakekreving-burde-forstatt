@@ -14,7 +14,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Alert } from "@navikt/ds-react/Alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Header } from "./komponenter/Header";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@navikt/ds-react";
 import { format } from "date-fns";
 
@@ -39,11 +39,14 @@ const postTilbakekreving = async (
     body: JSON.stringify(data),
   });
   if (!response.ok) {
-    //backend feilmelding goes here
     throw new Error("Noe gikk galt ved opprettelse av tilbakekreving");
   }
 
   const responseData: TilbakekrevingResponse = await response.json();
+
+  if (responseData.frontendFeilmelding) {
+    throw new Error(responseData.frontendFeilmelding);
+  }
 
   return responseData;
 };
@@ -96,18 +99,22 @@ function App() {
       setSisteSendtInnData(requestObject);
       return postTilbakekreving(requestObject);
     },
+    onMutate: () => {
+      setTimeout(() => {
+        if (svarMeldingRef.current) {
+          svarMeldingRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 200);
+    },
   });
 
-  useEffect(() => {
-    if ((mutation.isSuccess || mutation.isError) && svarMeldingRef.current) {
-      console.log("Scrolling to svarMeldingRef");
-
-      svarMeldingRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [mutation.isSuccess, mutation.isError]);
+  const resetSkjema = () => {
+    reset();
+    mutation.reset();
+  };
 
   return (
     <>
@@ -171,26 +178,9 @@ function App() {
                 variant="primary"
                 loading={mutation.isPending || isSubmitting}
               >
-                Opprette tilbakekreving
+                Opprett tilbakekreving
               </Button>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  reset({
-                    ytelse: undefined,
-                    perioder: [
-                      {
-                        fom: undefined,
-                        tom: undefined,
-                        simulertBelop: "",
-                        kravgrunnlagBelop: "",
-                      },
-                    ],
-                    personIdent: "",
-                  });
-                  mutation.reset();
-                }}
-              >
+              <Button variant="secondary" onClick={resetSkjema}>
                 Tilbakestill skjemaet
               </Button>
             </HStack>
