@@ -59,8 +59,8 @@ fun main() {
             channel = "Q1_FAMILIE_TILBAKE",
             queueManager = "MQLS02",
             queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
-            user = System.getenv("CREDENTIAL_USERNAME"),
-            password = System.getenv("CREDENTIAL_PASSWORD"),
+            user = System.getenv("CREDENTIAL_USERNAME") ?: "username",
+            password = System.getenv("CREDENTIAL_PASSWORD") ?: "password",
         )
 
     val mqService = MQService(mqConfig)

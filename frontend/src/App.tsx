@@ -1,5 +1,5 @@
 import "@navikt/ds-css/dist/index.css";
-import { VStack } from "@navikt/ds-react/Stack";
+import { HStack, VStack } from "@navikt/ds-react/Stack";
 import { TextField } from "@navikt/ds-react/TextField";
 import { Button } from "@navikt/ds-react/Button";
 import Perioder from "./komponenter/Perioder";
@@ -54,6 +54,7 @@ function App() {
   >(undefined);
   const {
     control,
+    reset,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<TilbakeFormData>({
@@ -147,14 +148,24 @@ function App() {
                 </div>
               </div>
             )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              loading={mutation.isPending || isSubmitting}
-            >
-              Oppretter tilbakekreving
-            </Button>
+            <HStack gap="4">
+              <Button
+                type="submit"
+                variant="primary"
+                loading={mutation.isPending || isSubmitting}
+              >
+                Oppretter tilbakekreving
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  reset();
+                  mutation.reset();
+                }}
+              >
+                Tilbakestill
+              </Button>
+            </HStack>
           </VStack>
         </form>
         {mutation.isSuccess && (
