@@ -157,7 +157,7 @@ class TilbakekrevingService(
                 data = null,
                 status = Ressurs.Status.FEILET,
                 melding = "Exception: ${e.message}",
-                frontendFeilmelding = "En feil oppstod under opprettign av behandling i tilbakekreving",
+                frontendFeilmelding = "En feil oppstod under oppretting av behandling i tilbakekreving",
                 stacktrace = e.stackTraceToString(),
             )
         }

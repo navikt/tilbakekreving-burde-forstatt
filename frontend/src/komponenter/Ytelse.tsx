@@ -1,20 +1,18 @@
 import { Select } from "@navikt/ds-react";
-import { Ytelse, ytelseGrupper } from "../typer/ytelse";
+import { Ytelse as TYtelse, ytelseGrupper } from "../typer/ytelse";
 
 interface Props {
-  valgtYtelse: Ytelse | undefined;
+  valgtYtelse: TYtelse | undefined;
   feilMelding?: string;
-  setValgtYtelse: (ytelse: Ytelse | undefined) => void;
+  setValgtYtelse: (ytelse: TYtelse | undefined) => void;
 }
 
-const Ytelser = ({ valgtYtelse, setValgtYtelse, feilMelding }: Props) => {
+const Ytelse = ({ valgtYtelse, setValgtYtelse, feilMelding }: Props) => {
   return (
     <Select
-      label="Ytelser"
-      value={valgtYtelse}
-      onChange={(e) => {
-        setValgtYtelse(e.target.value as Ytelse);
-      }}
+      label="Ytelse"
+      value={valgtYtelse || ""}
+      onChange={(e) => setValgtYtelse(e.target.value as TYtelse)}
       error={feilMelding}
     >
       <option value="">Velg ytelse</option>
@@ -31,4 +29,4 @@ const Ytelser = ({ valgtYtelse, setValgtYtelse, feilMelding }: Props) => {
   );
 };
 
-export default Ytelser;
+export default Ytelse;
