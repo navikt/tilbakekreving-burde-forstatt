@@ -2,7 +2,7 @@ import "@navikt/ds-css/dist/index.css";
 import { HStack, VStack } from "@navikt/ds-react/Stack";
 import { TextField } from "@navikt/ds-react/TextField";
 import { Button } from "@navikt/ds-react/Button";
-import Perioder from "./komponenter/Perioder";
+
 import Ytelse from "./komponenter/Ytelse";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -17,6 +17,7 @@ import { Header } from "./komponenter/Header";
 import { useRef, useState } from "react";
 import { Link } from "@navikt/ds-react";
 import { format } from "date-fns";
+import Perioder from "./komponenter/Perioder/Perioder";
 
 type TilbakekrevingResponse = {
   data: string;
@@ -58,6 +59,7 @@ function App() {
   >(undefined);
   const {
     control,
+    watch,
     reset,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -77,7 +79,7 @@ function App() {
     mode: "onChange",
     resolver: zodResolver(tilbakeFormDataSchema),
   });
-
+  const watchedYtelse = watch("ytelse");
   const mutation = useMutation({
     mutationFn: (formData: TilbakeFormData) => {
       const requestObject = {
@@ -154,7 +156,14 @@ function App() {
                 )}
               />
             </HStack>
-            <Perioder feilMelding={errors.perioder} control={control} />
+
+            {watchedYtelse && (
+              <Perioder
+                ytelse={watchedYtelse}
+                feilMelding={errors.perioder}
+                control={control}
+              />
+            )}
 
             {mutation.isError && (
               <div

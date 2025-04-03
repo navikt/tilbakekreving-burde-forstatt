@@ -16,3 +16,9 @@ export const ytelseGrupper = [
     ytelser: [ytelseSchema.enum.Barnetrygd, ytelseSchema.enum.Kontantstøtte],
   },
 ] as const;
+
+export const månedsytelser = [
+  ytelseSchema.enum.Overgangsstønad,
+  ytelseSchema.enum.Barnetrygd,
+  ytelseSchema.enum.Kontantstøtte,
+];

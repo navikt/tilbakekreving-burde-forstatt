@@ -1,11 +1,5 @@
 import { PlusIcon } from "@navikt/aksel-icons";
-import {
-  DatePicker,
-  HStack,
-  Button,
-  useRangeDatepicker,
-  TextField,
-} from "@navikt/ds-react";
+import { HStack, Button, TextField } from "@navikt/ds-react";
 import { VStack } from "@navikt/ds-react";
 import { TrashIcon } from "@navikt/aksel-icons";
 import {
@@ -14,10 +8,13 @@ import {
   FieldArrayWithId,
   useFieldArray,
 } from "react-hook-form";
-import { TilbakeFormData } from "../typer/formData";
+import { TilbakeFormData } from "../../typer/formData";
+import { Maanedsvelger } from "./Maanedsvelger";
+import { Dagvelger } from "./Dagvelger";
+import { månedsytelser, Ytelse } from "../../typer/ytelse";
 
-type TilbakekrevingControl = Control<TilbakeFormData>;
-type PeriodeFeilmelding =
+export type TilbakekrevingControl = Control<TilbakeFormData>;
+export type PeriodeFeilmelding =
   | {
       message?: string;
       [index: number]:
@@ -34,52 +31,32 @@ type PeriodeFeilmelding =
 interface PeriodeInputProps {
   indeks: number;
   control: TilbakekrevingControl;
+  ytelse: Ytelse;
   feilMelding?: PeriodeFeilmelding;
 }
 
-const PeriodeInput = ({ indeks, feilMelding, control }: PeriodeInputProps) => {
-  const { fields, update } = useFieldArray({ control, name: "perioder" });
-  const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
-    onRangeChange: (range) => {
-      if (range?.from && range?.to)
-        update(indeks, { ...fields[indeks], fom: range.from, tom: range.to });
-    },
-  });
-
+const Periode = ({
+  indeks,
+  feilMelding,
+  control,
+  ytelse,
+}: PeriodeInputProps) => {
   return (
     <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="4">
       <h3 className="font-bold text-blue-700">Periode {indeks + 1}</h3>
-
-      <DatePicker {...datepickerProps} dropdownCaption>
-        <HStack gap="4">
-          <Controller
-            name={`perioder.${indeks}.fom`}
-            control={control}
-            render={({ field }) => (
-              <DatePicker.Input
-                {...fromInputProps}
-                label="Fra dato"
-                error={feilMelding?.[indeks]?.fom?.message}
-                ref={field.ref}
-                onBlur={field.onBlur}
-              />
-            )}
-          />
-          <Controller
-            name={`perioder.${indeks}.tom`}
-            control={control}
-            render={({ field }) => (
-              <DatePicker.Input
-                {...toInputProps}
-                label="Til dato"
-                error={feilMelding?.[indeks]?.tom?.message}
-                ref={field.ref}
-                onBlur={field.onBlur}
-              />
-            )}
-          />
-        </HStack>
-      </DatePicker>
+      {månedsytelser.includes(ytelse) ? (
+        <Maanedsvelger
+          control={control}
+          indeks={indeks}
+          feilmelding={feilMelding}
+        />
+      ) : (
+        <Dagvelger
+          control={control}
+          indeks={indeks}
+          feilmelding={feilMelding}
+        />
+      )}
 
       <Controller
         name={`perioder.${indeks}.simulertBelop`}
@@ -116,11 +93,12 @@ const PeriodeInput = ({ indeks, feilMelding, control }: PeriodeInputProps) => {
 };
 
 interface Props {
-  feilMelding?: PeriodeFeilmelding;
   control: TilbakekrevingControl;
+  ytelse: Ytelse;
+  feilMelding?: PeriodeFeilmelding;
 }
 
-const Perioder = ({ feilMelding, control }: Props) => {
+const Perioder = ({ control, ytelse, feilMelding }: Props) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "perioder",
@@ -145,8 +123,9 @@ const Perioder = ({ feilMelding, control }: Props) => {
       <VStack gap="4">
         {fields.map((periode) => (
           <HStack key={periode.id} gap="4" align="center">
-            <PeriodeInput
+            <Periode
               indeks={fields.indexOf(periode)}
+              ytelse={ytelse}
               feilMelding={feilMelding}
               control={control}
             />
