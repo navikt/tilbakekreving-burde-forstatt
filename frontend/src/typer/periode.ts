@@ -21,8 +21,8 @@ export const periodeSchema = z.object({
     .refine((date) => date <= sluttenAvIDag, {
       message: "Til-dato kan ikke være i fremtiden",
     }),
-  simulertBelop: beløpSchema,
-  kravgrunnlagBelop: beløpSchema,
+  simulertBeløp: beløpSchema,
+  kravgrunnlagBeløp: beløpSchema,
 });
 
 export type Periode = z.infer<typeof periodeSchema>;

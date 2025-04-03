@@ -5,7 +5,7 @@ import { personIdentSchema } from "./personIdent";
 
 export const tilbakeFormDataSchema = z.object({
   perioder: z.array(periodeSchema).refine((perioder) => perioder.length > 0, {
-    message: "Du må legge til minst én periode",
+    message: "Du må legge til minst én periode", //TODO må vise denne feilmeldingen på riktig sted
   }),
   ytelse: ytelseSchema,
   personIdent: personIdentSchema,
@@ -17,8 +17,8 @@ const tilbakeRequest = z.object({
     z.object({
       fom: z.string(),
       tom: z.string(),
-      simulertBelop: z.number(),
-      kravgrunnlagBelop: z.number(),
+      simulertBeløp: z.number(),
+      kravgrunnlagBeløp: z.number(),
     })
   ),
   ytelse: ytelseSchema,

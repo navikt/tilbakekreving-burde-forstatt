@@ -20,7 +20,7 @@ const erPositivtTall = (verdi: string): boolean => {
 };
 
 export const beløpSchema = z
-  .string()
+  .string({ required_error: "Beløp må fylles ut" })
   .min(1, { message: "Beløp må fylles ut" })
   .refine(erPositivtTall, {
     message: "Beløp må være et positivt tall",

@@ -59,7 +59,7 @@ const Periode = ({
       )}
 
       <Controller
-        name={`perioder.${indeks}.simulertBelop`}
+        name={`perioder.${indeks}.simulertBeløp`}
         control={control}
         render={({ field }) => (
           <TextField
@@ -74,7 +74,7 @@ const Periode = ({
         )}
       />
       <Controller
-        name={`perioder.${indeks}.kravgrunnlagBelop`}
+        name={`perioder.${indeks}.kravgrunnlagBeløp`}
         control={control}
         render={({ field }) => (
           <TextField
@@ -108,8 +108,8 @@ const Perioder = ({ control, ytelse, feilMelding }: Props) => {
     append({
       fom: new Date(),
       tom: new Date(),
-      simulertBelop: "",
-      kravgrunnlagBelop: "",
+      simulertBeløp: "",
+      kravgrunnlagBeløp: "",
     });
   };
 
