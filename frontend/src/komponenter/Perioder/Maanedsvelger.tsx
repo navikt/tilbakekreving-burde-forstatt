@@ -9,6 +9,7 @@ interface Props {
 export const Maanedsvelger = ({ indeks }: Props) => {
   const {
     control,
+    clearErrors,
     formState: { errors },
   } = useFormContext<TilbakeFormData>();
   const { fields, update } = useFieldArray({ control, name: "perioder" });
@@ -24,6 +25,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
       toDate: månedenFørInneværendeMåned,
       onMonthChange: (month) => {
         if (month) update(indeks, { ...fields[indeks], fom: month });
+        clearErrors(`perioder.${indeks}.fom`);
       },
     });
 
@@ -39,6 +41,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
             0
           );
           update(indeks, { ...fields[indeks], tom: sisteDagIMåned });
+          clearErrors(`perioder.${indeks}.tom`);
         }
       },
     });

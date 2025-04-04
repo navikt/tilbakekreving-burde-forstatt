@@ -117,6 +117,7 @@ function App() {
   const resetSkjema = () => {
     reset();
     mutation.reset();
+    setSisteSendtInnData(undefined);
   };
 
   return (
