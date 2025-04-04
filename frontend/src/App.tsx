@@ -10,7 +10,7 @@ import {
   tilbakeFormDataSchema,
   TilbakeRequest,
 } from "./typer/formData";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 import { Alert } from "@navikt/ds-react/Alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Header } from "./komponenter/Header";
@@ -57,13 +57,7 @@ function App() {
   const [sisteSendtInnData, setSisteSendtInnData] = useState<
     TilbakeRequest | undefined
   >(undefined);
-  const {
-    control,
-    watch,
-    reset,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<TilbakeFormData>({
+  const metoder = useForm<TilbakeFormData>({
     defaultValues: {
       perioder: [
         {
@@ -79,6 +73,13 @@ function App() {
     mode: "onChange",
     resolver: zodResolver(tilbakeFormDataSchema),
   });
+  const {
+    watch,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = metoder;
+
   const watchedYtelse = watch("ytelse");
   const mutation = useMutation({
     mutationFn: (formData: TilbakeFormData) => {
@@ -127,74 +128,68 @@ function App() {
           Opprett testdata for tilbakekreving
         </h3>
         <p>Laget i hackatonet 2025 🌞</p>
-        <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
-          <VStack gap="4">
-            <HStack gap="4">
-              <Controller
-                name="ytelse"
-                control={control}
-                render={({ field }) => (
-                  <Ytelse
-                    valgtYtelse={field.value}
-                    setValgtYtelse={(nyYtelse) => field.onChange(nyYtelse)}
-                    feilMelding={errors.ytelse?.message}
-                  />
-                )}
-              />
 
-              <Controller
-                name="personIdent"
-                control={control}
-                rules={{ pattern: /^[0-9]{11}$/ }}
-                render={({ field }) => (
-                  <TextField
-                    label="Fødselsnummer eller D-nummer"
-                    {...field}
-                    pattern="[0-9]{11}"
-                    error={errors.personIdent?.message}
-                  />
-                )}
-              />
-            </HStack>
+        <FormProvider {...metoder}>
+          <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
+            <VStack gap="4">
+              <HStack gap="4">
+                <Controller
+                  name="ytelse"
+                  control={metoder.control}
+                  render={({ field }) => (
+                    <Ytelse
+                      setValgtYtelse={(nyYtelse) => field.onChange(nyYtelse)}
+                    />
+                  )}
+                />
+                <Controller
+                  name="personIdent"
+                  control={metoder.control}
+                  rules={{ pattern: /^[0-9]{11}$/ }}
+                  render={({ field }) => (
+                    <TextField
+                      label="Fødselsnummer eller D-nummer"
+                      {...field}
+                      pattern="[0-9]{11}"
+                      error={metoder.formState.errors.personIdent?.message}
+                    />
+                  )}
+                />
+              </HStack>
 
-            {watchedYtelse && (
-              <Perioder
-                ytelse={watchedYtelse}
-                feilMelding={errors.perioder}
-                control={control}
-              />
-            )}
+              {watchedYtelse && <Perioder />}
 
-            {mutation.isError && (
-              <div
-                ref={svarMeldingRef}
-                className="p-4 bg-red-50 border border-red-200 text-red-700 rounded"
-              >
-                <p className="font-bold">Feil ved innsending:</p>
-                <p>{String(mutation.error)}</p>
-                <div className="mt-4">
-                  <p className="font-bold">Data som ble forsøkt sendt:</p>
-                  <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
-                    {JSON.stringify(sisteSendtInnData, null, 2)}
-                  </pre>
+              {mutation.isError && (
+                <div
+                  ref={svarMeldingRef}
+                  className="p-4 bg-red-50 border border-red-200 text-red-700 rounded"
+                >
+                  <p className="font-bold">Feil ved innsending:</p>
+                  <p>{String(mutation.error)}</p>
+                  <div className="mt-4">
+                    <p className="font-bold">Data som ble forsøkt sendt:</p>
+                    <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
+                      {JSON.stringify(sisteSendtInnData, null, 2)}
+                    </pre>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <HStack gap="4">
-              <Button
-                type="submit"
-                variant="primary"
-                loading={mutation.isPending || isSubmitting}
-              >
-                Opprett tilbakekreving
-              </Button>
-              <Button variant="secondary" onClick={resetSkjema}>
-                Tilbakestill skjemaet
-              </Button>
-            </HStack>
-          </VStack>
-        </form>
+              <HStack gap="4">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  loading={mutation.isPending || isSubmitting}
+                >
+                  Opprett tilbakekreving
+                </Button>
+                <Button variant="secondary" onClick={resetSkjema}>
+                  Tilbakestill skjemaet
+                </Button>
+              </HStack>
+            </VStack>
+          </form>
+        </FormProvider>
 
         {mutation.isSuccess && (
           <Alert ref={svarMeldingRef} variant="success" className="mb-4">

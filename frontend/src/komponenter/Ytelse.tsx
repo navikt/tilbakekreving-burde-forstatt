@@ -1,19 +1,24 @@
 import { Select } from "@navikt/ds-react";
 import { Ytelse as TYtelse, ytelseGrupper } from "../typer/ytelse";
+import { useFormContext } from "react-hook-form";
+import { TilbakeFormData } from "../typer/formData";
 
 interface Props {
-  valgtYtelse: TYtelse | undefined;
   setValgtYtelse: (ytelse: TYtelse | undefined) => void;
-  feilMelding?: string;
 }
 
-const Ytelse = ({ valgtYtelse, setValgtYtelse, feilMelding }: Props) => {
+const Ytelse = ({ setValgtYtelse }: Props) => {
+  const {
+    getValues,
+    formState: { errors },
+  } = useFormContext<TilbakeFormData>();
+  const { ytelse } = getValues();
   return (
     <Select
       label="Ytelse"
-      value={valgtYtelse || ""}
+      value={ytelse || ""}
       onChange={(e) => setValgtYtelse(e.target.value as TYtelse)}
-      error={feilMelding}
+      error={errors.ytelse?.message}
     >
       <option value="">Velg ytelse</option>
       {ytelseGrupper.map((gruppe) => (

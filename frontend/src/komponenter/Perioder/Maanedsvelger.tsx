@@ -1,14 +1,16 @@
 import { HStack, MonthPicker, useMonthpicker } from "@navikt/ds-react";
-import { Controller, useFieldArray } from "react-hook-form";
-import { PeriodeFeilmelding, TilbakekrevingControl } from "./Perioder";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { TilbakeFormData } from "../../typer/formData";
 
 interface Props {
-  control: TilbakekrevingControl;
   indeks: number;
-  feilmelding?: PeriodeFeilmelding;
 }
 
-export const Maanedsvelger = ({ control, indeks, feilmelding }: Props) => {
+export const Maanedsvelger = ({ indeks }: Props) => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<TilbakeFormData>();
   const { fields, update } = useFieldArray({ control, name: "perioder" });
 
   const månedenFørInneværendeMåned = new Date();
@@ -47,14 +49,11 @@ export const Maanedsvelger = ({ control, indeks, feilmelding }: Props) => {
         <Controller
           name={`perioder.${indeks}.fom`}
           control={control}
-          render={({ field }) => (
+          render={() => (
             <MonthPicker.Input
               {...fromInputProps}
               label="Fra og med måned"
-              error={feilmelding?.[indeks]?.fom?.message}
-              ref={field.ref}
-              onBlur={field.onBlur}
-              onChange={(value) => field.onChange(value)}
+              error={errors.perioder?.[indeks]?.fom?.message}
             />
           )}
         />
@@ -63,13 +62,11 @@ export const Maanedsvelger = ({ control, indeks, feilmelding }: Props) => {
         <Controller
           name={`perioder.${indeks}.tom`}
           control={control}
-          render={({ field }) => (
+          render={() => (
             <MonthPicker.Input
               {...toInputProps}
               label="Til og med måned"
-              error={feilmelding?.[indeks]?.tom?.message}
-              ref={field.ref}
-              onBlur={field.onBlur}
+              error={errors.perioder?.[indeks]?.tom?.message}
             />
           )}
         />

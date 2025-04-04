@@ -1,15 +1,17 @@
-import { Controller, useFieldArray } from "react-hook-form";
-import { PeriodeFeilmelding, TilbakekrevingControl } from "./Perioder";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { DatePicker, useRangeDatepicker } from "@navikt/ds-react/DatePicker";
 import { HStack } from "@navikt/ds-react/Stack";
+import { TilbakeFormData } from "../../typer/formData";
 
 interface Props {
-  control: TilbakekrevingControl;
   indeks: number;
-  feilmelding?: PeriodeFeilmelding;
 }
 
-export const Dagvelger = ({ control, indeks, feilmelding }: Props) => {
+export const Dagvelger = ({ indeks }: Props) => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<TilbakeFormData>();
   const { fields, update } = useFieldArray({ control, name: "perioder" });
 
   const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
@@ -25,26 +27,22 @@ export const Dagvelger = ({ control, indeks, feilmelding }: Props) => {
         <Controller
           name={`perioder.${indeks}.fom`}
           control={control}
-          render={({ field }) => (
+          render={() => (
             <DatePicker.Input
               {...fromInputProps}
               label="Fra dato"
-              error={feilmelding?.[indeks]?.fom?.message}
-              ref={field.ref}
-              onBlur={field.onBlur}
+              error={errors.perioder?.[indeks]?.fom?.message}
             />
           )}
         />
         <Controller
           name={`perioder.${indeks}.tom`}
           control={control}
-          render={({ field }) => (
+          render={() => (
             <DatePicker.Input
               {...toInputProps}
               label="Til dato"
-              error={feilmelding?.[indeks]?.tom?.message}
-              ref={field.ref}
-              onBlur={field.onBlur}
+              error={errors.perioder?.[indeks]?.tom?.message}
             />
           )}
         />
