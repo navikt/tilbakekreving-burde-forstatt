@@ -89,8 +89,8 @@ function App() {
           const periodeUtenId = {
             fom: periode.fom,
             tom: periode.tom,
-            simulertBeløp: Number(periode.simulertBeløp),
-            kravgrunnlagBeløp: Number(periode.kravgrunnlagBeløp),
+            simulertBelop: Number(periode.simulertBeløp),
+            kravgrunnlagBelop: Number(periode.kravgrunnlagBeløp),
           };
           return {
             ...periodeUtenId,

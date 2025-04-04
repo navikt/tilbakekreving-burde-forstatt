@@ -17,8 +17,8 @@ const tilbakeRequest = z.object({
     z.object({
       fom: z.string(),
       tom: z.string(),
-      simulertBeløp: z.number(),
-      kravgrunnlagBeløp: z.number(),
+      simulertBelop: z.number(),
+      kravgrunnlagBelop: z.number(),
     })
   ),
   ytelse: ytelseSchema,
