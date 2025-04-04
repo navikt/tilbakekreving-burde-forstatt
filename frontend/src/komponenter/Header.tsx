@@ -14,7 +14,7 @@ export const Header = () => {
       <InternalHeader>
         <InternalHeader.Title as="h1">Burde forstått 🤔</InternalHeader.Title>
         <Spacer />
-        <Dropdown defaultOpen>
+        <Dropdown>
           <InternalHeader.UserButton
             as={Dropdown.Toggle}
             name={bruker.navn ?? "Ikke logget inn"}
