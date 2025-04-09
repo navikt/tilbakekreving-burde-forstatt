@@ -37,4 +37,4 @@ spec:
       emptyDir:
         medium: Memory
   ingresses:
-    - https://burde-forstatt.intern.dev.nav.no
+    - https://burde-forstatt.ansatt.dev.nav.no

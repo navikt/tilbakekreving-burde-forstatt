@@ -33,7 +33,7 @@ spec:
       memory: 512Mi
       cpu: 25m
   ingresses:
-    - https://burde-forstatt.intern.dev.nav.no/api
+    - https://burde-forstatt.ansatt.dev.nav.no/api
   azure:
     application:
       enabled: true
