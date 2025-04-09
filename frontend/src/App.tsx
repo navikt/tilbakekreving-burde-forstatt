@@ -153,6 +153,7 @@ function App() {
                   render={({ field }) => (
                     <TextField
                       label="Fødselsnummer eller D-nummer"
+                      description="Skal være fra Dolly"
                       {...field}
                       pattern="[0-9]{11}"
                       error={metoder.formState.errors.personIdent?.message}

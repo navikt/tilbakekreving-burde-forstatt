@@ -16,6 +16,7 @@ const Ytelse = ({ setValgtYtelse }: Props) => {
   return (
     <Select
       label="Ytelse"
+      description="Ytelser for felles løsning"
       value={ytelse || ""}
       onChange={(e) => setValgtYtelse(e.target.value as TYtelse)}
       error={errors.ytelse?.message}
