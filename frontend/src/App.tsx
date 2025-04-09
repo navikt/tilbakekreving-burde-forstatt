@@ -86,6 +86,9 @@ function App() {
       const requestObject = {
         ...formData,
         perioder: formData.perioder.map((periode) => {
+          if (!periode.fom || !periode.tom) {
+            throw new Error("Periode må ha både fra-dato og til-dato");
+          }
           const periodeUtenId = {
             fom: periode.fom,
             tom: periode.tom,

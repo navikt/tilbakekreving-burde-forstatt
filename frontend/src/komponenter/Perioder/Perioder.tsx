@@ -72,8 +72,10 @@ const Perioder = () => {
 
   const leggTilPeriode = () => {
     append({
-      fom: new Date(),
-      tom: new Date(),
+      // append bruker ikke Partial på typen. Blir uansett hacky med enten superRefine på zod-valideringen eller casting her...
+      // Subscriber på denne for å lytte etter fiks: https://github.com/orgs/react-hook-form/discussions/10211
+      fom: undefined as unknown as Date,
+      tom: undefined as unknown as Date,
       simulertBeløp: "",
       kravgrunnlagBeløp: "",
     });
