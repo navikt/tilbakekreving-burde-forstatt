@@ -77,7 +77,7 @@ export default tseslint.config(
             '@typescript-eslint/no-non-null-assertion': 'error',
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/sort-type-constituents': 'warn',
-            "react/react-in-jsx-scope": 'off',
+            'react/react-in-jsx-scope': 'off',
         },
         settings: {
             react: {
