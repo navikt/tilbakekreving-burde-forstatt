@@ -1,6 +1,7 @@
+import type { TilbakeFormData } from "../../typer/formData";
+
 import { HStack, MonthPicker, useMonthpicker } from "@navikt/ds-react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import { TilbakeFormData } from "../../typer/formData";
 
 interface Props {
   indeks: number;
@@ -16,7 +17,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
 
   const månedenFørInneværendeMåned = new Date();
   månedenFørInneværendeMåned.setMonth(
-    månedenFørInneværendeMåned.getMonth() - 1
+    månedenFørInneværendeMåned.getMonth() - 1,
   );
 
   const { monthpickerProps: fromMonthpickerProps, inputProps: fromInputProps } =
@@ -38,7 +39,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
           const sisteDagIMåned = new Date(
             month.getFullYear(),
             month.getMonth() + 1,
-            0
+            0,
           );
           update(indeks, { ...fields[indeks], tom: sisteDagIMåned });
           clearErrors(`perioder.${indeks}.tom`);

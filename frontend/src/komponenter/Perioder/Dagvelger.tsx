@@ -1,7 +1,8 @@
-import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import type { TilbakeFormData } from "../../typer/formData";
+
 import { DatePicker, useRangeDatepicker } from "@navikt/ds-react/DatePicker";
 import { HStack } from "@navikt/ds-react/Stack";
-import { TilbakeFormData } from "../../typer/formData";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
 interface Props {
   indeks: number;

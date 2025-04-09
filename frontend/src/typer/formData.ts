@@ -1,7 +1,8 @@
 import { z } from "zod";
+
 import { periodeSchema } from "./periode";
-import { ytelseSchema } from "./ytelse";
 import { personIdentSchema } from "./personIdent";
+import { ytelseSchema } from "./ytelse";
 
 export const tilbakeFormDataSchema = z.object({
   perioder: z.array(periodeSchema).refine((perioder) => perioder.length > 0, {
@@ -19,7 +20,7 @@ const tilbakeRequest = z.object({
       tom: z.string(),
       simulertBelop: z.number(),
       kravgrunnlagBelop: z.number(),
-    })
+    }),
   ),
   ytelse: ytelseSchema,
   personIdent: personIdentSchema,

@@ -1,7 +1,10 @@
+import type { TilbakeFormData } from "../typer/formData";
+import type { Ytelse as TYtelse } from "../typer/ytelse";
+
 import { Select } from "@navikt/ds-react";
-import { Ytelse as TYtelse, ytelseGrupper } from "../typer/ytelse";
 import { useFormContext } from "react-hook-form";
-import { TilbakeFormData } from "../typer/formData";
+
+import { ytelseGrupper } from "../typer/ytelse";
 
 interface Props {
   setValgtYtelse: (ytelse: TYtelse | undefined) => void;

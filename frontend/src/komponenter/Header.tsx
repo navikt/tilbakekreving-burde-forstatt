@@ -1,10 +1,11 @@
 import { LeaveIcon } from "@navikt/aksel-icons";
+import { EnterIcon } from "@navikt/aksel-icons";
 import { Dropdown } from "@navikt/ds-react/Dropdown";
 import { InternalHeader } from "@navikt/ds-react/InternalHeader";
 import { Spacer } from "@navikt/ds-react/Stack";
 import { BodyShort } from "@navikt/ds-react/Typography";
+
 import { useAuth } from "../hooks/useAuth";
-import { EnterIcon } from "@navikt/aksel-icons";
 
 export const Header = () => {
   const { bruker, loggInn, loggUt } = useAuth();

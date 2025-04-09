@@ -1,16 +1,14 @@
+import type { TilbakeFormData } from "../../typer/formData";
+import type { FieldArrayWithId } from "react-hook-form";
+
 import { PlusIcon } from "@navikt/aksel-icons";
+import { TrashIcon } from "@navikt/aksel-icons";
 import { HStack, Button, TextField } from "@navikt/ds-react";
 import { VStack } from "@navikt/ds-react";
-import { TrashIcon } from "@navikt/aksel-icons";
-import {
-  Controller,
-  FieldArrayWithId,
-  useFieldArray,
-  useFormContext,
-} from "react-hook-form";
-import { TilbakeFormData } from "../../typer/formData";
-import { Maanedsvelger } from "./Maanedsvelger";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+
 import { Dagvelger } from "./Dagvelger";
+import { Maanedsvelger } from "./Maanedsvelger";
 import { månedsytelser } from "../../typer/ytelse";
 
 interface PeriodeInputProps {

@@ -1,23 +1,21 @@
 import "@navikt/ds-css/dist/index.css";
+import type { TilbakeFormData, TilbakeRequest } from "./typer/formData";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "@navikt/ds-react";
+import { Alert } from "@navikt/ds-react/Alert";
+import { Button } from "@navikt/ds-react/Button";
 import { HStack, VStack } from "@navikt/ds-react/Stack";
 import { TextField } from "@navikt/ds-react/TextField";
-import { Button } from "@navikt/ds-react/Button";
-
-import Ytelse from "./komponenter/Ytelse";
 import { useMutation } from "@tanstack/react-query";
-import {
-  TilbakeFormData,
-  tilbakeFormDataSchema,
-  TilbakeRequest,
-} from "./typer/formData";
-import { useForm, Controller, FormProvider } from "react-hook-form";
-import { Alert } from "@navikt/ds-react/Alert";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Header } from "./komponenter/Header";
-import { useRef, useState } from "react";
-import { Link } from "@navikt/ds-react";
 import { format } from "date-fns";
+import { useRef, useState } from "react";
+import { useForm, Controller, FormProvider } from "react-hook-form";
+
+import { Header } from "./komponenter/Header";
 import Perioder from "./komponenter/Perioder/Perioder";
+import Ytelse from "./komponenter/Ytelse";
+import { tilbakeFormDataSchema } from "./typer/formData";
 
 type TilbakekrevingResponse = {
   data: string;
@@ -30,7 +28,7 @@ type TilbakekrevingResponse = {
 const formatterTilYYYYMMDD = (date: Date): string => format(date, "yyyy-MM-dd");
 
 const postTilbakekreving = async (
-  data: TilbakeRequest
+  data: TilbakeRequest,
 ): Promise<TilbakekrevingResponse> => {
   const response = await fetch("/api/tilbakekreving", {
     method: "POST",

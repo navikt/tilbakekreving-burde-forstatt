@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { beløpSchema } from "./belop";
 
 const sluttenAvIDag = new Date();
@@ -24,7 +25,7 @@ export const periodeSchema = z
     {
       message: "Til-dato må være etter fra-dato",
       path: ["tom"],
-    }
+    },
   );
 
 export type Periode = z.infer<typeof periodeSchema>;
