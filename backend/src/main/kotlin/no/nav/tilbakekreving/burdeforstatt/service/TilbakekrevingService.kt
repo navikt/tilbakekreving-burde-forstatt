@@ -15,6 +15,7 @@ import io.ktor.http.contentType
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Periode
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.PeriodeIRequest
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Varsel
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ytelsestype
@@ -32,6 +33,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.time.LocalDate
+import java.time.YearMonth
 
 class TilbakekrevingService(
     private val httpClient: HttpClient,
@@ -56,8 +58,6 @@ class TilbakekrevingService(
             }
         mqService.sendMessage(
             detaljertKravgrunnlagMelding,
-            opprettTilbakekrevingRequest.eksternFagsakId,
-            opprettTilbakekrevingRequest.ytelsestype,
         )
         log.info("Kravgrunnlag med id {} er sendt til MQ", dummyKravgrunnlag.kravgrunnlagId)
 
@@ -187,42 +187,61 @@ class TilbakekrevingService(
             }
 
         requestFraBurdeForstatt.perioder.forEach { periodeFraBurdeForstatt ->
-            val periodeDto =
-                PeriodeDto().apply {
-                    fom = periodeFraBurdeForstatt.fom
-                    tom = periodeFraBurdeForstatt.tom
-                }
+            val splittetPeridoer = splittPeriodeHvisFlereMåneder(periodeFraBurdeForstatt)
 
-            val detaljertKravgrunnlagPeriodeDto =
-                DetaljertKravgrunnlagPeriodeDto().apply {
-                    periode = periodeDto
-                    belopSkattMnd = BigDecimal(0.00)
-                }
-            detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
-                DetaljertKravgrunnlagBelopDto().apply {
-                    kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
-                    typeKlasse = TypeKlasseDto.YTEL
-                    belopOpprUtbet = BigDecimal(10000)
-                    belopNy = BigDecimal(0.00)
-                    belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop
-                    belopUinnkrevd = BigDecimal(0.00)
-                    skattProsent = BigDecimal(0.00)
-                },
-            )
-            detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
-                DetaljertKravgrunnlagBelopDto().apply {
-                    kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
-                    typeKlasse = TypeKlasseDto.FEIL
-                    belopOpprUtbet = BigDecimal(0)
-                    belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop
-                    belopTilbakekreves = BigDecimal(0)
-                    belopUinnkrevd = BigDecimal(0.00)
-                    skattProsent = BigDecimal(0.00)
-                },
-            )
-            detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().add(detaljertKravgrunnlagPeriodeDto)
+            splittetPeridoer.forEach { splittetPeriode ->
+                val detaljertKravgrunnlagPeriodeDto =
+                    DetaljertKravgrunnlagPeriodeDto().apply {
+                        periode = splittetPeriode
+                        belopSkattMnd = BigDecimal(0.00)
+                    }
+
+                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                    DetaljertKravgrunnlagBelopDto().apply {
+                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
+                        typeKlasse = TypeKlasseDto.YTEL
+                        belopOpprUtbet = BigDecimal(10000)
+                        belopNy = BigDecimal(0.00)
+                        belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop
+                        belopUinnkrevd = BigDecimal(0.00)
+                        skattProsent = BigDecimal(0.00)
+                    },
+                )
+                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                    DetaljertKravgrunnlagBelopDto().apply {
+                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
+                        typeKlasse = TypeKlasseDto.FEIL
+                        belopOpprUtbet = BigDecimal(0)
+                        belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop
+                        belopTilbakekreves = BigDecimal(0)
+                        belopUinnkrevd = BigDecimal(0.00)
+                        skattProsent = BigDecimal(0.00)
+                    },
+                )
+                detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().add(detaljertKravgrunnlagPeriodeDto)
+            }
         }
+
         return detaljertKravgrunnlagDto
+    }
+
+    private fun splittPeriodeHvisFlereMåneder(periode: PeriodeIRequest): List<PeriodeDto> {
+        val perioder = mutableListOf<PeriodeDto>()
+
+        var fomMåned = YearMonth.of(periode.fom.year, periode.fom.month)
+        val tomMåned = YearMonth.of(periode.tom.year, periode.tom.month)
+
+        while (fomMåned <= tomMåned) {
+            perioder.add(
+                PeriodeDto().apply {
+                    fom = fomMåned.atDay(1)
+                    tom = fomMåned.atEndOfMonth()
+                },
+            )
+            fomMåned = fomMåned.plusMonths(1)
+        }
+
+        return perioder
     }
 
     private fun hentKlasseKode(ytelsestype: Ytelsestype): String {

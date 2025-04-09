@@ -6,7 +6,6 @@ import jakarta.jms.Queue
 import jakarta.jms.Session
 import jakarta.jms.TextMessage
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ytelsestype
 import no.nav.tilbakekreving.burdeforstatt.util.Marshaller
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import org.slf4j.LoggerFactory
@@ -14,11 +13,7 @@ import org.slf4j.LoggerFactory
 class MQService(private val mqConfig: MqConfig) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun sendMessage(
-        detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding,
-        eksternFagsakId: String,
-        ytelsestype: Ytelsestype,
-    ) {
+    fun sendMessage(detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding) {
         try {
             val connection = mqConfig.createConnection()
             val session: Session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
