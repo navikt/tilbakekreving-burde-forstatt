@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ytelseSchema = z.enum(
   ["Overgangsstønad", "Barnetrygd", "Kontantstøtte"],
-  { message: "Ugyldig ytelse" }
+  { message: "Ytelse er påkrevd" }
 );
 export type Ytelse = z.infer<typeof ytelseSchema>;
 

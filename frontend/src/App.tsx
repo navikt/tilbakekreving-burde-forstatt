@@ -166,13 +166,15 @@ function App() {
                   className="p-4 bg-red-50 border border-red-200 text-red-700 rounded"
                 >
                   <p className="font-bold">Feil ved innsending:</p>
-                  <p>{String(mutation.error)}</p>
-                  <div className="mt-4">
-                    <p className="font-bold">Data som ble forsøkt sendt:</p>
-                    <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
-                      {JSON.stringify(sisteSendtInnData, null, 2)}
-                    </pre>
-                  </div>
+                  <p>{mutation.error.message}</p>
+                  {sisteSendtInnData && (
+                    <div className="mt-4">
+                      <p className="font-bold">Data som ble forsøkt sendt:</p>
+                      <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
+                        {JSON.stringify(sisteSendtInnData, null, 2)}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -184,7 +186,7 @@ function App() {
                 >
                   Opprett tilbakekreving
                 </Button>
-                <Button variant="secondary" onClick={resetSkjema}>
+                <Button variant="secondary" type="button" onClick={resetSkjema}>
                   Tilbakestill skjemaet
                 </Button>
               </HStack>
