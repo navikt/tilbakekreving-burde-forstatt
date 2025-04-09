@@ -184,7 +184,7 @@ function App() {
                 >
                   Opprett tilbakekreving
                 </Button>
-                <Button variant="secondary" onClick={resetSkjema}>
+                <Button variant="secondary" type="button" onClick={resetSkjema}>
                   Tilbakestill skjemaet
                 </Button>
               </HStack>
