@@ -187,9 +187,9 @@ class TilbakekrevingService(
             }
 
         requestFraBurdeForstatt.perioder.forEach { periodeFraBurdeForstatt ->
-            val splittetPeridoer = splittPeriodeHvisFlereMåneder(periodeFraBurdeForstatt)
+            val splittetPerioder = splittPeriodeHvisFlereMåneder(periodeFraBurdeForstatt)
 
-            splittetPeridoer.forEach { splittetPeriode ->
+            splittetPerioder.forEach { splittetPeriode ->
                 val detaljertKravgrunnlagPeriodeDto =
                     DetaljertKravgrunnlagPeriodeDto().apply {
                         periode = splittetPeriode
@@ -200,9 +200,9 @@ class TilbakekrevingService(
                     DetaljertKravgrunnlagBelopDto().apply {
                         kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
                         typeKlasse = TypeKlasseDto.YTEL
-                        belopOpprUtbet = BigDecimal(10000)
+                        belopOpprUtbet = opprettTilbakekrevingRequest.varsel?.sumFeilutbetaling
                         belopNy = BigDecimal(0.00)
-                        belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop
+                        belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop / splittetPerioder.size.toBigDecimal()
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
                     },
@@ -212,7 +212,7 @@ class TilbakekrevingService(
                         kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
                         typeKlasse = TypeKlasseDto.FEIL
                         belopOpprUtbet = BigDecimal(0)
-                        belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop
+                        belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop / splittetPerioder.size.toBigDecimal()
                         belopTilbakekreves = BigDecimal(0)
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
