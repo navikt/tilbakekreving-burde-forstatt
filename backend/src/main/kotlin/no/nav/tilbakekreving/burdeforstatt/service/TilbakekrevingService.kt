@@ -200,7 +200,7 @@ class TilbakekrevingService(
                     DetaljertKravgrunnlagBelopDto().apply {
                         kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
                         typeKlasse = TypeKlasseDto.YTEL
-                        belopOpprUtbet = BigDecimal(10000)
+                        belopOpprUtbet = periodeFraBurdeForstatt.simulertBelop
                         belopNy = BigDecimal(0.00)
                         belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop
                         belopUinnkrevd = BigDecimal(0.00)
@@ -211,9 +211,9 @@ class TilbakekrevingService(
                     DetaljertKravgrunnlagBelopDto().apply {
                         kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
                         typeKlasse = TypeKlasseDto.FEIL
-                        belopOpprUtbet = BigDecimal(0)
-                        belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop
-                        belopTilbakekreves = BigDecimal(0)
+                        belopOpprUtbet = periodeFraBurdeForstatt.simulertBelop
+                        belopNy = BigDecimal(0.00)
+                        belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
                     },
