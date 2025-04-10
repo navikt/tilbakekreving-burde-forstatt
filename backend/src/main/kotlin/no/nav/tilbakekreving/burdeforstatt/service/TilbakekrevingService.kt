@@ -188,6 +188,7 @@ class TilbakekrevingService(
 
         requestFraBurdeForstatt.perioder.forEach { periodeFraBurdeForstatt ->
             val splittetPerioder = splittPeriodeHvisFlereMåneder(periodeFraBurdeForstatt)
+            val sjekkRest = periodeFraBurdeForstatt.kravgrunnlagBelop % splittetPerioder.size.toBigDecimal()
 
             splittetPerioder.forEach { splittetPeriode ->
                 val detaljertKravgrunnlagPeriodeDto =
@@ -219,6 +220,9 @@ class TilbakekrevingService(
                     },
                 )
                 detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().add(detaljertKravgrunnlagPeriodeDto)
+            }
+            if (sjekkRest != BigDecimal.ZERO) {
+                detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().first().tilbakekrevingsBelop.first().belopTilbakekreves++
             }
         }
 
