@@ -1,7 +1,7 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
 import { HStack, MonthPicker, useMonthpicker } from '@navikt/ds-react';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
@@ -11,9 +11,9 @@ export const Maanedsvelger = ({ indeks }: Props) => {
     const {
         control,
         clearErrors,
+        setValue,
         formState: { errors },
     } = useFormContext<TilbakeFormData>();
-    const { fields, update } = useFieldArray({ control, name: 'perioder' });
 
     const månedenFørInneværendeMåned = new Date();
     månedenFørInneværendeMåned.setMonth(månedenFørInneværendeMåned.getMonth() - 1);
@@ -21,19 +21,29 @@ export const Maanedsvelger = ({ indeks }: Props) => {
     const { monthpickerProps: fromMonthpickerProps, inputProps: fromInputProps } = useMonthpicker({
         fromDate: new Date('2015-01-01'),
         toDate: månedenFørInneværendeMåned,
-        onMonthChange: month => {
-            if (month) update(indeks, { ...fields[indeks], fom: month });
-            clearErrors(`perioder.${indeks}.fom`);
+        onMonthChange: førsteDagIMåneden => {
+            if (førsteDagIMåneden) {
+                setValue(`perioder.${indeks}.fom`, førsteDagIMåneden, {
+                    shouldValidate: true,
+                });
+                clearErrors(`perioder.${indeks}.fom`);
+            }
         },
     });
 
     const { monthpickerProps: toMonthpickerProps, inputProps: toInputProps } = useMonthpicker({
         fromDate: new Date('2015-01-01'),
         toDate: månedenFørInneværendeMåned,
-        onMonthChange: month => {
-            if (month) {
-                const sisteDagIMåned = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-                update(indeks, { ...fields[indeks], tom: sisteDagIMåned });
+        onMonthChange: førsteDagIMåneden => {
+            if (førsteDagIMåneden) {
+                const sisteDagIMåned = new Date(
+                    førsteDagIMåneden.getFullYear(),
+                    førsteDagIMåneden.getMonth() + 1,
+                    0
+                );
+                setValue(`perioder.${indeks}.tom`, sisteDagIMåned, {
+                    shouldValidate: true,
+                });
                 clearErrors(`perioder.${indeks}.tom`);
             }
         },

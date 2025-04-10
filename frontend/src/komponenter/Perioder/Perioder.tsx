@@ -84,7 +84,7 @@ const Perioder = () => {
     };
 
     return (
-        <div>
+        <section>
             <h2 className="text-xl font-semibold mb-4">Perioder</h2>
             <VStack gap="4">
                 {fields.map(periode => (
@@ -116,7 +116,7 @@ const Perioder = () => {
                     Legg til periode
                 </Button>
             </VStack>
-        </div>
+        </section>
     );
 };
 

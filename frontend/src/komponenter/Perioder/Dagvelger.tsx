@@ -1,8 +1,7 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
-import { DatePicker, useRangeDatepicker } from '@navikt/ds-react/DatePicker';
-import { HStack } from '@navikt/ds-react/Stack';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { HStack, DatePicker, useRangeDatepicker } from '@navikt/ds-react';
+import { Controller, useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
@@ -11,14 +10,28 @@ interface Props {
 export const Dagvelger = ({ indeks }: Props) => {
     const {
         control,
+        clearErrors,
+        setValue,
         formState: { errors },
     } = useFormContext<TilbakeFormData>();
-    const { fields, update } = useFieldArray({ control, name: 'perioder' });
+
+    const månedenFørInneværendeMåned = new Date();
+    månedenFørInneværendeMåned.setMonth(månedenFørInneværendeMåned.getMonth() - 1);
 
     const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
+        fromDate: new Date('2015-01-01'),
+        toDate: månedenFørInneværendeMåned,
         onRangeChange: range => {
-            if (range?.from && range?.to)
-                update(indeks, { ...fields[indeks], fom: range.from, tom: range.to });
+            if (range?.from && range?.to) {
+                setValue(`perioder.${indeks}.fom`, range.from, {
+                    shouldValidate: true,
+                });
+                setValue(`perioder.${indeks}.tom`, range.to, {
+                    shouldValidate: true,
+                });
+                clearErrors(`perioder.${indeks}.fom`);
+                clearErrors(`perioder.${indeks}.tom`);
+            }
         },
     });
 
