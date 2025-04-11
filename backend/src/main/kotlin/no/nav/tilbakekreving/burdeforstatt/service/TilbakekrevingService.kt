@@ -31,9 +31,11 @@ import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.RoundingMode
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.random.Random
 
 class TilbakekrevingService(
     private val httpClient: HttpClient,
@@ -49,6 +51,7 @@ class TilbakekrevingService(
         val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest)
         if (behandling.status != Ressurs.Status.SUKSESS) {
             log.error("Kunne ikke opprette behandling i tilbakekreving-backend. Skipper sending av kravgrunnlag")
+            opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
             return behandling
         }
         val dummyKravgrunnlag = opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
@@ -186,14 +189,14 @@ class TilbakekrevingService(
                 referanse = "1"
             }
 
-        requestFraBurdeForstatt.perioder.forEach { periodeFraBurdeForstatt ->
-            val splittetPerioder = splittPeriodeHvisFlereMåneder(periodeFraBurdeForstatt)
-            val sjekkRest = periodeFraBurdeForstatt.kravgrunnlagBelop % splittetPerioder.size.toBigDecimal()
+        requestFraBurdeForstatt.perioder.forEach {
+            val splittetPerioder = splittPeriodeHvisFlereMåneder(it)
+            val splittetAmount = delBeløpMellomPerioder(it.kravgrunnlagBelop, splittetPerioder.size)
 
-            splittetPerioder.forEach { splittetPeriode ->
+            splittetPerioder.forEach {
                 val detaljertKravgrunnlagPeriodeDto =
                     DetaljertKravgrunnlagPeriodeDto().apply {
-                        periode = splittetPeriode
+                        periode = it
                         belopSkattMnd = BigDecimal(0.00)
                     }
 
@@ -203,7 +206,7 @@ class TilbakekrevingService(
                         typeKlasse = TypeKlasseDto.YTEL
                         belopOpprUtbet = opprettTilbakekrevingRequest.varsel?.sumFeilutbetaling
                         belopNy = BigDecimal(0.00)
-                        belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop / splittetPerioder.size.toBigDecimal()
+                        belopTilbakekreves = splittetAmount[splittetPerioder.indexOf(it)]
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
                     },
@@ -213,19 +216,16 @@ class TilbakekrevingService(
                         kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
                         typeKlasse = TypeKlasseDto.FEIL
                         belopOpprUtbet = BigDecimal(0)
-                        belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop / splittetPerioder.size.toBigDecimal()
+                        belopNy = splittetAmount[splittetPerioder.indexOf(it)]
                         belopTilbakekreves = BigDecimal(0)
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
                     },
                 )
-                detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().add(detaljertKravgrunnlagPeriodeDto)
-            }
-            if (sjekkRest != BigDecimal.ZERO) {
-                detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().first().tilbakekrevingsBelop.first().belopTilbakekreves++
+
+                detaljertKravgrunnlagDto.tilbakekrevingsPeriode.add(detaljertKravgrunnlagPeriodeDto)
             }
         }
-
         return detaljertKravgrunnlagDto
     }
 
@@ -253,5 +253,39 @@ class TilbakekrevingService(
             Ytelsestype.BARNETRYGD -> "BATR"
             else -> ytelsestype.kode
         }
+    }
+
+    fun delBeløpMellomPerioder(
+        total: BigDecimal,
+        deler: Int,
+    ): List<BigDecimal> {
+        val weights = List(deler) { Random.nextDouble() }
+        val sumOfWeights = weights.sum()
+
+        val rawValues =
+            weights.map { weight ->
+                total.multiply(BigDecimal(weight / sumOfWeights))
+            }
+
+        val rounded = rawValues.map { it.setScale(0, RoundingMode.DOWN) }.toMutableList()
+
+        var currentSum = rounded.reduce(BigDecimal::add)
+        var diff = total.subtract(currentSum)
+
+        val unit = BigDecimal.ONE
+        while (diff.compareTo(BigDecimal.ZERO) != 0) {
+            for (i in 0 until deler) {
+                if (diff.compareTo(BigDecimal.ZERO) == 0) break
+
+                if (diff > BigDecimal.ZERO) {
+                    rounded[i] = rounded[i].add(unit)
+                    diff = diff.subtract(unit)
+                } else if (rounded[i] > BigDecimal.ZERO) {
+                    rounded[i] = rounded[i].subtract(unit)
+                    diff = diff.add(unit)
+                }
+            }
+        }
+        return rounded
     }
 }
