@@ -47,15 +47,19 @@ class TilbakekrevingService(
     suspend fun opprettBehandlingOgKravgrunnlagITilbakekreving(requestFraBurdeForstatt: RequestFraBurdeForstatt): Ressurs<String> {
         val opprettTilbakekrevingRequest = hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt)
         val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest)
+
         if (behandling.status != Ressurs.Status.SUKSESS) {
             log.error("Kunne ikke opprette behandling i tilbakekreving-backend. Skipper sending av kravgrunnlag")
+            opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
             return behandling
         }
+
         val dummyKravgrunnlag = opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
         val detaljertKravgrunnlagMelding =
             DetaljertKravgrunnlagMelding().apply {
                 detaljertKravgrunnlag = dummyKravgrunnlag
             }
+
         mqService.sendMessage(
             detaljertKravgrunnlagMelding,
         )
@@ -186,14 +190,14 @@ class TilbakekrevingService(
                 referanse = "1"
             }
 
-        requestFraBurdeForstatt.perioder.forEach { periodeFraBurdeForstatt ->
-            val splittetPerioder = splittPeriodeHvisFlereMåneder(periodeFraBurdeForstatt)
-            val sjekkRest = periodeFraBurdeForstatt.kravgrunnlagBelop % splittetPerioder.size.toBigDecimal()
+        requestFraBurdeForstatt.perioder.forEach {
+            val splittetPerioder = splittPeriodeHvisFlereMåneder(it)
+            val belop = it.kravgrunnlagBelop
 
-            splittetPerioder.forEach { splittetPeriode ->
+            splittetPerioder.forEach {
                 val detaljertKravgrunnlagPeriodeDto =
                     DetaljertKravgrunnlagPeriodeDto().apply {
-                        periode = splittetPeriode
+                        periode = it
                         belopSkattMnd = BigDecimal(0.00)
                     }
 
@@ -203,7 +207,7 @@ class TilbakekrevingService(
                         typeKlasse = TypeKlasseDto.YTEL
                         belopOpprUtbet = opprettTilbakekrevingRequest.varsel?.sumFeilutbetaling
                         belopNy = BigDecimal(0.00)
-                        belopTilbakekreves = periodeFraBurdeForstatt.kravgrunnlagBelop / splittetPerioder.size.toBigDecimal()
+                        belopTilbakekreves = belop
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
                     },
@@ -213,19 +217,16 @@ class TilbakekrevingService(
                         kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
                         typeKlasse = TypeKlasseDto.FEIL
                         belopOpprUtbet = BigDecimal(0)
-                        belopNy = periodeFraBurdeForstatt.kravgrunnlagBelop / splittetPerioder.size.toBigDecimal()
+                        belopNy = belop
                         belopTilbakekreves = BigDecimal(0)
                         belopUinnkrevd = BigDecimal(0.00)
                         skattProsent = BigDecimal(0.00)
                     },
                 )
-                detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().add(detaljertKravgrunnlagPeriodeDto)
-            }
-            if (sjekkRest != BigDecimal.ZERO) {
-                detaljertKravgrunnlagDto.getTilbakekrevingsPeriode().first().tilbakekrevingsBelop.first().belopTilbakekreves++
+
+                detaljertKravgrunnlagDto.tilbakekrevingsPeriode.add(detaljertKravgrunnlagPeriodeDto)
             }
         }
-
         return detaljertKravgrunnlagDto
     }
 
