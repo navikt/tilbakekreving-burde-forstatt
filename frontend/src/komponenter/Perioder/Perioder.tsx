@@ -36,7 +36,7 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                 control={control}
                 render={({ field }) => (
                     <TextField
-                        label="Simulert feilutbetalt beløp"
+                        label="Simulert feilutbetalt månedsbeløp"
                         {...field}
                         type="text"
                         inputMode="text"
@@ -49,7 +49,7 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                 control={control}
                 render={({ field }) => (
                     <TextField
-                        label="Kravgrunnlag beløp"
+                        label="Kravgrunnlag månedsbeløp"
                         {...field}
                         type="text"
                         inputMode="text"
