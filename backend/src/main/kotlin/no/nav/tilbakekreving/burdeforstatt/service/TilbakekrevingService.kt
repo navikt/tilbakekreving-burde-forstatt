@@ -99,6 +99,7 @@ class TilbakekrevingService(
             "Barnetrygd" -> Fagsystem.BA
             "Kontantstøtte" -> Fagsystem.KONT
             "Overgangsstønad" -> Fagsystem.EF
+            "Tilleggsstønad" -> Fagsystem.TSO
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
     }
@@ -108,6 +109,7 @@ class TilbakekrevingService(
             "Barnetrygd" -> Ytelsestype.BARNETRYGD
             "Kontantstøtte" -> Ytelsestype.KONTANTSTØTTE
             "Overgangsstønad" -> Ytelsestype.OVERGANGSSTØNAD
+            "Tilleggsstønad" -> Ytelsestype.TILLEGGSSTØNAD
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
     }

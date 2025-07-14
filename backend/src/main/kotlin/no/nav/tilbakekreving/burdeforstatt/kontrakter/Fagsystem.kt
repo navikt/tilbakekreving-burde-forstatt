@@ -12,4 +12,6 @@ enum class Fagsystem(
 
     KONT("Kontantstøtte", "KON"),
     IT01("Infotrygd", ""),
+
+    TSO("Tilleggsstønad", "TSO"),
 }
