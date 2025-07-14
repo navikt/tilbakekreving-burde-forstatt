@@ -56,3 +56,7 @@ spec:
       value: /
     - name: LOG_FORMAT
       value: JSON
+    - name: MQ_GAMMEL_MODELL
+      value: QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG
+    - name: MQ_NY_MODELL
+      value: Q1_TILLEGGSSTONADER.KRAVGRUNNLAG

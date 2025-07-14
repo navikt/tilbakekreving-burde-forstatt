@@ -40,7 +40,7 @@ enum class Ytelsestype(
         ),
     ),
     TILLEGGSSTØNAD(
-        "TSO",
+        "TS",
         mapOf(
             Språkkode.NB to "Tilleggsstønad",
             Språkkode.NN to "Tilleggsstønad",

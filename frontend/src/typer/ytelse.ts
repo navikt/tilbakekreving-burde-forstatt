@@ -16,7 +16,7 @@ export const ytelseGrupper = [
     },
     {
         fagsystem: 'Tilleggsstønad',
-        ytelser: [ytelseSchema.enum.Tilleggsstønad /*, ytelseSchema.enum.Kontantstøtte*/],
+        ytelser: [ytelseSchema.enum.Tilleggsstønad],
     },
 ] as const;
 

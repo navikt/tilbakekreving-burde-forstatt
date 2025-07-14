@@ -13,7 +13,6 @@ data class MqConfig(
     val port: Int,
     val channel: String,
     val queueManager: String,
-    val queue: String,
     val user: String,
     val password: String,
     val enabled: Boolean = true,

@@ -10,14 +10,19 @@ import no.nav.tilbakekreving.burdeforstatt.util.Marshaller
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import org.slf4j.LoggerFactory
 
-class MQService(private val mqConfig: MqConfig) {
+class MQService(
+    private val mqConfig: MqConfig,
+) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun sendMessage(detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding) {
+    fun sendKravgrunnlag(
+        detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding,
+        kø: String,
+    ) {
         try {
             val connection = mqConfig.createConnection()
             val session: Session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
-            val queue: Queue = session.createQueue(mqConfig.queue)
+            val queue: Queue = session.createQueue(kø)
             val producer: MessageProducer = session.createProducer(queue)
 
             val dtoXml = Marshaller.marshall(detaljertKravgrunnlagMelding)
