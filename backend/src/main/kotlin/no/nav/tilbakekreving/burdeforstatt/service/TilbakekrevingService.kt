@@ -13,6 +13,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.security.SecureRandom
+import java.time.LocalDate
+import java.time.YearMonth
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
@@ -31,11 +36,6 @@ import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
-import java.math.BigInteger
-import java.security.SecureRandom
-import java.time.LocalDate
-import java.time.YearMonth
 
 class TilbakekrevingService(
     private val httpClient: HttpClient,
@@ -87,7 +87,7 @@ class TilbakekrevingService(
         return Ressurs.success(
             data =
                 "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/" +
-                    "${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/$behandlingId",
+                        "${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/$behandlingId",
             melding = "Behandling og kravgrunnlag er sendt til tilbakekreving-backend",
         )
     }
@@ -194,7 +194,15 @@ class TilbakekrevingService(
         try {
             val uri =
                 URLBuilder(tilbakekrevingUrl).apply {
-                    appendPathSegments("api", "forvaltning", "ytelsestype", ytelsestype.name, "fagsak", eksternFagsakId, "v1")
+                    appendPathSegments(
+                        "api",
+                        "forvaltning",
+                        "ytelsestype",
+                        ytelsestype.name,
+                        "fagsak",
+                        eksternFagsakId,
+                        "v1"
+                    )
                 }.buildString()
 
             val response: HttpResponse =
