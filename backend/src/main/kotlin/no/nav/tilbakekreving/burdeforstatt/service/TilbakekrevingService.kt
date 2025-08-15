@@ -13,11 +13,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
-import java.math.BigDecimal
-import java.math.BigInteger
-import java.security.SecureRandom
-import java.time.LocalDate
-import java.time.YearMonth
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
@@ -36,6 +31,11 @@ import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.security.SecureRandom
+import java.time.LocalDate
+import java.time.YearMonth
 
 class TilbakekrevingService(
     private val httpClient: HttpClient,
@@ -87,7 +87,7 @@ class TilbakekrevingService(
         return Ressurs.success(
             data =
                 "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/" +
-                        "${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/$behandlingId",
+                    "${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/$behandlingId",
             melding = "Behandling og kravgrunnlag er sendt til tilbakekreving-backend",
         )
     }
@@ -113,25 +113,23 @@ class TilbakekrevingService(
         )
     }
 
-    private fun hentFagsystem(ytelseFraRequest: String): Fagsystem {
-        return when (ytelseFraRequest) {
+    private fun hentFagsystem(ytelseFraRequest: String): Fagsystem =
+        when (ytelseFraRequest) {
             "Barnetrygd" -> Fagsystem.BA
             "Kontantstøtte" -> Fagsystem.KONT
             "Overgangsstønad" -> Fagsystem.EF
             "Tilleggsstønad" -> Fagsystem.TS
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
-    }
 
-    private fun hentYtelsesType(ytelseFraRequest: String): Ytelsestype {
-        return when (ytelseFraRequest) {
+    private fun hentYtelsesType(ytelseFraRequest: String): Ytelsestype =
+        when (ytelseFraRequest) {
             "Barnetrygd" -> Ytelsestype.BARNETRYGD
             "Kontantstøtte" -> Ytelsestype.KONTANTSTØTTE
             "Overgangsstønad" -> Ytelsestype.OVERGANGSSTØNAD
             "Tilleggsstønad" -> Ytelsestype.TILLEGGSSTØNAD
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
-    }
 
     private fun opprettVarselFraRequest(request: RequestFraBurdeForstatt): Varsel {
         val periodeFraRequest = request.perioder
@@ -150,9 +148,10 @@ class TilbakekrevingService(
     private suspend fun opprettBehandlingITilbakekreving(request: OpprettTilbakekrevingRequest): Ressurs<String> =
         try {
             val tilbakekrevingUri =
-                URLBuilder(tilbakekrevingUrl).apply {
-                    appendPathSegments("api", "behandling", "v1")
-                }.buildString()
+                URLBuilder(tilbakekrevingUrl)
+                    .apply {
+                        appendPathSegments("api", "behandling", "v1")
+                    }.buildString()
 
             val response: HttpResponse =
                 httpClient.post(tilbakekrevingUri) {
@@ -193,17 +192,18 @@ class TilbakekrevingService(
     ): String {
         try {
             val uri =
-                URLBuilder(tilbakekrevingUrl).apply {
-                    appendPathSegments(
-                        "api",
-                        "forvaltning",
-                        "ytelsestype",
-                        ytelsestype.name,
-                        "fagsak",
-                        eksternFagsakId,
-                        "v1"
-                    )
-                }.buildString()
+                URLBuilder(tilbakekrevingUrl)
+                    .apply {
+                        appendPathSegments(
+                            "api",
+                            "forvaltning",
+                            "ytelsestype",
+                            ytelsestype.name,
+                            "fagsak",
+                            eksternFagsakId,
+                            "v1",
+                        )
+                    }.buildString()
 
             val response: HttpResponse =
                 httpClient.get(uri) {
@@ -246,14 +246,17 @@ class TilbakekrevingService(
             }
 
         requestFraBurdeForstatt.perioder.forEach {
-            val perioder = if (erSammeMåned(it)) {
-                listOf(PeriodeDto().apply {
-                    fom = it.fom
-                    tom = it.tom
-                })
-            } else {
-                splittPeriodeHvisFlereMåneder(it)
-            }
+            val perioder =
+                if (erSammeMåned(it)) {
+                    listOf(
+                        PeriodeDto().apply {
+                            fom = it.fom
+                            tom = it.tom
+                        },
+                    )
+                } else {
+                    splittPeriodeHvisFlereMåneder(it)
+                }
 
             val belop = it.kravgrunnlagBelop
 
@@ -293,9 +296,8 @@ class TilbakekrevingService(
         return detaljertKravgrunnlagDto
     }
 
-    private fun erSammeMåned(periode: PeriodeIRequest): Boolean {
-        return periode.fom.year == periode.tom.year && periode.fom.month == periode.tom.month
-    }
+    private fun erSammeMåned(periode: PeriodeIRequest): Boolean =
+        periode.fom.year == periode.tom.year && periode.fom.month == periode.tom.month
 
     private fun splittPeriodeHvisFlereMåneder(periode: PeriodeIRequest): List<PeriodeDto> {
         val perioder = mutableListOf<PeriodeDto>()
@@ -316,17 +318,15 @@ class TilbakekrevingService(
         return perioder
     }
 
-    private fun hentKlasseKode(ytelsestype: Ytelsestype): String {
-        return when (ytelsestype) {
+    private fun hentKlasseKode(ytelsestype: Ytelsestype): String =
+        when (ytelsestype) {
             Ytelsestype.BARNETRYGD -> "BATR"
             else -> ytelsestype.kode
         }
-    }
 
-    private fun hentKodeFagområdet(ytelsestype: Ytelsestype): String {
-        return when (ytelsestype) {
+    private fun hentKodeFagområdet(ytelsestype: Ytelsestype): String =
+        when (ytelsestype) {
             Ytelsestype.TILLEGGSSTØNAD -> "TILLST"
             else -> ytelsestype.kode
         }
-    }
 }
