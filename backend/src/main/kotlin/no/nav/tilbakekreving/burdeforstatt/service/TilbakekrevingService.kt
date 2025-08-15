@@ -238,10 +238,18 @@ class TilbakekrevingService(
             }
 
         requestFraBurdeForstatt.perioder.forEach {
-            val splittetPerioder = splittPeriodeHvisFlereMåneder(it)
+            val perioder = if (erSammeMåned(it)) {
+                listOf(PeriodeDto().apply {
+                    fom = it.fom
+                    tom = it.tom
+                })
+            } else {
+                splittPeriodeHvisFlereMåneder(it)
+            }
+
             val belop = it.kravgrunnlagBelop
 
-            splittetPerioder.forEach {
+            perioder.forEach {
                 val detaljertKravgrunnlagPeriodeDto =
                     DetaljertKravgrunnlagPeriodeDto().apply {
                         periode = it
@@ -275,6 +283,10 @@ class TilbakekrevingService(
             }
         }
         return detaljertKravgrunnlagDto
+    }
+
+    private fun erSammeMåned(periode: PeriodeIRequest): Boolean {
+        return periode.fom.year == periode.tom.year && periode.fom.month == periode.tom.month
     }
 
     private fun splittPeriodeHvisFlereMåneder(periode: PeriodeIRequest): List<PeriodeDto> {
