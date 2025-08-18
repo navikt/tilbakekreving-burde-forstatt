@@ -39,6 +39,13 @@ enum class Ytelsestype(
             Språkkode.NN to "Kontantstøtte",
         ),
     ),
+    TILLEGGSSTØNAD(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Tilleggsstønad",
+            Språkkode.NN to "Tilleggsstønad",
+        ),
+    ),
     ;
 
     fun tilTema(): Tema =
@@ -46,5 +53,6 @@ enum class Ytelsestype(
             BARNETRYGD -> Tema.BAR
             BARNETILSYN, OVERGANGSSTØNAD, SKOLEPENGER -> Tema.ENF
             KONTANTSTØTTE -> Tema.KON
+            TILLEGGSSTØNAD -> Tema.TSO
         }
 }

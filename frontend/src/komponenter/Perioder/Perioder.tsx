@@ -7,9 +7,18 @@ import { HStack, Button, TextField } from '@navikt/ds-react';
 import { VStack } from '@navikt/ds-react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
-import { Dagvelger } from './Dagvelger';
+import { DagVelger } from './Dagvelger';
+import { FraTilDatoVelger } from './FraTilDatoVelger';
 import { Maanedsvelger } from './Maanedsvelger';
-import { månedsytelser } from '../../typer/ytelse';
+import { månedsytelser, datoYtelser } from '../../typer/ytelse';
+
+const erMånedsytelse = (ytelse: string) => {
+    return månedsytelser.some(månedsYtelse => månedsYtelse === ytelse);
+};
+
+const erDatoYtelse = (ytelse: string) => {
+    return datoYtelser.some(datoYtelse => datoYtelse === ytelse);
+};
 
 interface PeriodeInputProps {
     indeks: number;
@@ -25,10 +34,12 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
     return (
         <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="4">
             <h3 className="font-bold text-blue-700">Periode {indeks + 1}</h3>
-            {månedsytelser.includes(ytelse) ? (
+            {erMånedsytelse(ytelse) ? (
                 <Maanedsvelger indeks={indeks} />
+            ) : erDatoYtelse(ytelse) ? (
+                <DagVelger indeks={indeks} />
             ) : (
-                <Dagvelger indeks={indeks} />
+                <FraTilDatoVelger indeks={indeks} />
             )}
 
             <Controller

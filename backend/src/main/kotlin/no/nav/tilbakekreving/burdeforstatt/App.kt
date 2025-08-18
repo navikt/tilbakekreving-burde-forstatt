@@ -58,7 +58,6 @@ fun main() {
             port = 1413,
             channel = "Q1_FAMILIE_TILBAKE",
             queueManager = "MQLS02",
-            queue = "QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG",
             user = System.getenv("CREDENTIAL_USERNAME") ?: "username",
             password = System.getenv("CREDENTIAL_PASSWORD") ?: "password",
         )

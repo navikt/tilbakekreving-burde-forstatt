@@ -1,13 +1,13 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
-import { HStack, DatePicker, useRangeDatepicker } from '@navikt/ds-react';
+import { DatePicker, useDatepicker } from '@navikt/ds-react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
 }
 
-export const Dagvelger = ({ indeks }: Props) => {
+export const DagVelger = ({ indeks }: Props) => {
     const {
         control,
         clearErrors,
@@ -15,18 +15,15 @@ export const Dagvelger = ({ indeks }: Props) => {
         formState: { errors },
     } = useFormContext<TilbakeFormData>();
 
-    const månedenFørInneværendeMåned = new Date();
-    månedenFørInneværendeMåned.setMonth(månedenFørInneværendeMåned.getMonth() - 1);
-
-    const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
+    const { datepickerProps, inputProps } = useDatepicker({
         fromDate: new Date('2015-01-01'),
-        toDate: månedenFørInneværendeMåned,
-        onRangeChange: range => {
-            if (range?.from && range?.to) {
-                setValue(`perioder.${indeks}.fom`, range.from, {
+        toDate: new Date(),
+        onDateChange: (dato: Date | undefined) => {
+            if (dato) {
+                setValue(`perioder.${indeks}.fom`, dato, {
                     shouldValidate: true,
                 });
-                setValue(`perioder.${indeks}.tom`, range.to, {
+                setValue(`perioder.${indeks}.tom`, dato, {
                     shouldValidate: true,
                 });
                 clearErrors(`perioder.${indeks}.fom`);
@@ -36,31 +33,18 @@ export const Dagvelger = ({ indeks }: Props) => {
     });
 
     return (
-        <DatePicker {...datepickerProps} dropdownCaption>
-            <HStack gap="4">
-                <Controller
-                    name={`perioder.${indeks}.fom`}
-                    control={control}
-                    render={() => (
-                        <DatePicker.Input
-                            {...fromInputProps}
-                            label="Fra dato"
-                            error={errors.perioder?.[indeks]?.fom?.message}
-                        />
-                    )}
-                />
-                <Controller
-                    name={`perioder.${indeks}.tom`}
-                    control={control}
-                    render={() => (
-                        <DatePicker.Input
-                            {...toInputProps}
-                            label="Til dato"
-                            error={errors.perioder?.[indeks]?.tom?.message}
-                        />
-                    )}
-                />
-            </HStack>
+        <DatePicker {...datepickerProps}>
+            <Controller
+                name={`perioder.${indeks}.fom`}
+                control={control}
+                render={() => (
+                    <DatePicker.Input
+                        {...inputProps}
+                        label="Velg til og fra dato"
+                        error={errors.perioder?.[indeks]?.fom?.message}
+                    />
+                )}
+            />
         </DatePicker>
     );
 };

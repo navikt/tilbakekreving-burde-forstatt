@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
-export const ytelseSchema = z.enum(['Overgangsstønad', 'Barnetrygd' /*, 'Kontantstøtte'*/], {
-    message: 'Ytelse er påkrevd',
-});
+export const ytelseSchema = z.enum(
+    ['Overgangsstønad', 'Barnetrygd', 'Tilleggsstønad' /*, 'Kontantstøtte'*/],
+    {
+        message: 'Ytelse er påkrevd',
+    }
+);
 export type Ytelse = z.infer<typeof ytelseSchema>;
 
 export const ytelseGrupper = [
@@ -14,10 +17,15 @@ export const ytelseGrupper = [
         fagsystem: 'Barnetrygd og kontantstøtte',
         ytelser: [ytelseSchema.enum.Barnetrygd /*, ytelseSchema.enum.Kontantstøtte*/],
     },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.Tilleggsstønad],
+    },
 ] as const;
 
 export const månedsytelser = [
     ytelseSchema.enum.Overgangsstønad,
     ytelseSchema.enum.Barnetrygd,
-    /*ytelseSchema.enum.Kontantstøtte,*/
-];
+] as const;
+
+export const datoYtelser = [ytelseSchema.enum.Tilleggsstønad] as const;
