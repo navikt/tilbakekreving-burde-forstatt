@@ -6,23 +6,28 @@ enum class Klassekoder(
 ) {
     BARNETRYGD(
         "BATR",
-        "KL_KODE_FEIL_ARBYT",
+        "BATR",
+        // "KL_KODE_FEIL_ARBYT",
     ),
     OVERGANGSSTØNAD(
         "EFOG",
-        "KL_KODE_FEIL_ARBYT",
+        "EFOG",
+        // "KL_KODE_FEIL_ARBYT",
     ),
     BARNETILSYN(
         "EFBT",
-        "KL_KODE_FEIL_ARBYT",
+        "EFBT",
+        // "KL_KODE_FEIL_ARBYT",
     ),
     SKOLEPENGER(
         "EFSP",
-        "KL_KODE_FEIL_ARBYT",
+        "EFSP",
+        // "KL_KODE_FEIL_ARBYT",
     ),
     KONTANTSTØTTE(
         "KS",
-        "KL_KODE_FEIL_ARBYT",
+        "KS",
+        // "KL_KODE_FEIL_ARBYT",
     ),
     TILLEGGSSTØNAD(
         "TSTBASISP4-OP",
