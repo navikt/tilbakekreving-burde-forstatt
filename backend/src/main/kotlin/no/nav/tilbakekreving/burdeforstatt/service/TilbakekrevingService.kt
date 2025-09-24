@@ -16,6 +16,7 @@ import io.ktor.http.contentType
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Klassekoder
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Periode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.PeriodeIRequest
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
@@ -269,7 +270,7 @@ class TilbakekrevingService(
 
                 detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
                     DetaljertKravgrunnlagBelopDto().apply {
-                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
+                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype).ytelsesKlassekode
                         typeKlasse = TypeKlasseDto.YTEL
                         belopOpprUtbet = opprettTilbakekrevingRequest.varsel?.sumFeilutbetaling
                         belopNy = BigDecimal(0.00)
@@ -280,7 +281,7 @@ class TilbakekrevingService(
                 )
                 detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
                     DetaljertKravgrunnlagBelopDto().apply {
-                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype)
+                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype).feilutbetalingKlassekose
                         typeKlasse = TypeKlasseDto.FEIL
                         belopOpprUtbet = BigDecimal(0)
                         belopNy = belop
@@ -318,11 +319,16 @@ class TilbakekrevingService(
         return perioder
     }
 
-    private fun hentKlasseKode(ytelsestype: Ytelsestype): String =
-        when (ytelsestype) {
-            Ytelsestype.BARNETRYGD -> "BATR"
-            else -> ytelsestype.kode
+    private fun hentKlasseKode(ytelsestype: Ytelsestype): Klassekoder {
+        return when (ytelsestype) {
+            Ytelsestype.BARNETRYGD -> Klassekoder.BARNETRYGD
+            Ytelsestype.TILLEGGSSTØNAD -> Klassekoder.TILLEGGSSTØNAD
+            Ytelsestype.OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
+            Ytelsestype.BARNETILSYN -> Klassekoder.BARNETILSYN
+            Ytelsestype.SKOLEPENGER -> Klassekoder.SKOLEPENGER
+            Ytelsestype.KONTANTSTØTTE -> Klassekoder.KONTANTSTØTTE
         }
+    }
 
     private fun hentKodeFagområdet(ytelsestype: Ytelsestype): String =
         when (ytelsestype) {
