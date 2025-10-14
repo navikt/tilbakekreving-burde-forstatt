@@ -191,6 +191,7 @@ class TilbakekrevingService(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
     ): String {
+        log.info("henter behandlingId for fagsystemId: $eksternFagsakId og ytelsestype: $ytelsestype")
         try {
             val uri =
                 URLBuilder(tilbakekrevingUrl)
