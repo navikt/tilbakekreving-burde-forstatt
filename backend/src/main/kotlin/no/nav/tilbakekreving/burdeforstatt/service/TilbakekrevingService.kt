@@ -83,7 +83,7 @@ class TilbakekrevingService(
                 detaljertKravgrunnlagMelding,
                 mqGammelModell,
             )
-            log.info("Kravgrunnlag med id {} er sendt til MQ", kravgrunnlagDto.kravgrunnlagId)
+            log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
         }
         return Ressurs.success(
             data =
