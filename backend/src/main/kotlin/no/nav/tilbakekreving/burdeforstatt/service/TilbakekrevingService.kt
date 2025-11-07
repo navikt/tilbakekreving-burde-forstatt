@@ -228,8 +228,8 @@ class TilbakekrevingService(
     ): DetaljertKravgrunnlagDto {
         val detaljertKravgrunnlagDto =
             DetaljertKravgrunnlagDto().apply {
-                kravgrunnlagId = BigInteger(64, SecureRandom())
-                vedtakId = BigInteger(64, SecureRandom())
+                kravgrunnlagId = BigInteger(63, SecureRandom())
+                vedtakId = BigInteger(63, SecureRandom())
                 kodeStatusKrav = "NY"
                 kodeFagomraade = hentKodeFagområdet(opprettTilbakekrevingRequest.ytelsestype)
                 fagsystemId = opprettTilbakekrevingRequest.eksternFagsakId
