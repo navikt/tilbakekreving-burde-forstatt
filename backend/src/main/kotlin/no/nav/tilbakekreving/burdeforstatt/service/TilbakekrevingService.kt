@@ -83,7 +83,7 @@ class TilbakekrevingService(
                 detaljertKravgrunnlagMelding,
                 mqGammelModell,
             )
-            log.info("Kravgrunnlag med id {} er sendt til MQ", kravgrunnlagDto.kravgrunnlagId)
+            log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
         }
         return Ressurs.success(
             data =
@@ -229,8 +229,8 @@ class TilbakekrevingService(
     ): DetaljertKravgrunnlagDto {
         val detaljertKravgrunnlagDto =
             DetaljertKravgrunnlagDto().apply {
-                kravgrunnlagId = BigInteger(64, SecureRandom())
-                vedtakId = BigInteger(64, SecureRandom())
+                kravgrunnlagId = BigInteger(63, SecureRandom())
+                vedtakId = BigInteger(63, SecureRandom())
                 kodeStatusKrav = "NY"
                 kodeFagomraade = hentKodeFagområdet(opprettTilbakekrevingRequest.ytelsestype)
                 fagsystemId = opprettTilbakekrevingRequest.eksternFagsakId
