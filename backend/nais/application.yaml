@@ -60,3 +60,5 @@ spec:
       value: QA.Q1_FAMILIE_TILBAKE.KRAVGRUNNLAG
     - name: MQ_NY_MODELL
       value: Q1_TILLEGGSSTONADER.KRAVGRUNNLAG
+  kafka:
+    pool: nav-dev

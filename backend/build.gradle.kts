@@ -41,6 +41,8 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
     implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250425112447_49835df")
 
+    implementation("org.apache.kafka:kafka-clients:4.1.1")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.0-M2")
 }
 

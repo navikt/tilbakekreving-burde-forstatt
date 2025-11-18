@@ -3,12 +3,14 @@ package no.nav.tilbakekreving.burdeforstatt
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
@@ -16,6 +18,7 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.authentication
 import io.ktor.server.auth.principal
+import io.ktor.server.engine.addShutdownHook
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -32,11 +35,25 @@ import no.nav.tilbakekreving.burdeforstatt.auth.TexasAuthenticationProvider
 import no.nav.tilbakekreving.burdeforstatt.auth.TexasPrincipal
 import no.nav.tilbakekreving.burdeforstatt.auth.TokenResponse
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
+import no.nav.tilbakekreving.burdeforstatt.config.KafkaConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
+import no.nav.tilbakekreving.burdeforstatt.service.FagsystemKafkaConsumer
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.service.TilbakekrevingService
+
+val objectMapper: ObjectMapper =
+    jacksonObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .configure(SerializationFeature.INDENT_OUTPUT, true)
+        .setDefaultPrettyPrinter(
+            DefaultPrettyPrinter().apply {
+                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                indentObjectsWith(DefaultIndenter("  ", "\n"))
+            },
+        )
+        .registerModule(JavaTimeModule())
 
 fun main() {
     val httpClient = defaultHttpClient()
@@ -62,24 +79,31 @@ fun main() {
             password = System.getenv("CREDENTIAL_PASSWORD") ?: "password",
         )
 
+    val kafkaConfig =
+        KafkaConfig(
+            kafkaBrokers = System.getenv("KAFKA_BROKERS"),
+            keystorePath = System.getenv("KAFKA_KEYSTORE_PATH"),
+            truststorePath = System.getenv("KAFKA_TRUSTSTORE_PATH"),
+            credstorePassword = System.getenv("KAFKA_CREDSTORE_PASSWORD"),
+        )
+
+    val fagsystemKafkaConsumer =
+        FagsystemKafkaConsumer(
+            kafkaConsumer = kafkaConfig.createConsumer(),
+            kafkaProducer = kafkaConfig.createProducer(),
+        )
     val mqService = MQService(mqConfig)
 
-    embeddedServer(Netty, port = 8080) {
-        install(ContentNegotiation) {
-            jackson {
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                configure(SerializationFeature.INDENT_OUTPUT, true)
-                setDefaultPrettyPrinter(
-                    DefaultPrettyPrinter().apply {
-                        indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                        indentObjectsWith(DefaultIndenter("  ", "\n"))
-                    },
-                )
-                registerModule(JavaTimeModule())
+    Thread(fagsystemKafkaConsumer).start()
+    val server =
+        embeddedServer(Netty, port = 8080) {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter(objectMapper))
             }
+            registerApiRoutes(appConfig, httpClient, mqService)
         }
-        registerApiRoutes(appConfig, httpClient, mqService)
-    }.start(wait = true)
+    server.addShutdownHook { fagsystemKafkaConsumer.stop() }
+    server.start(wait = true)
 }
 
 private fun Application.registerApiRoutes(
