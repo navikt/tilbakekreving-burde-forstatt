@@ -49,6 +49,7 @@ class FagsystemKafkaConsumer(
                             "vedtaksdato" to LocalDate.now().minusDays(14),
                             "utvidPerioder" to null,
                         ),
+                    "behandlendeEnhet" to "0001",
                 ),
             )
 
