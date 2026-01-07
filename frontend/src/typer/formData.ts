@@ -4,17 +4,12 @@ import { periodeSchema } from './periode';
 import { personIdentSchema } from './personIdent';
 import { ytelseSchema } from './ytelse';
 
-export const tilbakeFormDataSchema = z
-    .object({
-        perioder: z.array(periodeSchema),
-        sendKravgrunnlag: z.boolean(),
-        ytelse: ytelseSchema,
-        personIdent: personIdentSchema,
-    })
-    .refine(({ perioder, sendKravgrunnlag }) => !sendKravgrunnlag || perioder.length > 0, {
-        message: 'Du må legge til minst én periode', //TODO må vise denne feilmeldingen på riktig sted
-        path: ['perioder'],
-    });
+export const tilbakeFormDataSchema = z.object({
+    perioder: z.array(periodeSchema).min(1, { message: 'Du må legge til minst én periode' }),
+    sendKravgrunnlag: z.boolean(),
+    ytelse: ytelseSchema,
+    personIdent: personIdentSchema,
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const tilbakeRequest = z.object({

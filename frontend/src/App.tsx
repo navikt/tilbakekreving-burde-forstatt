@@ -78,7 +78,6 @@ function App() {
     } = metoder;
 
     const watchedYtelse = watch('ytelse');
-    const watchedSendKravgrunnlag = watch('sendKravgrunnlag');
     const mutation = useMutation({
         mutationFn: (formData: TilbakeFormData) => {
             const requestObject = {
@@ -158,21 +157,11 @@ function App() {
                                 />
                             </HStack>
 
-                            <Checkbox
-                                {...metoder.register('sendKravgrunnlag', {
-                                    onChange: e => {
-                                        if (e.target.checked) {
-                                            metoder.resetField('perioder');
-                                        } else {
-                                            metoder.setValue('perioder', []);
-                                        }
-                                    },
-                                })}
-                            >
+                            <Checkbox {...metoder.register('sendKravgrunnlag')}>
                                 Send kravgrunnlag
                             </Checkbox>
 
-                            {watchedYtelse && watchedSendKravgrunnlag && <Perioder />}
+                            {watchedYtelse && <Perioder />}
 
                             {mutation.isError && (
                                 <div
