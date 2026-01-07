@@ -2,7 +2,7 @@ import '@navikt/ds-css/dist/index.css';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from '@navikt/ds-react';
+import { Checkbox, Link } from '@navikt/ds-react';
 import { Alert } from '@navikt/ds-react/Alert';
 import { Button } from '@navikt/ds-react/Button';
 import { HStack, VStack } from '@navikt/ds-react/Stack';
@@ -63,6 +63,7 @@ function App() {
                     kravgrunnlagBeløp: '',
                 },
             ],
+            sendKravgrunnlag: true,
             ytelse: undefined,
             personIdent: '',
         },
@@ -77,6 +78,7 @@ function App() {
     } = metoder;
 
     const watchedYtelse = watch('ytelse');
+    const watchedSendKravgrunnlag = watch('sendKravgrunnlag');
     const mutation = useMutation({
         mutationFn: (formData: TilbakeFormData) => {
             const requestObject = {
@@ -156,7 +158,21 @@ function App() {
                                 />
                             </HStack>
 
-                            {watchedYtelse && <Perioder />}
+                            <Checkbox
+                                {...metoder.register('sendKravgrunnlag', {
+                                    onChange: e => {
+                                        if (e.target.checked) {
+                                            metoder.resetField('perioder');
+                                        } else {
+                                            metoder.setValue('perioder', []);
+                                        }
+                                    },
+                                })}
+                            >
+                                Send kravgrunnlag
+                            </Checkbox>
+
+                            {watchedYtelse && watchedSendKravgrunnlag && <Perioder />}
 
                             {mutation.isError && (
                                 <div

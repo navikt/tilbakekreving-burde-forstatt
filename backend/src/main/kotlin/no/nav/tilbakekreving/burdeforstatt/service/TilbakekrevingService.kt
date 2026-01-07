@@ -79,10 +79,12 @@ class TilbakekrevingService(
             }
             behandlingId = behandling.data!!
 
-            mqService.sendKravgrunnlag(
-                detaljertKravgrunnlagMelding,
-                mqGammelModell,
-            )
+            if (!requestFraBurdeForstatt.sendKravgrunnlag) {
+                mqService.sendKravgrunnlag(
+                    detaljertKravgrunnlagMelding,
+                    mqGammelModell,
+                )
+            }
             log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
         }
         return Ressurs.success(
