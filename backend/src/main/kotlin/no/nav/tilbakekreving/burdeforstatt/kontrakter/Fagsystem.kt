@@ -14,4 +14,5 @@ enum class Fagsystem(
     IT01("Infotrygd", ""),
 
     TS("Tilleggsstønad", "TSO"),
+    AAP("Arbeidsavklaringspenger", "AAP"),
 }

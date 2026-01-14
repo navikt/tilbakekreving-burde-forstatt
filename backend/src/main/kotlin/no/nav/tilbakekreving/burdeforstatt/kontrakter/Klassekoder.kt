@@ -33,4 +33,8 @@ enum class Klassekoder(
         "TSTBASISP4-OP",
         "KL_KODE_FEIL_ARBYT",
     ),
+    ARBEIDSAVKLARINGSPENGER(
+        "AAPUAA",
+        "KL_KODE_FEIL_ARBYT",
+    ),
 }
