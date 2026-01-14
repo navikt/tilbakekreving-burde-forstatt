@@ -46,6 +46,13 @@ enum class Ytelsestype(
             Språkkode.NN to "Tilleggsstønad",
         ),
     ),
+    ARBEIDSAVKLARINGSPENGER(
+        "AAP",
+        mapOf(
+            Språkkode.NB to "Arbeidsavklaringspenger",
+            Språkkode.NN to "Arbeidsavklaringspengar",
+        ),
+    ),
     ;
 
     fun tilTema(): Tema =
@@ -54,5 +61,6 @@ enum class Ytelsestype(
             BARNETILSYN, OVERGANGSSTØNAD, SKOLEPENGER -> Tema.ENF
             KONTANTSTØTTE -> Tema.KON
             TILLEGGSSTØNAD -> Tema.TSO
+            ARBEIDSAVKLARINGSPENGER -> Tema.AAP
         }
 }

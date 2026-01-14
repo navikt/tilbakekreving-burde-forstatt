@@ -59,7 +59,7 @@ class TilbakekrevingService(
                 detaljertKravgrunnlag = kravgrunnlagDto
             }
 
-        if (requestFraBurdeForstatt.ytelse == "Tilleggsstønad") {
+        if (requestFraBurdeForstatt.ytelse in NY_MODELL_YTELSER) {
             mqService.sendKravgrunnlag(
                 detaljertKravgrunnlagMelding,
                 mqNyModell,
@@ -79,13 +79,13 @@ class TilbakekrevingService(
             }
             behandlingId = behandling.data!!
 
-            if (!requestFraBurdeForstatt.sendKravgrunnlag) {
+            if (requestFraBurdeForstatt.sendKravgrunnlag) {
                 mqService.sendKravgrunnlag(
                     detaljertKravgrunnlagMelding,
                     mqGammelModell,
                 )
+                log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
             }
-            log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
         }
         return Ressurs.success(
             data =
@@ -122,6 +122,7 @@ class TilbakekrevingService(
             "Kontantstøtte" -> Fagsystem.KONT
             "Overgangsstønad" -> Fagsystem.EF
             "Tilleggsstønad" -> Fagsystem.TS
+            "Arbeidsavklaringspenger" -> Fagsystem.AAP
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
 
@@ -131,6 +132,7 @@ class TilbakekrevingService(
             "Kontantstøtte" -> Ytelsestype.KONTANTSTØTTE
             "Overgangsstønad" -> Ytelsestype.OVERGANGSSTØNAD
             "Tilleggsstønad" -> Ytelsestype.TILLEGGSSTØNAD
+            "Arbeidsavklaringspenger" -> Ytelsestype.ARBEIDSAVKLARINGSPENGER
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
 
@@ -326,6 +328,7 @@ class TilbakekrevingService(
         return when (ytelsestype) {
             Ytelsestype.BARNETRYGD -> Klassekoder.BARNETRYGD
             Ytelsestype.TILLEGGSSTØNAD -> Klassekoder.TILLEGGSSTØNAD
+            Ytelsestype.ARBEIDSAVKLARINGSPENGER -> Klassekoder.ARBEIDSAVKLARINGSPENGER
             Ytelsestype.OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
             Ytelsestype.BARNETILSYN -> Klassekoder.BARNETILSYN
             Ytelsestype.SKOLEPENGER -> Klassekoder.SKOLEPENGER
@@ -338,4 +341,12 @@ class TilbakekrevingService(
             Ytelsestype.TILLEGGSSTØNAD -> "TILLST"
             else -> ytelsestype.kode
         }
+
+    companion object {
+        val NY_MODELL_YTELSER =
+            setOf(
+                "Tilleggsstønad",
+                "Arbeidsavklaringspenger",
+            )
+    }
 }
