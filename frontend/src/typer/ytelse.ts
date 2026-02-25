@@ -1,7 +1,21 @@
 import { z } from 'zod';
 
 export const ytelseSchema = z.enum(
-    ['Overgangsstønad', 'Barnetrygd', 'Tilleggsstønad' , 'Kontantstøtte', 'Arbeidsavklaringspenger'],
+    [
+        'Overgangsstønad',
+        'Barnetrygd',
+        'Tilleggsstønad',
+        'Kontantstøtte',
+        'Arbeidsavklaringspenger',
+        "BoligOgOvernatting",
+        "DagligReise",
+        "Flytting",
+        "Læremidler",
+        "PassAvBarn",
+        "ReiseForÅKommeIArbeid",
+        "ReiseVedOppstartAvslutningHjemreise",
+        "ReiseTilSamling",
+    ],
     {
         message: 'Ytelse er påkrevd',
     }
@@ -26,6 +40,39 @@ export const ytelseGrupper = [
         ytelser: [ytelseSchema.enum.Tilleggsstønad],
     },
     {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.BoligOgOvernatting],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.DagligReise],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.Flytting],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.Læremidler],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.PassAvBarn],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.ReiseForÅKommeIArbeid],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise],
+    },
+    {
+        fagsystem: 'Tilleggsstønad',
+        ytelser: [ytelseSchema.enum.ReiseTilSamling],
+    },
+
+    {
         fagsystem: 'Arbeidsavklaringspenger',
         ytelser: [ytelseSchema.enum.Arbeidsavklaringspenger],
     },
@@ -39,5 +86,13 @@ export const månedsytelser = [
 
 export const datoYtelser = [
     ytelseSchema.enum.Tilleggsstønad,
-    ytelseSchema.enum.Arbeidsavklaringspenger
+    ytelseSchema.enum.Arbeidsavklaringspenger,
+    ytelseSchema.enum.BoligOgOvernatting,
+    ytelseSchema.enum.DagligReise,
+    ytelseSchema.enum.Flytting,
+    ytelseSchema.enum.Læremidler,
+    ytelseSchema.enum.PassAvBarn,
+    ytelseSchema.enum.ReiseForÅKommeIArbeid,
+    ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise,
+    ytelseSchema.enum.ReiseTilSamling,
 ] as const;

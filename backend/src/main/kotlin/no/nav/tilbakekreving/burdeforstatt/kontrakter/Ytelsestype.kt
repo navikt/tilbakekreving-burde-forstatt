@@ -46,6 +46,63 @@ enum class Ytelsestype(
             Språkkode.NN to "Tilleggsstønad",
         ),
     ),
+    BOLIG_OG_OVERNATTING(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Bolig og overordning",
+            Språkkode.NN to "Bustad og overnatting",
+        ),
+    ),
+    DAGLIG_REGISE(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Daglig regise",
+            Språkkode.NN to "Dagleg reise",
+        ),
+    ),
+    FLYTTING(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Flytting",
+            Språkkode.NN to "Flytting",
+        ),
+    ),
+    LÆREMIDLER(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Læremidler",
+            Språkkode.NN to "Læremiddel",
+        ),
+    ),
+    PASS_AV_BARN(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Barnepass",
+            Språkkode.NN to "Barnepass",
+        ),
+    ),
+    REISE_FOR_Å_KOMME_I_ARBEID(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Reise for å komme i arbeid",
+            Språkkode.NN to "Reise for å kome i arbeid",
+        ),
+    ),
+    REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Reise ved oppstart, avslutning eller hjemreise",
+            Språkkode.NN to "Reise ved oppstart, avslutning eller heimreise",
+        ),
+    ),
+    REISE_TIL_SAMLING(
+        "TS",
+        mapOf(
+            Språkkode.NB to "Reise til samling",
+            Språkkode.NN to "Reise til samling",
+        ),
+    ),
+
     ARBEIDSAVKLARINGSPENGER(
         "AAP",
         mapOf(
@@ -60,7 +117,63 @@ enum class Ytelsestype(
             BARNETRYGD -> Tema.BAR
             BARNETILSYN, OVERGANGSSTØNAD, SKOLEPENGER -> Tema.ENF
             KONTANTSTØTTE -> Tema.KON
-            TILLEGGSSTØNAD -> Tema.TSO
+            TILLEGGSSTØNAD,
+            BOLIG_OG_OVERNATTING,
+            DAGLIG_REGISE,
+            FLYTTING,
+            LÆREMIDLER,
+            PASS_AV_BARN,
+            REISE_FOR_Å_KOMME_I_ARBEID,
+            REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE,
+            REISE_TIL_SAMLING,
+            -> Tema.TSO
             ARBEIDSAVKLARINGSPENGER -> Tema.AAP
         }
+
+    fun tilKodeFagområdet(): String =
+        when (this) {
+            TILLEGGSSTØNAD -> "TILLST"
+            BOLIG_OG_OVERNATTING -> "TILLSTBO"
+            DAGLIG_REGISE -> "TILLSTDR"
+            FLYTTING -> "TILLSTFL"
+            LÆREMIDLER -> "TILLSTLM"
+            PASS_AV_BARN -> "TILLSTPB"
+            REISE_FOR_Å_KOMME_I_ARBEID -> "TILLSTRA"
+            REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE -> "TILLSTRO"
+            REISE_TIL_SAMLING -> "TILLISTRS"
+            else -> this.kode
+        }
+
+    fun tilKlassekoder(): Klassekoder =
+        when (this) {
+            BARNETRYGD -> Klassekoder.BARNETRYGD
+
+            TILLEGGSSTØNAD,
+            BOLIG_OG_OVERNATTING,
+            DAGLIG_REGISE,
+            FLYTTING,
+            LÆREMIDLER,
+            PASS_AV_BARN,
+            REISE_FOR_Å_KOMME_I_ARBEID,
+            REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE,
+            REISE_TIL_SAMLING,
+            -> Klassekoder.TILLEGGSSTØNAD
+
+            ARBEIDSAVKLARINGSPENGER -> Klassekoder.ARBEIDSAVKLARINGSPENGER
+            OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
+            BARNETILSYN -> Klassekoder.BARNETILSYN
+            SKOLEPENGER -> Klassekoder.SKOLEPENGER
+            KONTANTSTØTTE -> Klassekoder.KONTANTSTØTTE
+        }
 }
+
+/*
+* TILLSTBO – Tilleggsstønad, bolig og overnatting
+* TILLSTDR – Tilleggsstønad, daglig reise
+* TILLSTFL – Tilleggsstønad, flytting
+* TILLSTLM – Tilleggsstønad, læremidler
+* TILLSTPB – Tilleggsstønad pass av barn
+* TILLSTRA – Tilleggsstønad, reise for å komme i arbeid
+* TILLSTRO – Tilleggsstønad, reise oppst., avsl.hjem
+* TILLISTRS-Tilleggsstønad, reise til samling
+ * */

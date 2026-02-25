@@ -52,8 +52,7 @@ val objectMapper: ObjectMapper =
                 indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
                 indentObjectsWith(DefaultIndenter("  ", "\n"))
             },
-        )
-        .registerModule(JavaTimeModule())
+        ).registerModule(JavaTimeModule())
 
 fun main() {
     val httpClient = defaultHttpClient()
