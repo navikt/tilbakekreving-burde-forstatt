@@ -16,7 +16,6 @@ import io.ktor.http.contentType
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.Klassekoder
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Periode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.PeriodeIRequest
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
@@ -121,7 +120,18 @@ class TilbakekrevingService(
             "Barnetrygd" -> Fagsystem.BA
             "Kontantstøtte" -> Fagsystem.KONT
             "Overgangsstønad" -> Fagsystem.EF
-            "Tilleggsstønad" -> Fagsystem.TS
+
+            "Tilleggsstønad",
+            "BoligOgOvernatting",
+            "DagligReise",
+            "Flytting",
+            "Læremidler",
+            "PassAvBarn",
+            "ReiseForÅKommeIArbeid",
+            "ReiseVedOppstartAvslutningHjemreise",
+            "ReiseTilSamling",
+            -> Fagsystem.TS
+
             "Arbeidsavklaringspenger" -> Fagsystem.AAP
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
@@ -132,6 +142,14 @@ class TilbakekrevingService(
             "Kontantstøtte" -> Ytelsestype.KONTANTSTØTTE
             "Overgangsstønad" -> Ytelsestype.OVERGANGSSTØNAD
             "Tilleggsstønad" -> Ytelsestype.TILLEGGSSTØNAD
+            "BoligOgOvernatting" -> Ytelsestype.BOLIG_OG_OVERNATTING
+            "DagligReise" -> Ytelsestype.DAGLIG_REGISE
+            "Flytting" -> Ytelsestype.FLYTTING
+            "Læremidler" -> Ytelsestype.LÆREMIDLER
+            "PassAvBarn" -> Ytelsestype.PASS_AV_BARN
+            "ReiseForÅKommeIArbeid" -> Ytelsestype.REISE_FOR_Å_KOMME_I_ARBEID
+            "ReiseVedOppstartAvslutningHjemreise" -> Ytelsestype.REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE
+            "ReiseTilSamling" -> Ytelsestype.REISE_TIL_SAMLING
             "Arbeidsavklaringspenger" -> Ytelsestype.ARBEIDSAVKLARINGSPENGER
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
@@ -204,7 +222,10 @@ class TilbakekrevingService(
                             "api",
                             "forvaltning",
                             "ytelsestype",
-                            ytelsestype.name,
+                            when (ytelsestype) {
+                                in TILLEGGSSTØNAD_YTELSER -> Ytelsestype.TILLEGGSSTØNAD.name
+                                else -> ytelsestype.name
+                            },
                             "fagsak",
                             eksternFagsakId,
                             "v1",
@@ -236,7 +257,7 @@ class TilbakekrevingService(
                 kravgrunnlagId = BigInteger(63, SecureRandom())
                 vedtakId = BigInteger(63, SecureRandom())
                 kodeStatusKrav = "NY"
-                kodeFagomraade = hentKodeFagområdet(opprettTilbakekrevingRequest.ytelsestype)
+                kodeFagomraade = opprettTilbakekrevingRequest.ytelsestype.tilKodeFagområdet()
                 fagsystemId = opprettTilbakekrevingRequest.eksternFagsakId
                 vedtakIdOmgjort = BigInteger(1, SecureRandom())
                 vedtakGjelderId = requestFraBurdeForstatt.personIdent
@@ -275,7 +296,7 @@ class TilbakekrevingService(
 
                 detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
                     DetaljertKravgrunnlagBelopDto().apply {
-                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype).ytelsesKlassekode
+                        kodeKlasse = opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().ytelsesKlassekode
                         typeKlasse = TypeKlasseDto.YTEL
                         belopOpprUtbet = opprettTilbakekrevingRequest.varsel?.sumFeilutbetaling
                         belopNy = BigDecimal(0.00)
@@ -286,7 +307,7 @@ class TilbakekrevingService(
                 )
                 detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
                     DetaljertKravgrunnlagBelopDto().apply {
-                        kodeKlasse = hentKlasseKode(opprettTilbakekrevingRequest.ytelsestype).feilutbetalingKlassekose
+                        kodeKlasse = opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().feilutbetalingKlassekose
                         typeKlasse = TypeKlasseDto.FEIL
                         belopOpprUtbet = BigDecimal(0)
                         belopNy = belop
@@ -324,29 +345,32 @@ class TilbakekrevingService(
         return perioder
     }
 
-    private fun hentKlasseKode(ytelsestype: Ytelsestype): Klassekoder {
-        return when (ytelsestype) {
-            Ytelsestype.BARNETRYGD -> Klassekoder.BARNETRYGD
-            Ytelsestype.TILLEGGSSTØNAD -> Klassekoder.TILLEGGSSTØNAD
-            Ytelsestype.ARBEIDSAVKLARINGSPENGER -> Klassekoder.ARBEIDSAVKLARINGSPENGER
-            Ytelsestype.OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
-            Ytelsestype.BARNETILSYN -> Klassekoder.BARNETILSYN
-            Ytelsestype.SKOLEPENGER -> Klassekoder.SKOLEPENGER
-            Ytelsestype.KONTANTSTØTTE -> Klassekoder.KONTANTSTØTTE
-        }
-    }
-
-    private fun hentKodeFagområdet(ytelsestype: Ytelsestype): String =
-        when (ytelsestype) {
-            Ytelsestype.TILLEGGSSTØNAD -> "TILLST"
-            else -> ytelsestype.kode
-        }
-
     companion object {
         val NY_MODELL_YTELSER =
             setOf(
                 "Tilleggsstønad",
+                "BoligOgOvernatting",
+                "DagligReise",
+                "Flytting",
+                "Læremidler",
+                "PassAvBarn",
+                "ReiseForÅKommeIArbeid",
+                "ReiseVedOppstartAvslutningHjemreise",
+                "ReiseTilSamling",
                 "Arbeidsavklaringspenger",
+            )
+
+        val TILLEGGSSTØNAD_YTELSER =
+            setOf(
+                Ytelsestype.TILLEGGSSTØNAD,
+                Ytelsestype.BOLIG_OG_OVERNATTING,
+                Ytelsestype.DAGLIG_REGISE,
+                Ytelsestype.FLYTTING,
+                Ytelsestype.LÆREMIDLER,
+                Ytelsestype.PASS_AV_BARN,
+                Ytelsestype.REISE_FOR_Å_KOMME_I_ARBEID,
+                Ytelsestype.REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE,
+                Ytelsestype.REISE_TIL_SAMLING,
             )
     }
 }

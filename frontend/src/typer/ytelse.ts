@@ -1,7 +1,21 @@
 import { z } from 'zod';
 
 export const ytelseSchema = z.enum(
-    ['Overgangsstønad', 'Barnetrygd', 'Tilleggsstønad' , 'Kontantstøtte', 'Arbeidsavklaringspenger'],
+    [
+        'Overgangsstønad',
+        'Barnetrygd',
+        'Tilleggsstønad',
+        'Kontantstøtte',
+        'Arbeidsavklaringspenger',
+        'BoligOgOvernatting',
+        'DagligReise',
+        'Flytting',
+        'Læremidler',
+        'PassAvBarn',
+        'ReiseForÅKommeIArbeid',
+        'ReiseVedOppstartAvslutningHjemreise',
+        'ReiseTilSamling',
+    ],
     {
         message: 'Ytelse er påkrevd',
     }
@@ -19,11 +33,21 @@ export const ytelseGrupper = [
     },
     {
         fagsystem: 'Kontantstøtte',
-        ytelser: [ ytelseSchema.enum.Kontantstøtte],
+        ytelser: [ytelseSchema.enum.Kontantstøtte],
     },
     {
         fagsystem: 'Tilleggsstønad',
-        ytelser: [ytelseSchema.enum.Tilleggsstønad],
+        ytelser: [
+            ytelseSchema.enum.Tilleggsstønad,
+            ytelseSchema.enum.BoligOgOvernatting,
+            ytelseSchema.enum.DagligReise,
+            ytelseSchema.enum.Flytting,
+            ytelseSchema.enum.Læremidler,
+            ytelseSchema.enum.PassAvBarn,
+            ytelseSchema.enum.ReiseForÅKommeIArbeid,
+            ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise,
+            ytelseSchema.enum.ReiseTilSamling,
+        ],
     },
     {
         fagsystem: 'Arbeidsavklaringspenger',
@@ -39,5 +63,13 @@ export const månedsytelser = [
 
 export const datoYtelser = [
     ytelseSchema.enum.Tilleggsstønad,
-    ytelseSchema.enum.Arbeidsavklaringspenger
+    ytelseSchema.enum.Arbeidsavklaringspenger,
+    ytelseSchema.enum.BoligOgOvernatting,
+    ytelseSchema.enum.DagligReise,
+    ytelseSchema.enum.Flytting,
+    ytelseSchema.enum.Læremidler,
+    ytelseSchema.enum.PassAvBarn,
+    ytelseSchema.enum.ReiseForÅKommeIArbeid,
+    ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise,
+    ytelseSchema.enum.ReiseTilSamling,
 ] as const;

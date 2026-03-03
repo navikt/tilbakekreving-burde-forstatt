@@ -7,11 +7,10 @@ class CustomNamespacePrefixMapper : NamespacePrefixMapper() {
         namespaceUri: String,
         suggestion: String?,
         requirePrefix: Boolean,
-    ): String {
-        return when (namespaceUri) {
+    ): String =
+        when (namespaceUri) {
             "urn:no:nav:tilbakekreving:typer:v1" -> "mmel"
             "urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1" -> "urn"
             else -> suggestion ?: ""
         }
-    }
 }
