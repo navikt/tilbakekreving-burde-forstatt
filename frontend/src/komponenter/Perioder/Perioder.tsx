@@ -45,21 +45,20 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                 <FraTilDatoVelger indeks={indeks} />
             )}
 
-            {erGammelModellYtelse(ytelse) && (
-                <Controller
-                    name={`perioder.${indeks}.simulertBeløp`}
-                    control={control}
-                    render={({ field }) => (
-                        <TextField
-                            label="Simulert feilutbetalt månedsbeløp"
-                            {...field}
-                            type="text"
-                            inputMode="text"
-                            error={errors.perioder?.[indeks]?.simulertBeløp?.message}
-                        />
-                    )}
-                />
-            )}
+            <Controller
+                name={`perioder.${indeks}.simulertBeløp`}
+                control={control}
+                render={({ field }) => (
+                    <TextField
+                        label="Simulert feilutbetalt månedsbeløp"
+                        {...field}
+                        type="text"
+                        inputMode="text"
+                        value={erGammelModellYtelse(ytelse) ? 5000 : field.value} // For gammel modell-ytelser er simulert beløp alltid 5000, så setter den til det uansett hva brukeren skriver inn
+                        error={errors.perioder?.[indeks]?.simulertBeløp?.message}
+                    />
+                )}
+            />
             <Controller
                 name={`perioder.${indeks}.kravgrunnlagBeløp`}
                 control={control}
