@@ -54,7 +54,7 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                         {...field}
                         type="text"
                         inputMode="text"
-                        value={erGammelModellYtelse(ytelse) ? 5000 : field.value} // For gammel modell-ytelser er simulert beløp alltid 5000, så setter den til det uansett hva brukeren skriver inn
+                        defaultValue={erGammelModellYtelse(ytelse) ? field.value : 5000}
                         error={errors.perioder?.[indeks]?.simulertBeløp?.message}
                     />
                 )}
