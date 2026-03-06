@@ -16,6 +16,9 @@ const erMånedsytelse = (ytelse: string) => {
     return månedsytelser.some(månedsYtelse => månedsYtelse === ytelse);
 };
 
+const erGammelModellYtelse = (ytelse: string) =>
+    ['Overgangsstønad', 'Barnetrygd', 'Kontantstøtte'].includes(ytelse);
+
 const erDatoYtelse = (ytelse: string) => {
     return datoYtelser.some(datoYtelse => datoYtelse === ytelse);
 };
@@ -42,19 +45,21 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                 <FraTilDatoVelger indeks={indeks} />
             )}
 
-            <Controller
-                name={`perioder.${indeks}.simulertBeløp`}
-                control={control}
-                render={({ field }) => (
-                    <TextField
-                        label="Simulert feilutbetalt månedsbeløp"
-                        {...field}
-                        type="text"
-                        inputMode="text"
-                        error={errors.perioder?.[indeks]?.simulertBeløp?.message}
-                    />
-                )}
-            />
+            {erGammelModellYtelse(ytelse) && (
+                <Controller
+                    name={`perioder.${indeks}.simulertBeløp`}
+                    control={control}
+                    render={({ field }) => (
+                        <TextField
+                            label="Simulert feilutbetalt månedsbeløp"
+                            {...field}
+                            type="text"
+                            inputMode="text"
+                            error={errors.perioder?.[indeks]?.simulertBeløp?.message}
+                        />
+                    )}
+                />
+            )}
             <Controller
                 name={`perioder.${indeks}.kravgrunnlagBeløp`}
                 control={control}
