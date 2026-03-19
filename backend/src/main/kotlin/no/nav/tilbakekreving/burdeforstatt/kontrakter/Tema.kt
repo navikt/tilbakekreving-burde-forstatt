@@ -10,4 +10,5 @@ enum class Tema(
     OPP("OPP", "B288"),
     TSO("TSO", "B287"),
     AAP("AAP", "B287"),
+    IND("TILTAKSPENGER", "B470"),
 }

@@ -15,6 +15,7 @@ export const ytelseSchema = z.enum(
         'ReiseForÅKommeIArbeid',
         'ReiseVedOppstartAvslutningHjemreise',
         'ReiseTilSamling',
+        'Tiltakspenger',
     ],
     {
         message: 'Ytelse er påkrevd',
@@ -53,6 +54,10 @@ export const ytelseGrupper = [
         fagsystem: 'Arbeidsavklaringspenger',
         ytelser: [ytelseSchema.enum.Arbeidsavklaringspenger],
     },
+    {
+        fagsystem: 'Tiltakspenger',
+        ytelser: [ytelseSchema.enum.Tiltakspenger],
+    },
 ] as const;
 
 export const månedsytelser = [
@@ -62,6 +67,7 @@ export const månedsytelser = [
 ] as const;
 
 export const datoYtelser = [
+    ytelseSchema.enum.Tiltakspenger,
     ytelseSchema.enum.Tilleggsstønad,
     ytelseSchema.enum.Arbeidsavklaringspenger,
     ytelseSchema.enum.BoligOgOvernatting,

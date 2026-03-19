@@ -38,6 +38,7 @@ data class KafkaConfig(
         val consumer = KafkaConsumer(properties, StringDeserializer(), StringDeserializer())
         consumer.subscribe(
             listOf(
+                "tilbake.privat-tilbakekreving-tiltakspenger",
                 "tilbake.privat-tilbakekreving-tilleggsstonad",
                 "tilbake.privat-tilbakekreving-arbeidsavklaringspenger",
             ),

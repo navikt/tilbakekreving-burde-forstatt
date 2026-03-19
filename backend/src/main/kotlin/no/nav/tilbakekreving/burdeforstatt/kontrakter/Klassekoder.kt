@@ -37,4 +37,8 @@ enum class Klassekoder(
         "AAPUAA",
         "KL_KODE_FEIL_ARBYT",
     ),
+    TILTAKSPENGER(
+        "TPBTOPPFAGR",
+        "KL_KODE_FEIL_ARBYT",
+    ),
 }

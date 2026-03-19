@@ -110,6 +110,13 @@ enum class Ytelsestype(
             Språkkode.NN to "Arbeidsavklaringspengar",
         ),
     ),
+    TILTAKSPENGER(
+        "TILTPENG",
+        mapOf(
+            Språkkode.NB to "Tiltakspenger",
+            Språkkode.NN to "Tiltakspengar",
+        ),
+    ),
     ;
 
     fun tilTema(): Tema =
@@ -128,6 +135,7 @@ enum class Ytelsestype(
             REISE_TIL_SAMLING,
             -> Tema.TSO
             ARBEIDSAVKLARINGSPENGER -> Tema.AAP
+            TILTAKSPENGER -> Tema.IND
         }
 
     fun tilKodeFagområdet(): String =
@@ -159,6 +167,7 @@ enum class Ytelsestype(
             REISE_TIL_SAMLING,
             -> Klassekoder.TILLEGGSSTØNAD
 
+            TILTAKSPENGER -> Klassekoder.TILTAKSPENGER
             ARBEIDSAVKLARINGSPENGER -> Klassekoder.ARBEIDSAVKLARINGSPENGER
             OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
             BARNETILSYN -> Klassekoder.BARNETILSYN
@@ -166,14 +175,3 @@ enum class Ytelsestype(
             KONTANTSTØTTE -> Klassekoder.KONTANTSTØTTE
         }
 }
-
-/*
-* TILLSTBO – Tilleggsstønad, bolig og overnatting
-* TILLSTDR – Tilleggsstønad, daglig reise
-* TILLSTFL – Tilleggsstønad, flytting
-* TILLSTLM – Tilleggsstønad, læremidler
-* TILLSTPB – Tilleggsstønad pass av barn
-* TILLSTRA – Tilleggsstønad, reise for å komme i arbeid
-* TILLSTRO – Tilleggsstønad, reise oppst., avsl.hjem
-* TILLISTRS-Tilleggsstønad, reise til samling
- * */
