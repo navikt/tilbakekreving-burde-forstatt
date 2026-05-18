@@ -7,6 +7,7 @@ export const ytelseSchema = z.enum(
         'Tilleggsstønad',
         'Kontantstøtte',
         'Arbeidsavklaringspenger',
+        'Dagpenger',
         'BoligOgOvernatting',
         'DagligReise',
         'Flytting',
@@ -63,7 +64,6 @@ export const månedsytelser = [
 
 export const datoYtelser = [
     ytelseSchema.enum.Tilleggsstønad,
-    ytelseSchema.enum.Arbeidsavklaringspenger,
     ytelseSchema.enum.BoligOgOvernatting,
     ytelseSchema.enum.DagligReise,
     ytelseSchema.enum.Flytting,
@@ -73,3 +73,8 @@ export const datoYtelser = [
     ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise,
     ytelseSchema.enum.ReiseTilSamling,
 ] as const;
+
+export const meldekortYtelser = [
+    ytelseSchema.enum.Arbeidsavklaringspenger,
+    ytelseSchema.enum.Dagpenger,
+]

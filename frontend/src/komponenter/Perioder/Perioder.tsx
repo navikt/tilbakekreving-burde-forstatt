@@ -10,11 +10,16 @@ import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { DagVelger } from './Dagvelger';
 import { FraTilDatoVelger } from './FraTilDatoVelger';
 import { Maanedsvelger } from './Maanedsvelger';
-import { månedsytelser, datoYtelser } from '../../typer/ytelse';
+import {månedsytelser, datoYtelser, meldekortYtelser} from '../../typer/ytelse';
+import {MeldekortVelger} from "./MeldekortVelger.tsx";
 
 const erMånedsytelse = (ytelse: string) => {
     return månedsytelser.some(månedsYtelse => månedsYtelse === ytelse);
 };
+
+const erMeldekortsytelse = (ytelse: string) => {
+    return meldekortYtelser.some(meldekortYtelse => meldekortYtelse === ytelse)
+}
 
 const erDatoYtelse = (ytelse: string) => {
     return datoYtelser.some(datoYtelse => datoYtelse === ytelse);
@@ -38,6 +43,8 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                 <Maanedsvelger indeks={indeks} />
             ) : erDatoYtelse(ytelse) ? (
                 <DagVelger indeks={indeks} />
+            ) : erMeldekortsytelse(ytelse) ? (
+                <MeldekortVelger indeks={indeks} />
             ) : (
                 <FraTilDatoVelger indeks={indeks} />
             )}
