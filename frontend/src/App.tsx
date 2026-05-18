@@ -123,15 +123,15 @@ function App() {
     return (
         <>
             <Header />
-            <VStack gap="4" className="max-w-3xl mx-auto p-4">
+            <VStack gap="space-4" className="max-w-3xl mx-auto p-4">
                 <h2 className="text-8xl font-bold text-pink-500">Burde forstått 🤔</h2>
                 <h3 className="text-xl font-bold">Opprett testdata for tilbakekreving</h3>
                 <p>Laget i hackatonet 2025 🌞</p>
 
                 <FormProvider {...metoder}>
                     <form onSubmit={handleSubmit(data => mutation.mutate(data))}>
-                        <VStack gap="4">
-                            <HStack gap="4">
+                        <VStack gap="space-4">
+                            <HStack gap="space-4">
                                 <Controller
                                     name="ytelse"
                                     control={metoder.control}
@@ -181,7 +181,7 @@ function App() {
                                 </div>
                             )}
 
-                            <HStack gap="4">
+                            <HStack gap="space-4">
                                 <Button
                                     type="submit"
                                     variant="primary"

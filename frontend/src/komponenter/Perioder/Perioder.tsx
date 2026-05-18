@@ -37,7 +37,7 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
     } = useFormContext<TilbakeFormData>();
     const { ytelse } = getValues();
     return (
-        <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="4">
+        <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="space-4">
             <h3 className="font-bold text-blue-700">Periode {indeks + 1}</h3>
             {erMånedsytelse(ytelse) ? (
                 <Maanedsvelger indeks={indeks} />
@@ -104,9 +104,9 @@ const Perioder = () => {
     return (
         <section>
             <h2 className="text-xl font-semibold mb-4">Perioder</h2>
-            <VStack gap="4">
+            <VStack gap="space-4">
                 {fields.map(periode => (
-                    <HStack key={periode.id} gap="4" align="center">
+                    <HStack key={periode.id} gap="space-4" align="center">
                         <Periode indeks={fields.indexOf(periode)} />
 
                         {fields.length > 1 && (

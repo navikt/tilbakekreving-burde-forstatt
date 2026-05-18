@@ -8,6 +8,14 @@ import { appConfig } from '../config/config.ts';
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [bruker, setBruker] = useState({ navn: '' });
 
+    const loggInn = () => {
+        window.location.href = appConfig.loginUrl;
+    };
+
+    const loggUt = () => {
+        // TODO: Legg til backend-endepunkt for å logge ut
+    };
+
     useEffect(() => {
         const sjekkAuth = async () => {
             try {
@@ -30,14 +38,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         sjekkAuth();
     }, []);
-
-    const loggInn = () => {
-        window.location.href = appConfig.loginUrl;
-    };
-
-    const loggUt = () => {
-        // TODO: Legg til backend-endepunkt for å logge ut
-    };
 
     return (
         <AuthContext.Provider value={{ bruker, loggInn, loggUt }}>{children}</AuthContext.Provider>

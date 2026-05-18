@@ -37,7 +37,7 @@ export const FraTilDatoVelger = ({ indeks }: Props) => {
 
     return (
         <DatePicker {...datepickerProps} dropdownCaption>
-            <HStack gap="4">
+            <HStack gap="space-4">
                 <Controller
                     name={`perioder.${indeks}.fom`}
                     control={control}

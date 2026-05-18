@@ -50,7 +50,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
     });
 
     return (
-        <HStack gap="4">
+        <HStack gap="space-4">
             <MonthPicker {...fromMonthpickerProps} dropdownCaption>
                 <Controller
                     name={`perioder.${indeks}.fom`}
