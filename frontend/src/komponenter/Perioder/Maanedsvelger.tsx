@@ -54,7 +54,7 @@ export const Maanedsvelger: FC<Props> = ({ indeks }) => {
     });
 
     return (
-        <HStack gap="space-4">
+        <HStack gap="space-16">
             <MonthPicker {...fromMonthpickerProps} dropdownCaption>
                 <MonthPicker.Input
                     {...fromInputProps}

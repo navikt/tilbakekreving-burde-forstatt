@@ -4,7 +4,6 @@ export const ytelseSchema = z.enum(
     [
         'Overgangsstønad',
         'Barnetrygd',
-        'Tilleggsstønad',
         'Kontantstøtte',
         'Arbeidsavklaringspenger',
         'Dagpenger',
@@ -39,7 +38,6 @@ export const ytelseGrupper = [
     {
         fagsystem: 'Tilleggsstønad',
         ytelser: [
-            ytelseSchema.enum.Tilleggsstønad,
             ytelseSchema.enum.BoligOgOvernatting,
             ytelseSchema.enum.DagligReise,
             ytelseSchema.enum.Flytting,
@@ -63,7 +61,6 @@ export const månedsytelser = [
 ] as const;
 
 export const datoYtelser = [
-    ytelseSchema.enum.Tilleggsstønad,
     ytelseSchema.enum.BoligOgOvernatting,
     ytelseSchema.enum.DagligReise,
     ytelseSchema.enum.Flytting,

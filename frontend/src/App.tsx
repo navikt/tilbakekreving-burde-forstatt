@@ -1,4 +1,4 @@
-import '@navikt/ds-css/dist/index.css';
+import '@navikt/ds-css';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 import type { FC } from 'react';
 
@@ -126,15 +126,15 @@ const App: FC = () => {
     return (
         <>
             <Header />
-            <VStack gap="space-4" className="max-w-3xl mx-auto p-4">
+            <VStack gap="space-16" className="max-w-3xl mx-auto p-4">
                 <h2 className="text-8xl font-bold text-pink-500">Burde forstått 🤔</h2>
                 <h3 className="text-xl font-bold">Opprett testdata for tilbakekreving</h3>
                 <p>Laget i hackatonet 2025 🌞</p>
 
                 <FormProvider {...metoder}>
                     <form onSubmit={handleSubmit(data => mutation.mutate(data))}>
-                        <VStack gap="space-4">
-                            <HStack gap="space-4">
+                        <VStack gap="space-16">
+                            <HStack gap="space-16">
                                 <Controller
                                     name="ytelse"
                                     control={metoder.control}
@@ -185,7 +185,7 @@ const App: FC = () => {
                                 </div>
                             )}
 
-                            <HStack gap="space-4">
+                            <HStack gap="space-16">
                                 <Button
                                     type="submit"
                                     size="small"

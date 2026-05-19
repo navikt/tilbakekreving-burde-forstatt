@@ -41,7 +41,7 @@ export const FraTilDatoVelger: FC<Props> = ({ indeks }) => {
 
     return (
         <DatePicker {...datepickerProps} dropdownCaption>
-            <HStack gap="space-4">
+            <HStack gap="space-16">
                 <DatePicker.Input
                     {...fromInputProps}
                     label="Fra og til dato"

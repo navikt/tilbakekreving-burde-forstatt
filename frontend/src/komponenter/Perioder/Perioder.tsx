@@ -1,11 +1,11 @@
 import type { TilbakeFormData } from '../../typer/formData';
 import type { FC } from 'react';
-import type { FieldArrayWithId } from 'react-hook-form';
 
 import { PlusIcon } from '@navikt/aksel-icons';
 import { TrashIcon } from '@navikt/aksel-icons';
 import { HStack, Button, TextField } from '@navikt/ds-react';
 import { VStack } from '@navikt/ds-react';
+import { useCallback, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
 import { DagVelger } from './Dagvelger';
@@ -38,7 +38,7 @@ const Periode: FC<PeriodeInputProps> = ({ indeks }: PeriodeInputProps) => {
     } = useFormContext<TilbakeFormData>();
     const { ytelse } = getValues();
     return (
-        <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="space-4">
+        <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="space-16">
             <h3 className="font-bold text-blue-700">Periode {indeks + 1}</h3>
             {erMånedsytelse(ytelse) ? (
                 <Maanedsvelger indeks={indeks} />
@@ -89,35 +89,46 @@ const Perioder: FC = () => {
         name: 'perioder',
     });
 
-    const leggTilPeriode = (): void => {
+    // useFieldArray kan regenerere fields med nye id-verdier etter setValue,
+    // som fører til unmount/remount. Vi holder egne stabile keys.
+    const [stableKeys, setStableKeys] = useState(() => ['periode-0']);
+    const [nextId, setNextId] = useState(1);
+
+    const leggTilPeriode = useCallback((): void => {
         // append bruker ikke Partial på typen. Blir uansett hacky med enten superRefine på zod-valideringen eller casting her...
         // Subscriber på denne for å lytte etter fiks: https://github.com/orgs/react-hook-form/discussions/10211
+        setStableKeys(prev => [...prev, `periode-${nextId}`]);
+        setNextId(n => n + 1);
         append({
             fom: undefined as unknown as Date,
             tom: undefined as unknown as Date,
             simulertBeløp: '',
             kravgrunnlagBeløp: '',
         });
-    };
+    }, [append, nextId]);
 
-    const fjernPeriode = (id: FieldArrayWithId['id']): void => {
-        remove(fields.findIndex(periode => periode.id === id));
-    };
+    const fjernPeriode = useCallback(
+        (index: number): void => {
+            setStableKeys(prev => prev.filter((_, i) => i !== index));
+            remove(index);
+        },
+        [remove]
+    );
 
     return (
         <section>
             <h2 className="text-xl font-semibold mb-4">Perioder</h2>
-            <VStack gap="space-4">
-                {fields.map(periode => (
-                    <HStack key={periode.id} gap="space-4" align="center">
-                        <Periode indeks={fields.indexOf(periode)} />
+            <VStack gap="space-16">
+                {fields.map((_, index) => (
+                    <HStack key={stableKeys[index]} gap="space-16" align="center">
+                        <Periode indeks={index} />
 
                         {fields.length > 1 && (
                             <Button
                                 variant="tertiary"
                                 size="small"
                                 icon={<TrashIcon aria-hidden />}
-                                onClick={() => fjernPeriode(periode.id)}
+                                onClick={() => fjernPeriode(index)}
                                 type="button"
                                 className="self-center"
                             >

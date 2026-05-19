@@ -12,6 +12,7 @@ interface Props {
 export const DagVelger: FC<Props> = ({ indeks }) => {
     const {
         control,
+        clearErrors,
         setValue,
         formState: { errors },
     } = useFormContext<TilbakeFormData>();
@@ -23,28 +24,30 @@ export const DagVelger: FC<Props> = ({ indeks }) => {
     const { datepickerProps, inputProps } = useDatepicker({
         fromDate: new Date('2015-01-01'),
         toDate: dagensDato,
-        onDateChange: async (dato: Date | undefined) => {
+        onDateChange: (dato: Date | undefined) => {
             if (dato) {
                 setValue(`perioder.${indeks}.fom`, dato, {
-                    shouldDirty: true,
+                    shouldValidate: true,
                 });
                 setValue(`perioder.${indeks}.tom`, dato, {
-                    shouldDirty: true,
+                    shouldValidate: true,
                 });
+                clearErrors(`perioder.${indeks}.fom`);
+                clearErrors(`perioder.${indeks}.tom`);
             }
         },
     });
 
     return (
-        <DatePicker {...datepickerProps}>
+        <DatePicker {...datepickerProps} dropdownCaption>
             <Controller
                 name={`perioder.${indeks}.fom`}
                 control={control}
                 render={() => (
                     <DatePicker.Input
                         {...inputProps}
-                        size="small"
                         label="Velg til og fra dato"
+                        size="small"
                         error={errors.perioder?.[indeks]?.fom?.message}
                     />
                 )}
