@@ -1,21 +1,26 @@
 import type { TilbakeFormData } from '../../typer/formData';
+import type { FC } from 'react';
 
 import { HStack, DatePicker, useRangeDatepicker } from '@navikt/ds-react';
+import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
 }
 
-export const FraTilDatoVelger = ({ indeks }: Props) => {
+export const FraTilDatoVelger: FC<Props> = ({ indeks }) => {
     const {
         clearErrors,
         setValue,
         formState: { errors },
     } = useFormContext<TilbakeFormData>();
 
-    const månedenFørInneværendeMåned = new Date();
-    månedenFørInneværendeMåned.setMonth(månedenFørInneværendeMåned.getMonth() - 1);
+    const månedenFørInneværendeMåned = useMemo(() => {
+        const dato = new Date();
+        dato.setMonth(dato.getMonth() - 1);
+        return dato;
+    }, []);
 
     const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
         fromDate: new Date('2015-01-01'),
@@ -40,11 +45,13 @@ export const FraTilDatoVelger = ({ indeks }: Props) => {
                 <DatePicker.Input
                     {...fromInputProps}
                     label="Fra og til dato"
+                    size="small"
                     error={errors.perioder?.[indeks]?.fom?.message}
                 />
                 <DatePicker.Input
                     {...toInputProps}
                     label="Til dato"
+                    size="small"
                     error={errors.perioder?.[indeks]?.tom?.message}
                 />
             </HStack>

@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+
 import { LeaveIcon } from '@navikt/aksel-icons';
 import { EnterIcon } from '@navikt/aksel-icons';
 import { Dropdown } from '@navikt/ds-react/Dropdown';
@@ -7,7 +9,7 @@ import { BodyShort } from '@navikt/ds-react/Typography';
 
 import { useAuth } from '../hooks/useAuth';
 
-export const Header = () => {
+export const Header: FC = () => {
     const { bruker, loggInn, loggUt } = useAuth();
 
     return (

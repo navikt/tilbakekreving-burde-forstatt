@@ -1,5 +1,6 @@
 import '@navikt/ds-css/dist/index.css';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
+import type { FC } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox, Link } from '@navikt/ds-react';
@@ -10,7 +11,7 @@ import { TextField } from '@navikt/ds-react/TextField';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useRef, useState } from 'react';
-import { useForm, Controller, FormProvider } from 'react-hook-form';
+import { useForm, Controller, FormProvider, useWatch } from 'react-hook-form';
 
 import { Header } from './komponenter/Header';
 import Perioder from './komponenter/Perioder/Perioder';
@@ -48,12 +49,14 @@ const postTilbakekreving = async (data: TilbakeRequest): Promise<TilbakekrevingR
     return responseData;
 };
 
-function App() {
+const App: FC = () => {
     const svarMeldingRef = useRef<HTMLDivElement>(null);
     const [sisteSendtInnData, setSisteSendtInnData] = useState<TilbakeRequest | undefined>(
         undefined
     );
+
     const metoder = useForm<TilbakeFormData>({
+        resolver: zodResolver(tilbakeFormDataSchema),
         defaultValues: {
             perioder: [
                 {
@@ -67,17 +70,17 @@ function App() {
             ytelse: undefined,
             personIdent: '',
         },
-        mode: 'onChange',
-        resolver: zodResolver(tilbakeFormDataSchema),
+        reValidateMode: 'onChange',
+        mode: 'onSubmit',
     });
     const {
-        watch,
         handleSubmit,
         reset,
         formState: { isSubmitting },
     } = metoder;
 
-    const watchedYtelse = watch('ytelse');
+    const watchedYtelse = useWatch({ control: metoder.control, name: 'ytelse' });
+
     const mutation = useMutation({
         mutationFn: (formData: TilbakeFormData) => {
             const requestObject = {
@@ -114,7 +117,7 @@ function App() {
         },
     });
 
-    const resetSkjema = () => {
+    const resetSkjema = (): void => {
         reset();
         mutation.reset();
         setSisteSendtInnData(undefined);
@@ -148,6 +151,7 @@ function App() {
                                     render={({ field }) => (
                                         <TextField
                                             label="Fødselsnummer eller D-nummer"
+                                            size="small"
                                             description="Skal være fra Dolly"
                                             {...field}
                                             pattern="[0-9]{11}"
@@ -157,7 +161,7 @@ function App() {
                                 />
                             </HStack>
 
-                            <Checkbox {...metoder.register('sendKravgrunnlag')}>
+                            <Checkbox {...metoder.register('sendKravgrunnlag')} size="small">
                                 Send kravgrunnlag
                             </Checkbox>
 
@@ -184,12 +188,12 @@ function App() {
                             <HStack gap="space-4">
                                 <Button
                                     type="submit"
-                                    variant="primary"
+                                    size="small"
                                     loading={mutation.isPending || isSubmitting}
                                 >
                                     Opprett tilbakekreving
                                 </Button>
-                                <Button variant="secondary" type="button" onClick={resetSkjema}>
+                                <Button variant="secondary" size="small" onClick={resetSkjema}>
                                     Tilbakestill skjemaet
                                 </Button>
                             </HStack>
@@ -198,7 +202,7 @@ function App() {
                 </FormProvider>
 
                 {mutation.isSuccess && (
-                    <Alert ref={svarMeldingRef} variant="success" className="mb-4">
+                    <Alert ref={svarMeldingRef} variant="success" className="mb-4" size="small">
                         <h3>Suksess! 🎉</h3>
                         <Link href={mutation.data.data} target="_blank" rel="noopener noreferrer">
                             Opprettet tilbakekreving her
@@ -208,6 +212,6 @@ function App() {
             </VStack>
         </>
     );
-}
+};
 
 export default App;

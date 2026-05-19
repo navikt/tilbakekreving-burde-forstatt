@@ -1,21 +1,26 @@
 import type { TilbakeFormData } from '../../typer/formData';
+import type { FC } from 'react';
 
 import { HStack, MonthPicker, useMonthpicker } from '@navikt/ds-react';
+import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
 }
 
-export const Maanedsvelger = ({ indeks }: Props) => {
+export const Maanedsvelger: FC<Props> = ({ indeks }) => {
     const {
         clearErrors,
         setValue,
         formState: { errors },
     } = useFormContext<TilbakeFormData>();
 
-    const månedenFørInneværendeMåned = new Date();
-    månedenFørInneværendeMåned.setMonth(månedenFørInneværendeMåned.getMonth() - 1);
+    const månedenFørInneværendeMåned = useMemo(() => {
+        const dato = new Date();
+        dato.setMonth(dato.getMonth() - 1);
+        return dato;
+    }, []);
 
     const { monthpickerProps: fromMonthpickerProps, inputProps: fromInputProps } = useMonthpicker({
         fromDate: new Date('2015-01-01'),
@@ -54,6 +59,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
                 <MonthPicker.Input
                     {...fromInputProps}
                     label="Fra og med måned"
+                    size="small"
                     error={errors.perioder?.[indeks]?.fom?.message}
                 />
             </MonthPicker>
@@ -61,6 +67,7 @@ export const Maanedsvelger = ({ indeks }: Props) => {
                 <MonthPicker.Input
                     {...toInputProps}
                     label="Til og med måned"
+                    size="small"
                     error={errors.perioder?.[indeks]?.tom?.message}
                 />
             </MonthPicker>

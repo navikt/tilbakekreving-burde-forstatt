@@ -1,4 +1,5 @@
 import type { TilbakeFormData } from '../../typer/formData';
+import type { FC } from 'react';
 import type { FieldArrayWithId } from 'react-hook-form';
 
 import { PlusIcon } from '@navikt/aksel-icons';
@@ -10,18 +11,18 @@ import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { DagVelger } from './Dagvelger';
 import { FraTilDatoVelger } from './FraTilDatoVelger';
 import { Maanedsvelger } from './Maanedsvelger';
-import {månedsytelser, datoYtelser, meldekortYtelser} from '../../typer/ytelse';
-import {MeldekortVelger} from "./MeldekortVelger.tsx";
+import { MeldekortVelger } from './MeldekortVelger.tsx';
+import { månedsytelser, datoYtelser, meldekortYtelser } from '../../typer/ytelse';
 
-const erMånedsytelse = (ytelse: string) => {
+const erMånedsytelse = (ytelse: string): boolean => {
     return månedsytelser.some(månedsYtelse => månedsYtelse === ytelse);
 };
 
-const erMeldekortsytelse = (ytelse: string) => {
-    return meldekortYtelser.some(meldekortYtelse => meldekortYtelse === ytelse)
-}
+const erMeldekortsytelse = (ytelse: string): boolean => {
+    return meldekortYtelser.some(meldekortYtelse => meldekortYtelse === ytelse);
+};
 
-const erDatoYtelse = (ytelse: string) => {
+const erDatoYtelse = (ytelse: string): boolean => {
     return datoYtelser.some(datoYtelse => datoYtelse === ytelse);
 };
 
@@ -29,7 +30,7 @@ interface PeriodeInputProps {
     indeks: number;
 }
 
-const Periode = ({ indeks }: PeriodeInputProps) => {
+const Periode: FC<PeriodeInputProps> = ({ indeks }: PeriodeInputProps) => {
     const {
         control,
         getValues,
@@ -57,6 +58,7 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                         label="Simulert feilutbetalt månedsbeløp"
                         {...field}
                         type="text"
+                        size="small"
                         inputMode="text"
                         error={errors.perioder?.[indeks]?.simulertBeløp?.message}
                     />
@@ -70,6 +72,7 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
                         label="Kravgrunnlag månedsbeløp"
                         {...field}
                         type="text"
+                        size="small"
                         inputMode="text"
                         error={errors.perioder?.[indeks]?.kravgrunnlagBeløp?.message}
                     />
@@ -79,14 +82,14 @@ const Periode = ({ indeks }: PeriodeInputProps) => {
     );
 };
 
-const Perioder = () => {
+const Perioder: FC = () => {
     const { control } = useFormContext<TilbakeFormData>();
     const { fields, append, remove } = useFieldArray({
         control,
         name: 'perioder',
     });
 
-    const leggTilPeriode = () => {
+    const leggTilPeriode = (): void => {
         // append bruker ikke Partial på typen. Blir uansett hacky med enten superRefine på zod-valideringen eller casting her...
         // Subscriber på denne for å lytte etter fiks: https://github.com/orgs/react-hook-form/discussions/10211
         append({
@@ -97,7 +100,7 @@ const Perioder = () => {
         });
     };
 
-    const fjernPeriode = (id: FieldArrayWithId['id']) => {
+    const fjernPeriode = (id: FieldArrayWithId['id']): void => {
         remove(fields.findIndex(periode => periode.id === id));
     };
 

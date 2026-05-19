@@ -1,23 +1,23 @@
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import { useState, useEffect } from 'react';
 
 import { AuthContext } from './useAuth';
 import { appConfig } from '../config/config.ts';
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [bruker, setBruker] = useState({ navn: '' });
 
-    const loggInn = () => {
+    const loggInn = (): void => {
         window.location.href = appConfig.loginUrl;
     };
 
-    const loggUt = () => {
+    const loggUt = (): void => {
         // TODO: Legg til backend-endepunkt for å logge ut
     };
 
     useEffect(() => {
-        const sjekkAuth = async () => {
+        const sjekkAuth = async (): Promise<void> => {
             try {
                 const response = await fetch('/api/me', {
                     headers: {
@@ -39,7 +39,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         sjekkAuth();
     }, []);
 
-    return (
-        <AuthContext.Provider value={{ bruker, loggInn, loggUt }}>{children}</AuthContext.Provider>
-    );
+    return <AuthContext value={{ bruker, loggInn, loggUt }}>{children}</AuthContext>;
 };

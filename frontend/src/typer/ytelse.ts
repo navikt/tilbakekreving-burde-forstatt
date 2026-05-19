@@ -77,4 +77,4 @@ export const datoYtelser = [
 export const meldekortYtelser = [
     ytelseSchema.enum.Arbeidsavklaringspenger,
     ytelseSchema.enum.Dagpenger,
-]
+];

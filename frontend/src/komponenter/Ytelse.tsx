@@ -1,5 +1,6 @@
 import type { TilbakeFormData } from '../typer/formData';
 import type { Ytelse as TYtelse } from '../typer/ytelse';
+import type { FC } from 'react';
 
 import { Select } from '@navikt/ds-react';
 import { useFormContext } from 'react-hook-form';
@@ -10,7 +11,7 @@ interface Props {
     setValgtYtelse: (ytelse: TYtelse | undefined) => void;
 }
 
-const Ytelse = ({ setValgtYtelse }: Props) => {
+const Ytelse: FC<Props> = ({ setValgtYtelse }) => {
     const {
         getValues,
         formState: { errors },
@@ -19,6 +20,7 @@ const Ytelse = ({ setValgtYtelse }: Props) => {
     return (
         <Select
             label="Ytelse"
+            size="small"
             description="Ytelser for felles løsning"
             value={ytelse || ''}
             onChange={e => setValgtYtelse(e.target.value as TYtelse)}
