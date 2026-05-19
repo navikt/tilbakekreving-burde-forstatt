@@ -9,10 +9,12 @@ services:
       WONDERWALL_OPENID_PROVIDER: "azure"
       WONDERWALL_UPSTREAM_HOST: host.docker.internal:5173
       WONDERWALL_REDIS_URI: redis://redis:6379
+      WONDERWALL_REDIS_TLS: "false"
       WONDERWALL_LOG_LEVEL: info
       WONDERWALL_LOG_FORMAT: text
       WONDERWALL_INGRESS: http://localhost:4000/api
       WONDERWALL_BIND_ADDRESS: 0.0.0.0:4000
+      WONDERWALL_COOKIE_SECURE: "false"
     dns:
       - 8.8.8.8
     ports:
