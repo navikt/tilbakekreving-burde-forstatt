@@ -1,7 +1,7 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
 import { HStack, DatePicker, useRangeDatepicker } from '@navikt/ds-react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
@@ -9,7 +9,6 @@ interface Props {
 
 export const FraTilDatoVelger = ({ indeks }: Props) => {
     const {
-        control,
         clearErrors,
         setValue,
         formState: { errors },
@@ -38,27 +37,15 @@ export const FraTilDatoVelger = ({ indeks }: Props) => {
     return (
         <DatePicker {...datepickerProps} dropdownCaption>
             <HStack gap="space-4">
-                <Controller
-                    name={`perioder.${indeks}.fom`}
-                    control={control}
-                    render={() => (
-                        <DatePicker.Input
-                            {...fromInputProps}
-                            label="Fra og til dato"
-                            error={errors.perioder?.[indeks]?.fom?.message}
-                        />
-                    )}
+                <DatePicker.Input
+                    {...fromInputProps}
+                    label="Fra og til dato"
+                    error={errors.perioder?.[indeks]?.fom?.message}
                 />
-                <Controller
-                    name={`perioder.${indeks}.tom`}
-                    control={control}
-                    render={() => (
-                        <DatePicker.Input
-                            {...toInputProps}
-                            label="Til dato"
-                            error={errors.perioder?.[indeks]?.tom?.message}
-                        />
-                    )}
+                <DatePicker.Input
+                    {...toInputProps}
+                    label="Til dato"
+                    error={errors.perioder?.[indeks]?.tom?.message}
                 />
             </HStack>
         </DatePicker>

@@ -1,7 +1,7 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
 import { HStack, MonthPicker, useMonthpicker } from '@navikt/ds-react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
@@ -9,7 +9,6 @@ interface Props {
 
 export const Maanedsvelger = ({ indeks }: Props) => {
     const {
-        control,
         clearErrors,
         setValue,
         formState: { errors },
@@ -52,29 +51,17 @@ export const Maanedsvelger = ({ indeks }: Props) => {
     return (
         <HStack gap="space-4">
             <MonthPicker {...fromMonthpickerProps} dropdownCaption>
-                <Controller
-                    name={`perioder.${indeks}.fom`}
-                    control={control}
-                    render={() => (
-                        <MonthPicker.Input
-                            {...fromInputProps}
-                            label="Fra og med måned"
-                            error={errors.perioder?.[indeks]?.fom?.message}
-                        />
-                    )}
+                <MonthPicker.Input
+                    {...fromInputProps}
+                    label="Fra og med måned"
+                    error={errors.perioder?.[indeks]?.fom?.message}
                 />
             </MonthPicker>
             <MonthPicker {...toMonthpickerProps} dropdownCaption>
-                <Controller
-                    name={`perioder.${indeks}.tom`}
-                    control={control}
-                    render={() => (
-                        <MonthPicker.Input
-                            {...toInputProps}
-                            label="Til og med måned"
-                            error={errors.perioder?.[indeks]?.tom?.message}
-                        />
-                    )}
+                <MonthPicker.Input
+                    {...toInputProps}
+                    label="Til og med måned"
+                    error={errors.perioder?.[indeks]?.tom?.message}
                 />
             </MonthPicker>
         </HStack>
