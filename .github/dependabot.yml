@@ -1,13 +1,14 @@
 version: 2
 registries:
-  npm-github:
+  npm-registry:
     type: npm-registry
-    url: https://npm.pkg.github.com
+    url: https://registry.npmjs.org
     token: ${{ secrets.READER_TOKEN }}
 updates:
   - package-ecosystem: npm
     directory: /frontend
-    registries: '*'
+    registries:
+      - npm-registry
     schedule:
       interval: daily
       time: '06:00'
