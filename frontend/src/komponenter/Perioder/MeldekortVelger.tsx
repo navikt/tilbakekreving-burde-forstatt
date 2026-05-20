@@ -2,7 +2,7 @@ import type { TilbakeFormData } from '../../typer/formData';
 
 import { DatePicker, useDatepicker } from '@navikt/ds-react';
 import { useMemo, type FC } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
@@ -14,7 +14,6 @@ function leggTilDager(dato: Date, dager: number): Date {
 
 export const MeldekortVelger: FC<Props> = ({ indeks }) => {
     const {
-        control,
         clearErrors,
         setValue,
         formState: { errors },
@@ -50,17 +49,11 @@ export const MeldekortVelger: FC<Props> = ({ indeks }) => {
 
     return (
         <DatePicker {...datepickerProps}>
-            <Controller
-                name={`perioder.${indeks}.fom`}
-                control={control}
-                render={() => (
-                    <DatePicker.Input
-                        {...inputProps}
-                        size="small"
-                        label="Velg til og fra dato"
-                        error={errors.perioder?.[indeks]?.fom?.message}
-                    />
-                )}
+            <DatePicker.Input
+                {...inputProps}
+                size="small"
+                label="Velg startuke for meldekortperioden"
+                error={errors.perioder?.[indeks]?.fom?.message}
             />
         </DatePicker>
     );

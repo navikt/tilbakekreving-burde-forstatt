@@ -3,7 +3,7 @@ import type { FC } from 'react';
 
 import { DatePicker, useDatepicker } from '@navikt/ds-react';
 import { useMemo } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 interface Props {
     indeks: number;
@@ -11,7 +11,6 @@ interface Props {
 
 export const DagVelger: FC<Props> = ({ indeks }) => {
     const {
-        control,
         clearErrors,
         setValue,
         formState: { errors },
@@ -40,17 +39,11 @@ export const DagVelger: FC<Props> = ({ indeks }) => {
 
     return (
         <DatePicker {...datepickerProps} dropdownCaption>
-            <Controller
-                name={`perioder.${indeks}.fom`}
-                control={control}
-                render={() => (
-                    <DatePicker.Input
-                        {...inputProps}
-                        label="Velg til og fra dato"
-                        size="small"
-                        error={errors.perioder?.[indeks]?.fom?.message}
-                    />
-                )}
+            <DatePicker.Input
+                {...inputProps}
+                label="Velg til og fra dato"
+                size="small"
+                error={errors.perioder?.[indeks]?.fom?.message}
             />
         </DatePicker>
     );
