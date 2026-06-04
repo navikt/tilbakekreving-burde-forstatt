@@ -5,7 +5,11 @@ import { useEffect, useState } from 'react';
 import { appConfig } from '../config/config.ts';
 import { AuthContext } from './useAuth';
 
-export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+type Props = {
+    children: ReactNode;
+};
+
+export const AuthProvider: FC<Props> = ({ children }: Props) => {
     const [bruker, setBruker] = useState({ navn: '' });
 
     const loggInn = (): void => {
@@ -16,6 +20,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         // TODO: Legg til backend-endepunkt for å logge ut
     };
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: Vil kun kjøre en gang ved innlastning
     useEffect(() => {
         const sjekkAuth = async (): Promise<void> => {
             try {

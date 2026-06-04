@@ -9,7 +9,7 @@ interface Props {
     indeks: number;
 }
 
-export const DagVelger: FC<Props> = ({ indeks }) => {
+export const DagVelger: FC<Props> = ({ indeks }: Props) => {
     const {
         clearErrors,
         setValue,

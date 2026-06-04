@@ -5,11 +5,15 @@ import { DatePicker, HStack, useRangeDatepicker } from '@navikt/ds-react';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
+type DateRange = {
+    from: Date | undefined;
+    to?: Date | undefined;
+};
 interface Props {
     indeks: number;
 }
 
-export const FraTilDatoVelger: FC<Props> = ({ indeks }) => {
+export const FraTilDatoVelger: FC<Props> = ({ indeks }: Props) => {
     const {
         clearErrors,
         setValue,
@@ -25,7 +29,7 @@ export const FraTilDatoVelger: FC<Props> = ({ indeks }) => {
     const { datepickerProps, toInputProps, fromInputProps } = useRangeDatepicker({
         fromDate: new Date('2015-01-01'),
         toDate: månedenFørInneværendeMåned,
-        onRangeChange: range => {
+        onRangeChange: (range: DateRange | undefined): void => {
             if (range?.from && range?.to) {
                 setValue(`perioder.${indeks}.fom`, range.from, {
                     shouldValidate: true,
