@@ -1,18 +1,16 @@
-import type { TilbakeFormData } from '../../typer/formData';
 import type { FC } from 'react';
+import type { TilbakeFormData } from '../../typer/formData';
 
-import { PlusIcon } from '@navikt/aksel-icons';
-import { TrashIcon } from '@navikt/aksel-icons';
-import { HStack, Button, TextField } from '@navikt/ds-react';
-import { VStack } from '@navikt/ds-react';
+import { PlusIcon, TrashIcon } from '@navikt/aksel-icons';
+import { Button, HStack, TextField, VStack } from '@navikt/ds-react';
 import { useCallback, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
+import { datoYtelser, meldekortYtelser, månedsytelser } from '../../typer/ytelse';
 import { DagVelger } from './Dagvelger';
 import { FraTilDatoVelger } from './FraTilDatoVelger';
 import { Maanedsvelger } from './Maanedsvelger';
 import { MeldekortVelger } from './MeldekortVelger.tsx';
-import { månedsytelser, datoYtelser, meldekortYtelser } from '../../typer/ytelse';
 
 const erMånedsytelse = (ytelse: string): boolean => {
     return månedsytelser.some(månedsYtelse => månedsYtelse === ytelse);

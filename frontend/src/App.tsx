@@ -1,6 +1,6 @@
 import '@navikt/ds-css';
-import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 import type { FC } from 'react';
+import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox, Link } from '@navikt/ds-react';
@@ -11,7 +11,7 @@ import { TextField } from '@navikt/ds-react/TextField';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useRef, useState } from 'react';
-import { useForm, Controller, FormProvider, useWatch } from 'react-hook-form';
+import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { Header } from './komponenter/Header';
 import Perioder from './komponenter/Perioder/Perioder';

@@ -1,7 +1,7 @@
-import type { TilbakeFormData } from '../../typer/formData';
 import type { FC } from 'react';
+import type { TilbakeFormData } from '../../typer/formData';
 
-import { HStack, DatePicker, useRangeDatepicker } from '@navikt/ds-react';
+import { DatePicker, HStack, useRangeDatepicker } from '@navikt/ds-react';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 

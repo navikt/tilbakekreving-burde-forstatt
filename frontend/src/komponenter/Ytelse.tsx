@@ -1,6 +1,6 @@
+import type { FC } from 'react';
 import type { TilbakeFormData } from '../typer/formData';
 import type { Ytelse as TYtelse } from '../typer/ytelse';
-import type { FC } from 'react';
 
 import { Select } from '@navikt/ds-react';
 import { useFormContext } from 'react-hook-form';

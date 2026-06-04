@@ -1,5 +1,5 @@
-import type { TilbakeFormData } from '../../typer/formData';
 import type { FC } from 'react';
+import type { TilbakeFormData } from '../../typer/formData';
 
 import { HStack, MonthPicker, useMonthpicker } from '@navikt/ds-react';
 import { useMemo } from 'react';

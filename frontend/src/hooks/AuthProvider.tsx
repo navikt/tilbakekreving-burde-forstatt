@@ -1,9 +1,9 @@
 import type { FC, ReactNode } from 'react';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import { AuthContext } from './useAuth';
 import { appConfig } from '../config/config.ts';
+import { AuthContext } from './useAuth';
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [bruker, setBruker] = useState({ navn: '' });

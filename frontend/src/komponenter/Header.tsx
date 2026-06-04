@@ -1,7 +1,6 @@
 import type { FC } from 'react';
 
-import { LeaveIcon } from '@navikt/aksel-icons';
-import { EnterIcon } from '@navikt/aksel-icons';
+import { EnterIcon, LeaveIcon } from '@navikt/aksel-icons';
 import { Dropdown } from '@navikt/ds-react/Dropdown';
 import { InternalHeader } from '@navikt/ds-react/InternalHeader';
 import { Spacer } from '@navikt/ds-react/Stack';
