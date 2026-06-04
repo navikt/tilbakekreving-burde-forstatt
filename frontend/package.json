@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "biome check src && tsc -b && vite build",
+    "build": "pnpm check && tsc -b && vite build",
     "check": "biome check src",
     "check:fix": "biome check --write src",
     "preview": "vite preview",
@@ -14,7 +14,7 @@
   },
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
-      "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+      "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --error-on-warnings"
     ]
   },
   "dependencies": {
