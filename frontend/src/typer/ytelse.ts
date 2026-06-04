@@ -6,6 +6,7 @@ export const ytelseSchema = z.enum(
         'Barnetrygd',
         'Kontantstøtte',
         'Arbeidsavklaringspenger',
+        'Tiltakspenger',
         'Dagpenger',
         'BoligOgOvernatting',
         'DagligReise',
@@ -52,6 +53,10 @@ export const ytelseGrupper = [
         fagsystem: 'Arbeidsavklaringspenger',
         ytelser: [ytelseSchema.enum.Arbeidsavklaringspenger],
     },
+    {
+        fagsystem: 'Tiltakspenger',
+        ytelser: [ytelseSchema.enum.Tiltakspenger],
+    },
 ] as const;
 
 export const månedsytelser = [
@@ -69,6 +74,7 @@ export const datoYtelser = [
     ytelseSchema.enum.ReiseForÅKommeIArbeid,
     ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise,
     ytelseSchema.enum.ReiseTilSamling,
+    ytelseSchema.enum.Tiltakspenger,
 ] as const;
 
 export const meldekortYtelser = [
