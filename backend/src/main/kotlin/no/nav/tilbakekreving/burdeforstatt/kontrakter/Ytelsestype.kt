@@ -110,6 +110,13 @@ enum class Ytelsestype(
             Språkkode.NN to "Arbeidsavklaringspengar",
         ),
     ),
+    TILTAKSPENGER(
+        "TP",
+        mapOf(
+            Språkkode.NB to "Tiltakspenger",
+            Språkkode.NN to "Tiltakspengar",
+        ),
+    ),
     ;
 
     fun tilTema(): Tema =
@@ -128,6 +135,7 @@ enum class Ytelsestype(
             REISE_TIL_SAMLING,
             -> Tema.TSO
             ARBEIDSAVKLARINGSPENGER -> Tema.AAP
+            TILTAKSPENGER -> Tema.IND
         }
 
     fun tilKodeFagområdet(): String =
@@ -160,6 +168,7 @@ enum class Ytelsestype(
             -> Klassekoder.TILLEGGSSTØNAD
 
             ARBEIDSAVKLARINGSPENGER -> Klassekoder.ARBEIDSAVKLARINGSPENGER
+            TILTAKSPENGER -> Klassekoder.TILTAKSPENGER
             OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
             BARNETILSYN -> Klassekoder.BARNETILSYN
             SKOLEPENGER -> Klassekoder.SKOLEPENGER
