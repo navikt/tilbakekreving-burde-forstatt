@@ -36,9 +36,13 @@ spec:
     - https://burde-forstatt.ansatt.dev.nav.no/api
   azure:
     application:
+      claims:
+        groups:
+          - id: 66573c1a-eabb-4bcd-95c3-5b5a140eacfe # forvalterrolle
       enabled: true
       tenant: trygdeetaten.no
       allowAllUsers: true
+
       replyURLs:
         - http://localhost:4000/api/oauth2/callback
     sidecar:
