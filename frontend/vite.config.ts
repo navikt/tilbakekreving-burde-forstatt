@@ -35,8 +35,9 @@ function devMockApi(): Plugin {
     };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const useBackend = (globalThis as any).process?.env?.VITE_USE_BACKEND === 'true';
+const useBackend =
+    (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env
+        ?.VITE_USE_BACKEND === 'true';
 
 // https://vite.dev/config/
 export default defineConfig({

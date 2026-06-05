@@ -1,5 +1,5 @@
-import type { TilbakeFormData } from '../../typer/formData';
 import type { FC } from 'react';
+import type { TilbakeFormData } from '../../typer/formData';
 
 import { HStack, MonthPicker, useMonthpicker } from '@navikt/ds-react';
 import { useMemo } from 'react';
@@ -9,7 +9,7 @@ interface Props {
     indeks: number;
 }
 
-export const Maanedsvelger: FC<Props> = ({ indeks }) => {
+export const Maanedsvelger: FC<Props> = ({ indeks }: Props) => {
     const {
         clearErrors,
         setValue,
@@ -25,7 +25,7 @@ export const Maanedsvelger: FC<Props> = ({ indeks }) => {
     const { monthpickerProps: fromMonthpickerProps, inputProps: fromInputProps } = useMonthpicker({
         fromDate: new Date('2015-01-01'),
         toDate: månedenFørInneværendeMåned,
-        onMonthChange: førsteDagIMåneden => {
+        onMonthChange: (førsteDagIMåneden: Date | undefined): void => {
             if (førsteDagIMåneden) {
                 setValue(`perioder.${indeks}.fom`, førsteDagIMåneden, {
                     shouldValidate: true,
@@ -38,7 +38,7 @@ export const Maanedsvelger: FC<Props> = ({ indeks }) => {
     const { monthpickerProps: toMonthpickerProps, inputProps: toInputProps } = useMonthpicker({
         fromDate: new Date('2015-01-01'),
         toDate: månedenFørInneværendeMåned,
-        onMonthChange: førsteDagIMåneden => {
+        onMonthChange: (førsteDagIMåneden: Date | undefined): void => {
             if (førsteDagIMåneden) {
                 const sisteDagIMåned = new Date(
                     førsteDagIMåneden.getFullYear(),

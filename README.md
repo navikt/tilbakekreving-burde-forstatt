@@ -67,3 +67,20 @@ VITE_USE_BACKEND=true pnpm dev
 ### 5. Åpne appen
 
 Gå til http://localhost:4000/ – du logges inn via Azure AD og trafikken rutes gjennom Wonderwall → Vite → Backend.
+
+## Kodekvalitet
+
+- **Biome** brukes til linting, formatering og import-sortering (erstatter ESLint + Prettier).
+- **Husky** + **lint-staged** kjører Biome automatisk ved commit.
+
+| Kommando | Beskrivelse |
+| --- | --- |
+| `pnpm check` | Biome read-only: linting + formatsjekk + import-sortering (skriver ingenting) |
+| `pnpm check:fix` | Biome med automatisk fiks: formaterer, fikser safe lint-regler og sorterer imports |
+| `pnpm typecheck` | Kjør `tsc --noEmit` (Biome typesjekker ikke) |
+
+I VS Code:
+
+1. Installer [Biome](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)-extensionen.
+2. Deaktiver Prettier for workspacet hvis den er aktivert.
+3. Biome er satt opp som standard formatter (`.vscode/settings.json`).

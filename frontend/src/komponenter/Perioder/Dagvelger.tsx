@@ -1,5 +1,5 @@
-import type { TilbakeFormData } from '../../typer/formData';
 import type { FC } from 'react';
+import type { TilbakeFormData } from '../../typer/formData';
 
 import { DatePicker, useDatepicker } from '@navikt/ds-react';
 import { useMemo } from 'react';
@@ -9,7 +9,7 @@ interface Props {
     indeks: number;
 }
 
-export const DagVelger: FC<Props> = ({ indeks }) => {
+export const DagVelger: FC<Props> = ({ indeks }: Props) => {
     const {
         clearErrors,
         setValue,

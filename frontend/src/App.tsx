@@ -1,6 +1,7 @@
 import '@navikt/ds-css';
+import type { FC, JSX } from 'react';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
-import type { FC } from 'react';
+import type { Ytelse as TYtelse } from './typer/ytelse';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox, Link } from '@navikt/ds-react';
@@ -11,7 +12,13 @@ import { TextField } from '@navikt/ds-react/TextField';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useRef, useState } from 'react';
-import { useForm, Controller, FormProvider, useWatch } from 'react-hook-form';
+import {
+    Controller,
+    type ControllerRenderProps,
+    FormProvider,
+    useForm,
+    useWatch,
+} from 'react-hook-form';
 
 import { Header } from './komponenter/Header';
 import Perioder from './komponenter/Perioder/Perioder';
@@ -138,9 +145,15 @@ const App: FC = () => {
                                 <Controller
                                     name="ytelse"
                                     control={metoder.control}
-                                    render={({ field }) => (
+                                    render={({
+                                        field,
+                                    }: {
+                                        field: ControllerRenderProps<TilbakeFormData, 'ytelse'>;
+                                    }): JSX.Element => (
                                         <Ytelse
-                                            setValgtYtelse={nyYtelse => field.onChange(nyYtelse)}
+                                            setValgtYtelse={(nyYtelse: TYtelse | undefined): void =>
+                                                field.onChange(nyYtelse)
+                                            }
                                         />
                                     )}
                                 />
@@ -148,7 +161,14 @@ const App: FC = () => {
                                     name="personIdent"
                                     control={metoder.control}
                                     rules={{ pattern: /^[0-9]{11}$/ }}
-                                    render={({ field }) => (
+                                    render={({
+                                        field,
+                                    }: {
+                                        field: ControllerRenderProps<
+                                            TilbakeFormData,
+                                            'personIdent'
+                                        >;
+                                    }): JSX.Element => (
                                         <TextField
                                             label="Fødselsnummer eller D-nummer"
                                             size="small"

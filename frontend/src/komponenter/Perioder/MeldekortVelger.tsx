@@ -1,7 +1,7 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
 import { DatePicker, useDatepicker } from '@navikt/ds-react';
-import { useMemo, type FC } from 'react';
+import { type FC, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 interface Props {
@@ -12,7 +12,7 @@ function leggTilDager(dato: Date, dager: number): Date {
     return new Date(dato.getFullYear(), dato.getMonth(), dato.getDate() + dager);
 }
 
-export const MeldekortVelger: FC<Props> = ({ indeks }) => {
+export const MeldekortVelger: FC<Props> = ({ indeks }: Props) => {
     const {
         clearErrors,
         setValue,
