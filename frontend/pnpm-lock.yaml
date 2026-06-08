@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@hookform/resolvers':
         specifier: 5.4.0
-        version: 5.4.0(react-hook-form@7.77.0(react@19.2.7))
+        version: 5.4.0(react-hook-form@7.78.0(react@19.2.7))
       '@navikt/aksel-icons':
         specifier: 8.11.1
         version: 8.11.1
@@ -36,8 +36,8 @@ importers:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
       react-hook-form:
-        specifier: 7.77.0
-        version: 7.77.0(react@19.2.7)
+        specifier: 7.78.0
+        version: 7.78.0(react@19.2.7)
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -660,8 +660,8 @@ packages:
     peerDependencies:
       react: ^19.2.7
 
-  react-hook-form@7.77.0:
-    resolution: {integrity: sha512-Sslh9YDYc0GDlWT/lxasnIduNo4v3yyvqRGvmGKUre5AFjDs/HV9/OafHGD8d+sB2yoL4UIL9L8X9i0WlZZebg==}
+  react-hook-form@7.78.0:
+    resolution: {integrity: sha512-EEZqc+N23moyzTlz61Pj+JvcXo76ICkpfOZo8JZw+sM4+wLQGh6nI2Ms+PdMOYNluFu0ghlM7B8mCzhRYtJCnA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -882,10 +882,10 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@hookform/resolvers@5.4.0(react-hook-form@7.77.0(react@19.2.7))':
+  '@hookform/resolvers@5.4.0(react-hook-form@7.78.0(react@19.2.7))':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.77.0(react@19.2.7)
+      react-hook-form: 7.78.0(react@19.2.7)
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -1254,7 +1254,7 @@ snapshots:
       react: 19.2.7
       scheduler: 0.27.0
 
-  react-hook-form@7.77.0(react@19.2.7):
+  react-hook-form@7.78.0(react@19.2.7):
     dependencies:
       react: 19.2.7
 
