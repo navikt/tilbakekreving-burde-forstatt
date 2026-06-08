@@ -143,7 +143,17 @@ private fun Application.registerApiRoutes(
                         return@post
                     }
 
-                    when (val tokenResponse = authClient.token(scope)) {
+                    val userToken =
+                        call.request.headers["Authorization"]
+                            ?.removePrefix("Bearer ")
+                            ?.trim()
+                    if (userToken.isNullOrBlank()) {
+                        log.error("Mangler bearer token i Authorization-header.")
+                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
+                        return@post
+                    }
+
+                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
                         is TokenResponse.Success ->
                             handleSuccess(
                                 httpClient,

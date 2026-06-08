@@ -9,6 +9,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.forms.submitForm
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
 import io.ktor.http.parameters
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
 
@@ -33,8 +34,8 @@ class AuthClient(
     suspend fun exchange(
         target: String,
         userToken: String,
-    ): TokenResponse =
-        try {
+    ): TokenResponse {
+        val response =
             httpClient
                 .submitForm(
                     appConfig.tokenExchangeEndpoint,
@@ -43,10 +44,13 @@ class AuthClient(
                         set("user_token", userToken)
                         set("identity_provider", "azuread")
                     },
-                ).body<TokenResponse.Success>()
-        } catch (e: ResponseException) {
-            TokenResponse.Error(e.response.body<TokenErrorResponse>(), e.response.status)
+                )
+        return if (response.status.isSuccess()) {
+            return response.body<TokenResponse.Success>()
+        } else {
+            TokenResponse.Error(response.body<TokenErrorResponse>(), response.status)
         }
+    }
 
     suspend fun introspect(accessToken: String): TokenIntrospectionResponse =
         httpClient
