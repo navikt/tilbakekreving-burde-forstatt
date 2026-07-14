@@ -63,6 +63,7 @@ class TilbakekrevingService(
                 detaljertKravgrunnlagMelding,
                 mqNyModell,
             )
+            log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqNyModell)
             Thread.sleep(5000)
             behandlingId =
                 hentBehandlingId(
