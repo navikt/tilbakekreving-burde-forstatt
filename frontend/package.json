@@ -9,6 +9,9 @@
     "check": "biome check src",
     "check:fix": "biome check --write src",
     "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "prepare": "cd .. && husky frontend/.husky"
   },
@@ -33,14 +36,20 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
     "@tailwindcss/vite": "4.3.0",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.1",
     "@types/react": "19.2.16",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
+    "@vitest/coverage-v8": "4.1.10",
     "husky": "9.1.7",
+    "jsdom": "29.1.1",
     "lint-staged": "17.0.7",
     "tailwindcss": "4.3.0",
     "typescript": "6.0.3",
-    "vite": "8.0.16"
+    "vite": "8.0.16",
+    "vitest": "4.1.10"
   },
   "packageManager": "pnpm@11.0.5"
 }
