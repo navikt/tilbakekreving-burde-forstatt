@@ -38,3 +38,11 @@ spec:
         medium: Memory
   ingresses:
     - https://burde-forstatt.ansatt.dev.nav.no
+  azure:
+    application:
+      claims:
+        groups:
+          - id: 66573c1a-eabb-4bcd-95c3-5b5a140eacfe # forvalterrolle
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: true
