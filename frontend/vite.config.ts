@@ -1,6 +1,8 @@
+import type { Plugin } from 'vite';
+
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 /**
  * Mock API-endepunkter for lokal utvikling uten backend.
@@ -53,5 +55,11 @@ export default defineConfig({
                 },
             },
         }),
+    },
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './src/test/setup.ts',
+        css: true,
     },
 });

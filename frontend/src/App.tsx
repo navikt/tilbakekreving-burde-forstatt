@@ -1,5 +1,7 @@
 import '@navikt/ds-css';
+
 import type { FC, JSX } from 'react';
+import type { DatoAlternativ } from './typer/endreKravgrunnlag';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 import type { Ytelse as TYtelse } from './typer/ytelse';
 
@@ -20,6 +22,7 @@ import {
     useWatch,
 } from 'react-hook-form';
 
+import { EndreKravgrunnlagModal } from './komponenter/EndreKravgrunnlag/EndreKravgrunnlagModal';
 import { Header } from './komponenter/Header';
 import Perioder from './komponenter/Perioder/Perioder';
 import Ytelse from './komponenter/Ytelse';
@@ -34,6 +37,28 @@ type TilbakekrevingResponse = {
 };
 
 const formatterTilYYYYMMDD = (date: Date): string => format(date, 'yyyy-MM-dd');
+
+const byggDatoAlternativer = (
+    perioder: TilbakeFormData['perioder'] | undefined,
+    felt: 'fom' | 'tom'
+): DatoAlternativ[] => {
+    if (!perioder) {
+        return [];
+    }
+    const sett = new Set<string>();
+    const alternativer: DatoAlternativ[] = [];
+    for (const periode of perioder) {
+        const dato = periode?.[felt];
+        if (dato instanceof Date && !Number.isNaN(dato.getTime())) {
+            const value = formatterTilYYYYMMDD(dato);
+            if (!sett.has(value)) {
+                sett.add(value);
+                alternativer.push({ value, label: format(dato, 'dd.MM.yyyy') });
+            }
+        }
+    }
+    return alternativer;
+};
 
 const postTilbakekreving = async (data: TilbakeRequest): Promise<TilbakekrevingResponse> => {
     const response = await fetch('/api/tilbakekreving', {
@@ -58,6 +83,7 @@ const postTilbakekreving = async (data: TilbakeRequest): Promise<TilbakekrevingR
 
 const App: FC = () => {
     const svarMeldingRef = useRef<HTMLDivElement>(null);
+    const endreKravgrunnlagModalRef = useRef<HTMLDialogElement>(null);
     const [sisteSendtInnData, setSisteSendtInnData] = useState<TilbakeRequest | undefined>(
         undefined
     );
@@ -87,6 +113,13 @@ const App: FC = () => {
     } = metoder;
 
     const watchedYtelse = useWatch({ control: metoder.control, name: 'ytelse' });
+    const watchedPerioder = useWatch({
+        control: metoder.control,
+        name: 'perioder',
+    });
+
+    const fraDatoAlternativer = byggDatoAlternativer(watchedPerioder, 'fom');
+    const tilDatoAlternativer = byggDatoAlternativer(watchedPerioder, 'tom');
 
     const mutation = useMutation({
         mutationFn: (formData: TilbakeFormData) => {
@@ -205,16 +238,33 @@ const App: FC = () => {
                                 </div>
                             )}
 
-                            <HStack gap="space-16">
+                            <HStack justify="space-between" align="center">
+                                <HStack gap="space-16">
+                                    <Button
+                                        type="submit"
+                                        size="small"
+                                        loading={mutation.isPending || isSubmitting}
+                                    >
+                                        Opprett tilbakekreving
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="small"
+                                        onClick={resetSkjema}
+                                    >
+                                        Tilbakestill skjemaet
+                                    </Button>
+                                </HStack>
                                 <Button
-                                    type="submit"
+                                    type="button"
+                                    variant="secondary"
                                     size="small"
-                                    loading={mutation.isPending || isSubmitting}
+                                    onClick={(): void =>
+                                        endreKravgrunnlagModalRef.current?.showModal()
+                                    }
                                 >
-                                    Opprett tilbakekreving
-                                </Button>
-                                <Button variant="secondary" size="small" onClick={resetSkjema}>
-                                    Tilbakestill skjemaet
+                                    Endre kravgrunnlag
                                 </Button>
                             </HStack>
                         </VStack>
@@ -230,6 +280,12 @@ const App: FC = () => {
                     </Alert>
                 )}
             </VStack>
+
+            <EndreKravgrunnlagModal
+                ref={endreKravgrunnlagModalRef}
+                fraDatoAlternativer={fraDatoAlternativer}
+                tilDatoAlternativer={tilDatoAlternativer}
+            />
         </>
     );
 };
