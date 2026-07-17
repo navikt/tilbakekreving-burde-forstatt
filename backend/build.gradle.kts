@@ -1,10 +1,10 @@
-val ktorVersion = "3.2.0"
-val logbackVersion = "1.5.32"
+val ktorVersion = "3.5.1"
+val logbackVersion = "1.5.38"
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     application
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.6.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
@@ -30,20 +30,20 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
-    implementation("org.messaginghub:pooled-jms:3.1.7")
+    implementation("org.messaginghub:pooled-jms:3.2.2")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.19.0")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.0")
-    implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.1")
+    implementation("org.glassfish.jaxb:jaxb-runtime:4.0.9")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
     implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250425112447_49835df")
 
-    implementation("org.apache.kafka:kafka-clients:4.2.0")
+    implementation("org.apache.kafka:kafka-clients:4.3.1")
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.0-M2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.2")
 }
 
 java {
