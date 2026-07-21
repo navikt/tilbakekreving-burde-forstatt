@@ -16,6 +16,9 @@ import io.ktor.http.contentType
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Kravstatuskode
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.OppdatertPeriode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Periode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.PeriodeIRequest
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
@@ -36,21 +39,24 @@ import java.math.BigInteger
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.collections.firstOrNull
 
 class TilbakekrevingService(
     private val httpClient: HttpClient,
     private val mqService: MQService,
     private val tilbakekrevingUrl: String,
-    private val token: String?,
-    private val navIdent: String,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val mqGammelModell = System.getenv("MQ_GAMMEL_MODELL")
     private val mqNyModell = System.getenv("MQ_NY_MODELL")
 
-    suspend fun opprettBehandlingOgKravgrunnlagITilbakekreving(requestFraBurdeForstatt: RequestFraBurdeForstatt): Ressurs<String> {
+    suspend fun opprettBehandlingOgKravgrunnlagITilbakekreving(
+        requestFraBurdeForstatt: RequestFraBurdeForstatt,
+        token: String,
+        navIdent: String,
+    ): Ressurs<String> {
         var behandlingId: String
-        val opprettTilbakekrevingRequest = hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt)
+        val opprettTilbakekrevingRequest = hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt, navIdent)
 
         val kravgrunnlagDto = opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
         val detaljertKravgrunnlagMelding =
@@ -68,9 +74,10 @@ class TilbakekrevingService(
                 hentBehandlingId(
                     opprettTilbakekrevingRequest.ytelsestype,
                     detaljertKravgrunnlagMelding.detaljertKravgrunnlag.fagsystemId,
+                    token,
                 )
         } else {
-            val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest)
+            val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest, token)
 
             if (behandling.status != Ressurs.Status.SUKSESS) {
                 log.error("Kunne ikke opprette behandling i tilbakekreving-backend. Skipper sending av kravgrunnlag")
@@ -94,7 +101,10 @@ class TilbakekrevingService(
         )
     }
 
-    private fun hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt: RequestFraBurdeForstatt): OpprettTilbakekrevingRequest {
+    private fun hentOpprettTilbakekrevingRequest(
+        requestFraBurdeForstatt: RequestFraBurdeForstatt,
+        navIdent: String,
+    ): OpprettTilbakekrevingRequest {
         val faktainfo =
             Faktainfo(
                 revurderingsårsak = "Test Årsak",
@@ -170,7 +180,10 @@ class TilbakekrevingService(
         return varsel
     }
 
-    private suspend fun opprettBehandlingITilbakekreving(request: OpprettTilbakekrevingRequest): Ressurs<String> =
+    private suspend fun opprettBehandlingITilbakekreving(
+        request: OpprettTilbakekrevingRequest,
+        token: String,
+    ): Ressurs<String> =
         try {
             val tilbakekrevingUri =
                 URLBuilder(tilbakekrevingUrl)
@@ -214,6 +227,7 @@ class TilbakekrevingService(
     private suspend fun hentBehandlingId(
         ytelsestype: Ytelsestype,
         eksternFagsakId: String,
+        token: String,
     ): String {
         log.info("henter behandlingId for fagsystemId: $eksternFagsakId og ytelsestype: $ytelsestype")
         try {
@@ -258,7 +272,7 @@ class TilbakekrevingService(
             DetaljertKravgrunnlagDto().apply {
                 kravgrunnlagId = BigInteger(63, SecureRandom())
                 vedtakId = BigInteger(63, SecureRandom())
-                kodeStatusKrav = "NY"
+                kodeStatusKrav = Kravstatuskode.NY.oppdragKode
                 kodeFagomraade = opprettTilbakekrevingRequest.ytelsestype.tilKodeFagområdet()
                 fagsystemId = opprettTilbakekrevingRequest.eksternFagsakId
                 vedtakIdOmgjort = BigInteger(1, SecureRandom())
@@ -345,6 +359,186 @@ class TilbakekrevingService(
         }
 
         return perioder
+    }
+
+    private suspend fun hentDetaljertKravgrunnlagDto(
+        eksternFagsakId: String,
+        ytelsestype: Ytelsestype,
+        token: String,
+    ): Ressurs<DetaljertKravgrunnlagDto> {
+        log.info("Henter kravgrunnlag for fagsystemId: {}", eksternFagsakId)
+
+        return try {
+            val uri =
+                URLBuilder(tilbakekrevingUrl)
+                    .apply {
+                        appendPathSegments(
+                            "api",
+                            "forvaltning",
+                            "kravgrunnlag",
+                            when (ytelsestype) {
+                                in TILLEGGSSTØNAD_YTELSER -> Ytelsestype.TILLEGGSSTØNAD.name
+                                else -> ytelsestype.name
+                            },
+                            eksternFagsakId,
+                            "burde-forstått",
+                        )
+                    }.buildString()
+
+            val response: HttpResponse =
+                httpClient.get(uri) {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            if (response.status != HttpStatusCode.OK) {
+                return Ressurs(
+                    data = null,
+                    status = Ressurs.Status.FEILET,
+                    melding = "Feil ved henting av kravgrunnlag: ${response.status}",
+                    frontendFeilmelding = "Kunne ikke hente kravgrunnlag",
+                    stacktrace = null,
+                )
+            }
+            val dto: DetaljertKravgrunnlagDto = response.body()
+            return Ressurs(
+                data = dto,
+                status = Ressurs.Status.SUKSESS,
+                melding = "Kravgrunnlag hentet",
+                frontendFeilmelding = null,
+                stacktrace = null,
+            )
+        } catch (e: Exception) {
+            log.error("Feilet under henting av kravgrunnlag. FagsystemId: {}", eksternFagsakId, e)
+            Ressurs(
+                data = null,
+                status = Ressurs.Status.FEILET,
+                melding = "Exception: ${e.message}",
+                frontendFeilmelding = "En feil oppstod under henting av kravgrunnlag",
+                stacktrace = e.stackTraceToString(),
+            )
+        }
+    }
+
+    suspend fun hentKravgrunnlag(
+        eksternFagsakId: String,
+        ytelsestype: String,
+        token: String,
+    ): Ressurs<KravgrunnlagInfoForOppdatering> {
+        log.info("Henter kravgrunnlag for fagsystemId: {}", eksternFagsakId)
+        val dto =
+            hentDetaljertKravgrunnlagDto(eksternFagsakId, hentYtelsesType(ytelsestype), token).data
+                ?: return Ressurs(
+                    data = null,
+                    status = Ressurs.Status.FEILET,
+                    melding = "Kunne ikke hente kravgrunnlag",
+                    frontendFeilmelding = "Kunne ikke hente kravgrunnlag",
+                    stacktrace = null,
+                )
+        val perioder = mapTilKravgrunnlagInfo(dto)
+        return Ressurs(
+            data = perioder,
+            status = Ressurs.Status.SUKSESS,
+            melding = "Kravgrunnlag hentet",
+            frontendFeilmelding = null,
+            stacktrace = null,
+        )
+    }
+
+    private fun mapTilKravgrunnlagInfo(dto: DetaljertKravgrunnlagDto): KravgrunnlagInfoForOppdatering =
+        KravgrunnlagInfoForOppdatering(
+            perioder =
+                dto.tilbakekrevingsPeriode.map { periode ->
+                    val belop =
+                        periode.tilbakekrevingsBelop
+                            .firstOrNull { it.typeKlasse == TypeKlasseDto.YTEL }
+                            ?.belopTilbakekreves
+                            ?: BigDecimal.ZERO
+
+                    OppdatertPeriode(
+                        fom = periode.periode.fom,
+                        tom = periode.periode.tom,
+                        belopTilbakekreves = belop,
+                    )
+                },
+        )
+
+    suspend fun oppdaterKravgrunnlag(
+        eksternFagsakId: String,
+        token: String,
+        ytelsestype: String,
+        kravgrunnlagInfo: KravgrunnlagInfoForOppdatering,
+    ): Boolean {
+        log.info("Oppdaterer kravgrunnlag for fagsystemId: $eksternFagsakId")
+        val ytelsestype = hentYtelsesType(ytelsestype)
+        val gammelKravgrunnlag =
+            hentDetaljertKravgrunnlagDto(eksternFagsakId, ytelsestype, token).data
+                ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for oppdatering")
+
+        val oppdatertKravgrunnlag =
+            DetaljertKravgrunnlagDto().apply {
+                kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId
+                vedtakId = gammelKravgrunnlag.vedtakId
+                kodeStatusKrav = Kravstatuskode.ENDRET.oppdragKode
+                kodeFagomraade = gammelKravgrunnlag.kodeFagomraade
+                fagsystemId = gammelKravgrunnlag.fagsystemId
+                vedtakIdOmgjort = gammelKravgrunnlag.vedtakIdOmgjort
+                vedtakGjelderId = gammelKravgrunnlag.vedtakGjelderId
+                typeGjelderId = gammelKravgrunnlag.typeGjelderId
+                utbetalesTilId = gammelKravgrunnlag.utbetalesTilId
+                typeUtbetId = gammelKravgrunnlag.typeUtbetId
+                enhetAnsvarlig = gammelKravgrunnlag.enhetAnsvarlig
+                enhetBosted = gammelKravgrunnlag.enhetBosted
+                enhetBehandl = gammelKravgrunnlag.enhetBehandl
+                kontrollfelt = gammelKravgrunnlag.kontrollfelt
+                saksbehId = gammelKravgrunnlag.saksbehId
+                referanse = gammelKravgrunnlag.referanse
+            }
+        kravgrunnlagInfo.perioder.forEach {
+            val detaljertKravgrunnlagPeriodeDto =
+                DetaljertKravgrunnlagPeriodeDto().apply {
+                    periode =
+                        PeriodeDto().apply {
+                            fom = it.fom
+                            tom = it.tom
+                        }
+                    belopSkattMnd = BigDecimal(0.00)
+                }
+            detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                DetaljertKravgrunnlagBelopDto().apply {
+                    kodeKlasse = ytelsestype.tilKlassekoder().ytelsesKlassekode
+                    typeKlasse = TypeKlasseDto.YTEL
+                    belopOpprUtbet = it.belopTilbakekreves
+                    belopNy = BigDecimal(0.00)
+                    belopTilbakekreves = it.belopTilbakekreves
+                    belopUinnkrevd = BigDecimal(0.00)
+                    skattProsent = BigDecimal(0.00)
+                },
+            )
+            detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                DetaljertKravgrunnlagBelopDto().apply {
+                    kodeKlasse = ytelsestype.tilKlassekoder().feilutbetalingKlassekose
+                    typeKlasse = TypeKlasseDto.FEIL
+                    belopOpprUtbet = BigDecimal(0)
+                    belopNy = it.belopTilbakekreves
+                    belopTilbakekreves = BigDecimal(0)
+                    belopUinnkrevd = BigDecimal(0.00)
+                    skattProsent = BigDecimal(0.00)
+                },
+            )
+            oppdatertKravgrunnlag.tilbakekrevingsPeriode.add(detaljertKravgrunnlagPeriodeDto)
+        }
+
+        log.info("Sender oppdatert kravgrunnlag for fagsystemId: $eksternFagsakId")
+
+        mqService.sendKravgrunnlag(
+            DetaljertKravgrunnlagMelding().apply {
+                detaljertKravgrunnlag = oppdatertKravgrunnlag
+            },
+            mqNyModell,
+        )
+
+        return true
     }
 
     companion object {
