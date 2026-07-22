@@ -1,13 +1,22 @@
 import type { JSX, RefObject } from 'react';
 import type { DatoAlternativ, EndreKravgrunnlagFormData } from '../../typer/endreKravgrunnlag';
+import type { Ytelse as TYtelse } from '../../typer/ytelse.ts';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon } from '@navikt/aksel-icons';
 import { Button, Modal, TextField, VStack } from '@navikt/ds-react';
 import { useCallback, useState } from 'react';
-import { FormProvider, type SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import {
+    Controller,
+    type ControllerRenderProps,
+    FormProvider,
+    type SubmitHandler,
+    useFieldArray,
+    useForm,
+} from 'react-hook-form';
 
 import { endreKravgrunnlagSchema } from '../../typer/endreKravgrunnlag';
+import Ytelse from '../Ytelse.tsx';
 import { KravgrunnlagPeriode } from './KravgrunnlagPeriode';
 
 interface Props {
@@ -41,6 +50,7 @@ export const EndreKravgrunnlagModal = ({
         control,
         handleSubmit,
         register,
+        getValues,
         formState: { errors },
     } = metoder;
 
@@ -51,6 +61,35 @@ export const EndreKravgrunnlagModal = ({
 
     const [stableKeys, setStableKeys] = useState(() => ['periode-0']);
     const [nextId, setNextId] = useState(1);
+
+    const hentKravgrunnlag = useCallback(async (): Promise<void> => {
+        const { eksternFagsystemId, ytelse } = getValues();
+
+        if (!eksternFagsystemId?.trim() || !ytelse?.trim()) {
+            console.error('Mangler eksternFagsystemId eller ytelse');
+            return;
+        }
+
+        const encodedYtelse = encodeURIComponent(ytelse.trim());
+        const encodedEksternFagsystemId = encodeURIComponent(eksternFagsystemId.trim());
+
+        const response = await fetch(
+            `/api/kravgrunnlag/${encodedYtelse}/${encodedEksternFagsystemId}`,
+            {
+                method: 'GET',
+                headers: { Accept: 'application/json' },
+                credentials: 'include',
+            }
+        );
+
+        if (!response.ok) {
+            console.error(`Klarte ikke hente kravgrunnlag: ${response.status}`);
+            return;
+        }
+
+        const data = await response.json();
+        console.log('Kravgrunnlag:', data);
+    }, [getValues]);
 
     const leggTilPeriode = useCallback((): void => {
         setStableKeys(prev => [...prev, `periode-${nextId}`]);
@@ -75,18 +114,49 @@ export const EndreKravgrunnlagModal = ({
     };
 
     return (
-        <Modal ref={ref} header={{ heading: 'Endre kravgrunnlaget' }} width="556px">
+        <Modal ref={ref} header={{ heading: 'Endre kravgrunnlaget' }} width="700px">
             <FormProvider {...metoder}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Modal.Body>
                         <VStack gap="space-24">
-                            <TextField
-                                label="Ekstern fagsystem id"
-                                size="small"
-                                className="w-[calc((100%-2rem)/3)]"
-                                {...register('eksternFagsystemId')}
-                                error={errors.eksternFagsystemId?.message}
-                            />
+                            <div className="flex items-end gap-4">
+                                <TextField
+                                    label="Ekstern fagsystem id"
+                                    size="small"
+                                    className="flex-1"
+                                    {...register('eksternFagsystemId')}
+                                    error={errors.eksternFagsystemId?.message}
+                                />
+                                <Controller
+                                    name="ytelse"
+                                    control={control}
+                                    render={({
+                                        field,
+                                    }: {
+                                        field: ControllerRenderProps<
+                                            EndreKravgrunnlagFormData,
+                                            'ytelse'
+                                        >;
+                                    }): JSX.Element => (
+                                        <Ytelse
+                                            setValgtYtelse={(nyYtelse: TYtelse | undefined): void =>
+                                                field.onChange(nyYtelse ?? '')
+                                            }
+                                        />
+                                    )}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="small"
+                                    icon={<PlusIcon aria-hidden />}
+                                    onClick={hentKravgrunnlag}
+                                    className="shrink-0"
+                                >
+                                    Hent Kravgrunnlag
+                                </Button>
+                            </div>
+
                             {fields.map((_, index) => (
                                 <KravgrunnlagPeriode
                                     key={stableKeys[index]}

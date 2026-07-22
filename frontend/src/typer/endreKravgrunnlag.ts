@@ -10,6 +10,7 @@ export const endreKravgrunnlagPeriodeSchema = z.object({
 
 export const endreKravgrunnlagSchema = z.object({
     eksternFagsystemId: z.string().min(1, { message: 'Ekstern fagsystem id er påkrevd' }),
+    ytelse: z.string().min(1, { message: 'Ytelsestype er påkrevd' }),
     perioder: z
         .array(endreKravgrunnlagPeriodeSchema)
         .min(1, { message: 'Du må legge til minst én periode' }),
