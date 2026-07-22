@@ -1,6 +1,5 @@
 import type { JSX, RefObject } from 'react';
 import type {
-    DatoAlternativ,
     EndreKravgrunnlagFormData,
     EndreKravgrunnlagPeriode,
 } from '../../typer/endreKravgrunnlag';
@@ -27,8 +26,6 @@ import { KravgrunnlagPeriode } from './KravgrunnlagPeriode';
 
 interface Props {
     ref: RefObject<HTMLDialogElement | null>;
-    fraDatoAlternativer: DatoAlternativ[];
-    tilDatoAlternativer: DatoAlternativ[];
 }
 
 const tomPeriode: EndreKravgrunnlagFormData['perioder'][number] = {
@@ -37,11 +34,7 @@ const tomPeriode: EndreKravgrunnlagFormData['perioder'][number] = {
     feilutbetalt: '',
 };
 
-export const EndreKravgrunnlagModal = ({
-    ref,
-    fraDatoAlternativer,
-    tilDatoAlternativer,
-}: Props): JSX.Element => {
+export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
     const metoder = useForm<EndreKravgrunnlagFormData>({
         resolver: zodResolver(endreKravgrunnlagSchema),
         defaultValues: {
@@ -173,8 +166,6 @@ export const EndreKravgrunnlagModal = ({
                                     indeks={index}
                                     kanSlettes={fields.length > 1}
                                     onSlett={(): void => fjernPeriode(index)}
-                                    fraDatoAlternativer={fraDatoAlternativer}
-                                    tilDatoAlternativer={tilDatoAlternativer}
                                 />
                             ))}
                             {fields.length > 0 && (

@@ -1,7 +1,6 @@
 import '@navikt/ds-css';
 
 import type { FC, JSX } from 'react';
-import type { DatoAlternativ } from './typer/endreKravgrunnlag';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 import type { Ytelse as TYtelse } from './typer/ytelse';
 
@@ -37,28 +36,6 @@ type TilbakekrevingResponse = {
 };
 
 const formatterTilYYYYMMDD = (date: Date): string => format(date, 'yyyy-MM-dd');
-
-const byggDatoAlternativer = (
-    perioder: TilbakeFormData['perioder'] | undefined,
-    felt: 'fom' | 'tom'
-): DatoAlternativ[] => {
-    if (!perioder) {
-        return [];
-    }
-    const sett = new Set<string>();
-    const alternativer: DatoAlternativ[] = [];
-    for (const periode of perioder) {
-        const dato = periode?.[felt];
-        if (dato instanceof Date && !Number.isNaN(dato.getTime())) {
-            const value = formatterTilYYYYMMDD(dato);
-            if (!sett.has(value)) {
-                sett.add(value);
-                alternativer.push({ value, label: format(dato, 'dd.MM.yyyy') });
-            }
-        }
-    }
-    return alternativer;
-};
 
 const postTilbakekreving = async (data: TilbakeRequest): Promise<TilbakekrevingResponse> => {
     const response = await fetch('/api/tilbakekreving', {
@@ -113,13 +90,6 @@ const App: FC = () => {
     } = metoder;
 
     const watchedYtelse = useWatch({ control: metoder.control, name: 'ytelse' });
-    const watchedPerioder = useWatch({
-        control: metoder.control,
-        name: 'perioder',
-    });
-
-    const fraDatoAlternativer = byggDatoAlternativer(watchedPerioder, 'fom');
-    const tilDatoAlternativer = byggDatoAlternativer(watchedPerioder, 'tom');
 
     const mutation = useMutation({
         mutationFn: (formData: TilbakeFormData) => {
@@ -281,11 +251,7 @@ const App: FC = () => {
                 )}
             </VStack>
 
-            <EndreKravgrunnlagModal
-                ref={endreKravgrunnlagModalRef}
-                fraDatoAlternativer={fraDatoAlternativer}
-                tilDatoAlternativer={tilDatoAlternativer}
-            />
+            <EndreKravgrunnlagModal ref={endreKravgrunnlagModalRef} />
         </>
     );
 };

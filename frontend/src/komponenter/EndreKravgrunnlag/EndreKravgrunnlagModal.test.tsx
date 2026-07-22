@@ -1,7 +1,7 @@
 import type { UserEvent } from '@testing-library/user-event';
 import type { JSX } from 'react';
 import type { HentKravgrunnlagVariabler } from '../../api/kravgrunnlag';
-import type { DatoAlternativ, EndreKravgrunnlagPeriode } from '../../typer/endreKravgrunnlag';
+import type { EndreKravgrunnlagPeriode } from '../../typer/endreKravgrunnlag';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
@@ -10,15 +10,6 @@ import { useEffect, useRef } from 'react';
 
 import { hentKravgrunnlagMutationKey } from '../../api/kravgrunnlag';
 import { EndreKravgrunnlagModal } from './EndreKravgrunnlagModal';
-
-const fraDatoAlternativer: DatoAlternativ[] = [
-    { value: '2024-01-01', label: '01.01.2024' },
-    { value: '2024-02-01', label: '01.02.2024' },
-];
-const tilDatoAlternativer: DatoAlternativ[] = [
-    { value: '2024-01-31', label: '31.01.2024' },
-    { value: '2024-02-28', label: '28.02.2024' },
-];
 
 type HentKravgrunnlag = (
     variabler: HentKravgrunnlagVariabler
@@ -41,13 +32,7 @@ const ÅpenModal = (): JSX.Element => {
     useEffect(() => {
         ref.current?.showModal();
     }, []);
-    return (
-        <EndreKravgrunnlagModal
-            ref={ref}
-            fraDatoAlternativer={fraDatoAlternativer}
-            tilDatoAlternativer={tilDatoAlternativer}
-        />
-    );
+    return <EndreKravgrunnlagModal ref={ref} />;
 };
 
 const lagTestQueryClient = (hentKravgrunnlag: HentKravgrunnlag): QueryClient => {
@@ -160,8 +145,8 @@ describe('Endre kravgrunnlag', () => {
         await hentKravgrunnlag(user);
 
         expect(periodeOverskrift(1)).toBeInTheDocument();
-        expect(datoFraVelger()).toHaveValue('2024-01-01');
-        expect(datoTilVelger()).toHaveValue('2024-01-31');
+        expect(datoFraVelger()).toHaveValue('01.01.2024');
+        expect(datoTilVelger()).toHaveValue('31.01.2024');
         expect(feilutbetaltFelt()).toHaveValue('1500');
     });
 
