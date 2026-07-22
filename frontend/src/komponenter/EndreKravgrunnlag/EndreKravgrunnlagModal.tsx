@@ -180,14 +180,14 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                                     Legg til ny periode
                                 </Button>
                             )}
-                            {fields.length > 0 && (
-                                <Button size="small" type="submit" className="self-start">
-                                    Endre kravgrunnlaget
-                                </Button>
-                            )}
                         </VStack>
                     </Modal.Body>
                     <Modal.Footer>
+                        {fields.length > 0 && (
+                            <Button size="small" type="submit">
+                                Endre kravgrunnlaget
+                            </Button>
+                        )}
                         <Button size="small" type="button" variant="secondary" onClick={lukk}>
                             Avbryt
                         </Button>
