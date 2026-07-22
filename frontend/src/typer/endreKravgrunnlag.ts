@@ -19,6 +19,20 @@ export const endreKravgrunnlagSchema = z.object({
 export type EndreKravgrunnlagPeriode = z.infer<typeof endreKravgrunnlagPeriodeSchema>;
 export type EndreKravgrunnlagFormData = z.infer<typeof endreKravgrunnlagSchema>;
 
+export const kravgrunnlagResponsSchema = z.object({
+    perioder: z
+        .array(
+            z.object({
+                fom: z.string(),
+                tom: z.string(),
+                belop: z.number(),
+            })
+        )
+        .min(1, { message: 'Kravgrunnlaget inneholder ingen perioder' }),
+});
+
+export type KravgrunnlagRespons = z.infer<typeof kravgrunnlagResponsSchema>;
+
 export type DatoAlternativ = {
     value: string;
     label: string;

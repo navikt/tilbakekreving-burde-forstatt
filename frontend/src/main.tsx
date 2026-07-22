@@ -4,7 +4,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import './index.css';
+
 import App from './App.tsx';
+import { hentKravgrunnlagFraApi, hentKravgrunnlagMutationKey } from './api/kravgrunnlag.ts';
 import { AuthProvider } from './hooks/AuthProvider.tsx';
 
 const queryClient = new QueryClient({
@@ -14,6 +16,10 @@ const queryClient = new QueryClient({
             refetchOnWindowFocus: false,
         },
     },
+});
+
+queryClient.setMutationDefaults(hentKravgrunnlagMutationKey, {
+    mutationFn: hentKravgrunnlagFraApi,
 });
 
 const container = document.getElementById('root');

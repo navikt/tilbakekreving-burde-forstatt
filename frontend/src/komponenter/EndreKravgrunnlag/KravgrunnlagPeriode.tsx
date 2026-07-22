@@ -34,6 +34,7 @@ export const KravgrunnlagPeriode: FC<Props> = ({
                 </Heading>
                 {kanSlettes && (
                     <Button
+                        type="button"
                         variant="tertiary"
                         size="small"
                         icon={<TrashIcon title={`Slett periode ${indeks + 1}`} />}
