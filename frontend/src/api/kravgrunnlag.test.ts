@@ -1,4 +1,4 @@
-import { tilEndreKravgrunnlagPerioder } from './kravgrunnlag';
+import { tilEndreKravgrunnlagPerioder, tilLagreKravgrunnlagBody } from './kravgrunnlag';
 
 const lagRespons = (overrides?: Record<string, unknown>): unknown => ({
     data: {
@@ -45,5 +45,25 @@ describe('tilEndreKravgrunnlagPerioder', () => {
 
     test('kaster feil når responsen har ugyldig form', () => {
         expect(() => tilEndreKravgrunnlagPerioder({ uventet: true })).toThrow();
+    });
+});
+
+describe('tilLagreKravgrunnlagBody', () => {
+    test('mapper datoer til [år, måned, dag] og feilutbetalt til belopTilbakekreves', () => {
+        const body = tilLagreKravgrunnlagBody([
+            { datoFra: '2026-06-08', datoTil: '2026-06-19', feilutbetalt: '5000' },
+        ]);
+
+        expect(body).toEqual({
+            perioder: [{ fom: [2026, 6, 8], tom: [2026, 6, 19], belopTilbakekreves: 5000 }],
+        });
+    });
+
+    test('tolker beløp med komma-desimal som tall', () => {
+        const body = tilLagreKravgrunnlagBody([
+            { datoFra: '2026-01-01', datoTil: '2026-01-31', feilutbetalt: '1500,50' },
+        ]);
+
+        expect(body.perioder[0].belopTilbakekreves).toBe(1500.5);
     });
 });

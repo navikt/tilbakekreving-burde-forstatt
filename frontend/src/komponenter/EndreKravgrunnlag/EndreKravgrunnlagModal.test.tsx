@@ -1,19 +1,21 @@
 import type { UserEvent } from '@testing-library/user-event';
 import type { JSX } from 'react';
-import type { HentKravgrunnlagVariabler } from '../../api/kravgrunnlag';
+import type { HentKravgrunnlagVariabler, LagreKravgrunnlagVariabler } from '../../api/kravgrunnlag';
 import type { EndreKravgrunnlagPeriode } from '../../typer/endreKravgrunnlag';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useEffect, useRef } from 'react';
 
-import { hentKravgrunnlagMutationKey } from '../../api/kravgrunnlag';
+import { hentKravgrunnlagMutationKey, lagreKravgrunnlagMutationKey } from '../../api/kravgrunnlag';
 import { EndreKravgrunnlagModal } from './EndreKravgrunnlagModal';
 
 type HentKravgrunnlag = (
     variabler: HentKravgrunnlagVariabler
 ) => Promise<EndreKravgrunnlagPeriode[]>;
+
+type LagreKravgrunnlag = (variabler: LagreKravgrunnlagVariabler) => Promise<void>;
 
 const enPeriode: EndreKravgrunnlagPeriode[] = [
     { datoFra: '2024-01-01', datoTil: '2024-01-31', feilutbetalt: '1500' },
@@ -35,19 +37,28 @@ const ÅpenModal = (): JSX.Element => {
     return <EndreKravgrunnlagModal ref={ref} />;
 };
 
-const lagTestQueryClient = (hentKravgrunnlag: HentKravgrunnlag): QueryClient => {
+const lagTestQueryClient = (
+    hentKravgrunnlag: HentKravgrunnlag,
+    lagreKravgrunnlag: LagreKravgrunnlag
+): QueryClient => {
     const queryClient = new QueryClient({
         defaultOptions: { mutations: { retry: false } },
     });
     queryClient.setMutationDefaults(hentKravgrunnlagMutationKey, {
         mutationFn: hentKravgrunnlag as (variabler: unknown) => Promise<EndreKravgrunnlagPeriode[]>,
     });
+    queryClient.setMutationDefaults(lagreKravgrunnlagMutationKey, {
+        mutationFn: lagreKravgrunnlag as (variabler: unknown) => Promise<void>,
+    });
     return queryClient;
 };
 
-const renderModal = (hentKravgrunnlag: HentKravgrunnlag = async () => enPeriode): void => {
+const renderModal = (
+    hentKravgrunnlag: HentKravgrunnlag = async () => enPeriode,
+    lagreKravgrunnlag: LagreKravgrunnlag = async () => undefined
+): void => {
     render(
-        <QueryClientProvider client={lagTestQueryClient(hentKravgrunnlag)}>
+        <QueryClientProvider client={lagTestQueryClient(hentKravgrunnlag, lagreKravgrunnlag)}>
             <ÅpenModal />
         </QueryClientProvider>
     );
@@ -193,7 +204,38 @@ describe('Endre kravgrunnlag', () => {
         await hentKravgrunnlag(user);
         await user.click(endreKravgrunnlagetKnapp());
 
-        expect(dialog).not.toBeVisible();
+        await waitFor(() => expect(dialog).not.toBeVisible());
+    });
+
+    test('sender periodene til lagring ved submit', async () => {
+        let sendteVariabler: LagreKravgrunnlagVariabler | undefined;
+        renderModal(undefined, async variabler => {
+            sendteVariabler = variabler;
+        });
+
+        await hentKravgrunnlag(user);
+        await user.click(endreKravgrunnlagetKnapp());
+
+        await waitFor(() => expect(sendteVariabler).toBeDefined());
+        expect(sendteVariabler).toEqual({
+            ytelse: 'Barnetrygd',
+            eksternFagsystemId: 'FAGSAK-123',
+            perioder: enPeriode,
+        });
+    });
+
+    test('viser feilmelding når lagring feiler', async () => {
+        renderModal(undefined, async () => {
+            throw new Error('Klarte ikke lagre kravgrunnlag (status 500)');
+        });
+
+        await hentKravgrunnlag(user);
+        await user.click(endreKravgrunnlagetKnapp());
+
+        expect(
+            await within(modal()).findByText('Klarte ikke lagre kravgrunnlag (status 500)')
+        ).toBeInTheDocument();
+        expect(modal()).toBeVisible();
     });
 
     test('bruker får beskjed når feilutbetalt-beløpet ikke er et gyldig positivt tall', async () => {

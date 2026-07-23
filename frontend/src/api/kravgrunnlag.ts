@@ -52,3 +52,55 @@ export const hentKravgrunnlagFraApi = async ({
 
     return tilEndreKravgrunnlagPerioder(await response.json());
 };
+
+export const lagreKravgrunnlagMutationKey = ['lagreKravgrunnlag'] as const;
+
+export type LagreKravgrunnlagVariabler = {
+    ytelse: string;
+    eksternFagsystemId: string;
+    perioder: EndreKravgrunnlagPeriode[];
+};
+
+const tilDatoArray = (dato: string): [number, number, number] => {
+    const [år, måned, dag] = dato.split('-');
+    return [Number(år), Number(måned), Number(dag)];
+};
+
+export const tilLagreKravgrunnlagBody = (
+    perioder: EndreKravgrunnlagPeriode[]
+): {
+    perioder: {
+        fom: [number, number, number];
+        tom: [number, number, number];
+        belopTilbakekreves: number;
+    }[];
+} => ({
+    perioder: perioder.map(periode => ({
+        fom: tilDatoArray(periode.datoFra),
+        tom: tilDatoArray(periode.datoTil),
+        belopTilbakekreves: Number(periode.feilutbetalt.replace(',', '.')),
+    })),
+});
+
+export const lagreKravgrunnlag = async ({
+    ytelse,
+    eksternFagsystemId,
+    perioder,
+}: LagreKravgrunnlagVariabler): Promise<void> => {
+    const encodedYtelse = encodeURIComponent(ytelse.trim());
+    const encodedEksternFagsystemId = encodeURIComponent(eksternFagsystemId.trim());
+
+    const response = await fetch(
+        `/api/kravgrunnlag/${encodedYtelse}/${encodedEksternFagsystemId}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(tilLagreKravgrunnlagBody(perioder)),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Klarte ikke lagre kravgrunnlag (status ${response.status})`);
+    }
+};

@@ -1,4 +1,5 @@
 import type { JSX, RefObject } from 'react';
+import type { LagreKravgrunnlagVariabler } from '../../api/kravgrunnlag';
 import type {
     EndreKravgrunnlagFormData,
     EndreKravgrunnlagPeriode,
@@ -19,7 +20,7 @@ import {
     useForm,
 } from 'react-hook-form';
 
-import { hentKravgrunnlagMutationKey } from '../../api/kravgrunnlag';
+import { hentKravgrunnlagMutationKey, lagreKravgrunnlagMutationKey } from '../../api/kravgrunnlag';
 import { endreKravgrunnlagSchema } from '../../typer/endreKravgrunnlag';
 import Ytelse from '../Ytelse.tsx';
 import { KravgrunnlagPeriode } from './KravgrunnlagPeriode';
@@ -86,6 +87,13 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
         hentKravgrunnlagMutation.mutate({ eksternFagsystemId, ytelse });
     };
 
+    const lagreKravgrunnlagMutation = useMutation<void, Error, LagreKravgrunnlagVariabler>({
+        mutationKey: lagreKravgrunnlagMutationKey,
+        onSuccess: (): void => {
+            lukk();
+        },
+    });
+
     const leggTilPeriode = (): void => {
         setStableKeys(prev => [...prev, `periode-${nextId}`]);
         setNextId(n => n + 1);
@@ -101,8 +109,14 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
         ref.current?.close();
     };
 
-    const onSubmit: SubmitHandler<EndreKravgrunnlagFormData> = (): void => {
-        lukk();
+    const onSubmit: SubmitHandler<EndreKravgrunnlagFormData> = (
+        data: EndreKravgrunnlagFormData
+    ): void => {
+        lagreKravgrunnlagMutation.mutate({
+            ytelse: data.ytelse,
+            eksternFagsystemId: data.eksternFagsystemId,
+            perioder: data.perioder,
+        });
     };
 
     return (
@@ -157,7 +171,11 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                             )}
 
                             {hentKravgrunnlagMutation.isPending && (
-                                <Loader size="large" title="Henter kravgrunnlag" />
+                                <Loader
+                                    size="large"
+                                    title="Henter kravgrunnlag"
+                                    className="self-center"
+                                />
                             )}
 
                             {fields.map((_, index) => (
@@ -168,6 +186,11 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                                     onSlett={(): void => fjernPeriode(index)}
                                 />
                             ))}
+                            {lagreKravgrunnlagMutation.isError && (
+                                <Alert variant="error" size="small">
+                                    {lagreKravgrunnlagMutation.error.message}
+                                </Alert>
+                            )}
                             {fields.length > 0 && (
                                 <Button
                                     type="button"
@@ -184,7 +207,11 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                     </Modal.Body>
                     <Modal.Footer>
                         {fields.length > 0 && (
-                            <Button size="small" type="submit">
+                            <Button
+                                size="small"
+                                type="submit"
+                                loading={lagreKravgrunnlagMutation.isPending}
+                            >
                                 Endre kravgrunnlaget
                             </Button>
                         )}
