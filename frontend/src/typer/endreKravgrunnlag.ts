@@ -33,7 +33,6 @@ export const kravgrunnlagResponsSchema = z.object({
                     })
                 )
                 .min(1, { message: 'Kravgrunnlaget inneholder ingen perioder' }),
-            kravstatuskode: z.string(),
         })
         .nullable(),
     status: z.string(),
