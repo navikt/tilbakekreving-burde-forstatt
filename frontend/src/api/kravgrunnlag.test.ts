@@ -3,7 +3,6 @@ import { tilEndreKravgrunnlagPerioder, tilLagreKravgrunnlagBody } from './kravgr
 const lagRespons = (overrides?: Record<string, unknown>): unknown => ({
     data: {
         perioder: [{ fom: [2026, 6, 8], tom: [2026, 6, 19], belopTilbakekreves: 5000 }],
-        kravstatuskode: 'NY',
     },
     status: 'SUKSESS',
     melding: 'Kravgrunnlag hentet',
@@ -26,7 +25,6 @@ describe('tilEndreKravgrunnlagPerioder', () => {
             lagRespons({
                 data: {
                     perioder: [{ fom: [2026, 1, 3], tom: [2026, 12, 31], belopTilbakekreves: 1 }],
-                    kravstatuskode: 'NY',
                 },
             })
         );
