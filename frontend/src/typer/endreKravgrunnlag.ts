@@ -10,6 +10,7 @@ export const endreKravgrunnlagPeriodeSchema = z.object({
 
 export const endreKravgrunnlagSchema = z.object({
     eksternFagsystemId: z.string().min(1, { message: 'Ekstern fagsystem id er påkrevd' }),
+    ytelse: z.string().min(1, { message: 'Ytelsestype er påkrevd' }),
     perioder: z
         .array(endreKravgrunnlagPeriodeSchema)
         .min(1, { message: 'Du må legge til minst én periode' }),
@@ -18,7 +19,26 @@ export const endreKravgrunnlagSchema = z.object({
 export type EndreKravgrunnlagPeriode = z.infer<typeof endreKravgrunnlagPeriodeSchema>;
 export type EndreKravgrunnlagFormData = z.infer<typeof endreKravgrunnlagSchema>;
 
-export type DatoAlternativ = {
-    value: string;
-    label: string;
-};
+const kravgrunnlagDatoSchema = z.tuple([z.number(), z.number(), z.number()]);
+
+export const kravgrunnlagResponsSchema = z.object({
+    data: z
+        .object({
+            perioder: z
+                .array(
+                    z.object({
+                        fom: kravgrunnlagDatoSchema,
+                        tom: kravgrunnlagDatoSchema,
+                        belopTilbakekreves: z.number(),
+                    })
+                )
+                .min(1, { message: 'Kravgrunnlaget inneholder ingen perioder' }),
+        })
+        .nullable(),
+    status: z.string(),
+    melding: z.string(),
+    frontendFeilmelding: z.string().nullable(),
+    stacktrace: z.string().nullable(),
+});
+
+export type KravgrunnlagRespons = z.infer<typeof kravgrunnlagResponsSchema>;

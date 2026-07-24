@@ -4,7 +4,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import './index.css';
+
 import App from './App.tsx';
+import {
+    hentKravgrunnlagFraApi,
+    hentKravgrunnlagMutationKey,
+    lagreKravgrunnlag,
+    lagreKravgrunnlagMutationKey,
+} from './api/kravgrunnlag.ts';
 import { AuthProvider } from './hooks/AuthProvider.tsx';
 
 const queryClient = new QueryClient({
@@ -14,6 +21,14 @@ const queryClient = new QueryClient({
             refetchOnWindowFocus: false,
         },
     },
+});
+
+queryClient.setMutationDefaults(hentKravgrunnlagMutationKey, {
+    mutationFn: hentKravgrunnlagFraApi,
+});
+
+queryClient.setMutationDefaults(lagreKravgrunnlagMutationKey, {
+    mutationFn: lagreKravgrunnlag,
 });
 
 const container = document.getElementById('root');

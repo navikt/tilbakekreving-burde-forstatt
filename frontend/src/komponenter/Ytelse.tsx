@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import type { TilbakeFormData } from '../typer/formData';
 import type { Ytelse as TYtelse } from '../typer/ytelse';
 
 import { Select } from '@navikt/ds-react';
@@ -15,7 +14,7 @@ const Ytelse: FC<Props> = ({ setValgtYtelse }: Props) => {
     const {
         getValues,
         formState: { errors },
-    } = useFormContext<TilbakeFormData>();
+    } = useFormContext<{ ytelse?: TYtelse }>();
     const { ytelse } = getValues();
     return (
         <Select
