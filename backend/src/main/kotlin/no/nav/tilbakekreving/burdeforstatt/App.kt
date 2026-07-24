@@ -37,6 +37,7 @@ import no.nav.tilbakekreving.burdeforstatt.auth.TokenResponse
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
 import no.nav.tilbakekreving.burdeforstatt.config.KafkaConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
 import no.nav.tilbakekreving.burdeforstatt.service.FagsystemKafkaConsumer
@@ -119,8 +120,9 @@ private fun Application.registerApiRoutes(
         register(TexasAuthenticationProvider(TexasAuthenticationProvider.Config("azuread", authClient)))
     }
 
-    var tilbakekrevingUrl = "http://tilbakekreving-backend"
+    val tilbakekrevingUrl = "http://tilbakekreving-backend"
     val scope = "api://dev-gcp.tilbake.tilbakekreving-backend/.default"
+    val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl)
 
     routing {
         get("/liveness") {
@@ -134,6 +136,7 @@ private fun Application.registerApiRoutes(
                 get("/me") {
                     call.respond(jacksonObjectMapper().writeValueAsString(call.principal<TexasPrincipal>()!!.userinfo))
                 }
+
                 post("/tilbakekreving") {
                     val principal = call.principal<TexasPrincipal>()
                     val navIdent = principal?.userinfo?.ident
@@ -156,19 +159,106 @@ private fun Application.registerApiRoutes(
                     when (val tokenResponse = authClient.exchange(scope, userToken)) {
                         is TokenResponse.Success ->
                             handleSuccess(
-                                httpClient,
-                                mqService,
-                                tilbakekrevingUrl,
-                                call,
-                                tokenResponse.accessToken,
-                                navIdent,
+                                tilbakekrevingService = tilbakekrevingService,
+                                call = call,
+                                accessToken = tokenResponse.accessToken,
+                                navIdent = navIdent,
                             )
+
                         is TokenResponse.Error -> {
                             log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
                             handleError(call, tokenResponse)
                         }
                     }
                 }
+
+                get("/kravgrunnlag/{ytelsestype}/{eksternFagsakId}") {
+                    val principal = call.principal<TexasPrincipal>()
+                    val navIdent = principal?.userinfo?.ident
+                    if (navIdent == null) {
+                        log.error("Kunne ikke hente NAVident.")
+                        call.respond(HttpStatusCode.Unauthorized, "Kunne ikke hente NAVident")
+                        return@get
+                    }
+
+                    val userToken =
+                        call.request.headers["Authorization"]
+                            ?.removePrefix("Bearer ")
+                            ?.trim()
+                    if (userToken.isNullOrBlank()) {
+                        log.error("Mangler bearer token i Authorization-header.")
+                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
+                        return@get
+                    }
+
+                    val ytelsestype = call.parameters["ytelsestype"]
+                    val eksternFagsakId = call.parameters["eksternFagsakId"]
+                    if (ytelsestype.isNullOrBlank() || eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler fagsystem eller eksternFagsakId i path")
+                        return@get
+                    }
+
+                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
+                        is TokenResponse.Success ->
+                            hentKravgrunnlag(
+                                tilbakekrevingService = tilbakekrevingService,
+                                call = call,
+                                accessToken = tokenResponse.accessToken,
+                                ytelsestype = ytelsestype,
+                                eksternFagsakId = eksternFagsakId,
+                            )
+
+                        is TokenResponse.Error -> {
+                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
+                            handleError(call, tokenResponse)
+                        }
+                    }
+                }
+
+                post("/kravgrunnlag/{ytelsestype}/{eksternFagsakId}") {
+                    val principal = call.principal<TexasPrincipal>()
+                    val navIdent = principal?.userinfo?.ident
+                    if (navIdent == null) {
+                        log.error("Kunne ikke hente NAVident.")
+                        call.respond(HttpStatusCode.Unauthorized, "Kunne ikke hente NAVident")
+                        return@post
+                    }
+
+                    val userToken =
+                        call.request.headers["Authorization"]
+                            ?.removePrefix("Bearer ")
+                            ?.trim()
+                    if (userToken.isNullOrBlank()) {
+                        log.error("Mangler bearer token i Authorization-header.")
+                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
+                        return@post
+                    }
+
+                    val ytelsestype = call.parameters["ytelsestype"]
+                    val eksternFagsakId = call.parameters["eksternFagsakId"]
+                    if (ytelsestype.isNullOrBlank() || eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler fagsystem eller eksternFagsakId i path")
+                        return@post
+                    }
+                    val requestBody = call.receive<KravgrunnlagInfoForOppdatering>()
+                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
+                        is TokenResponse.Success ->
+                            oppdaterKravgrunnlag(
+                                tilbakekrevingService = tilbakekrevingService,
+                                call = call,
+                                accessToken = tokenResponse.accessToken,
+                                ytelsestype = ytelsestype,
+                                eksternFagsakId = eksternFagsakId,
+                                requestBody = requestBody,
+                            )
+
+                        is TokenResponse.Error -> {
+                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
+                            handleError(call, tokenResponse)
+                        }
+                    }
+                }
+
                 get("/redirect") {
                     call.respondRedirect(appConfig.loginRedirectUrl)
                 }
@@ -178,19 +268,47 @@ private fun Application.registerApiRoutes(
 }
 
 private suspend fun handleSuccess(
-    httpClient: HttpClient,
-    mqService: MQService,
-    tilbakekrevingUrl: String,
+    tilbakekrevingService: TilbakekrevingService,
     call: ApplicationCall,
     accessToken: String,
     navIdent: String,
 ) {
     val requestFraBurdeForstatt = call.receive<RequestFraBurdeForstatt>()
-    val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl, accessToken, navIdent)
-    val respons = tilbakekrevingService.opprettBehandlingOgKravgrunnlagITilbakekreving(requestFraBurdeForstatt)
+    val response = tilbakekrevingService.opprettBehandlingOgKravgrunnlagITilbakekreving(requestFraBurdeForstatt, accessToken, navIdent)
+    val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status, response)
+}
 
-    val status = if (respons.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
-    call.respond(status, respons)
+private suspend fun hentKravgrunnlag(
+    tilbakekrevingService: TilbakekrevingService,
+    call: ApplicationCall,
+    accessToken: String,
+    ytelsestype: String,
+    eksternFagsakId: String,
+) {
+    val response = tilbakekrevingService.hentKravgrunnlag(eksternFagsakId = eksternFagsakId, ytelsestype = ytelsestype, token = accessToken)
+    val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status, response)
+}
+
+private suspend fun oppdaterKravgrunnlag(
+    tilbakekrevingService: TilbakekrevingService,
+    call: ApplicationCall,
+    accessToken: String,
+    ytelsestype: String,
+    eksternFagsakId: String,
+    requestBody: KravgrunnlagInfoForOppdatering,
+) {
+    val ok =
+        tilbakekrevingService.oppdaterKravgrunnlag(
+            eksternFagsakId = eksternFagsakId,
+            token = accessToken,
+            ytelsestype = ytelsestype,
+            kravgrunnlagInfo = requestBody,
+        )
+
+    val status = if (ok) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status)
 }
 
 private suspend fun handleError(

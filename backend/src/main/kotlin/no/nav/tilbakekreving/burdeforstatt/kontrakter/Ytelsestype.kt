@@ -174,6 +174,23 @@ enum class Ytelsestype(
             SKOLEPENGER -> Klassekoder.SKOLEPENGER
             KONTANTSTØTTE -> Klassekoder.KONTANTSTØTTE
         }
+
+    companion object {
+        fun tilYtelsestype(kode: String): Ytelsestype =
+            when (kode) {
+                "BA" -> BARNETRYGD
+                "EFOG" -> OVERGANGSSTØNAD
+                "EFBT" -> BARNETILSYN
+                "EFSP" -> SKOLEPENGER
+                "KS" -> KONTANTSTØTTE
+                "TS" -> TILLEGGSSTØNAD
+                "AAP" -> ARBEIDSAVKLARINGSPENGER
+                "TP" -> TILTAKSPENGER
+                else -> {
+                    throw IllegalArgumentException("Ukjent ytelsestype: $kode")
+                }
+            }
+    }
 }
 
 /*
