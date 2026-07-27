@@ -149,6 +149,7 @@ enum class Ytelsestype(
             REISE_FOR_Å_KOMME_I_ARBEID -> "TILLSTRA"
             REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE -> "TILLSTRO"
             REISE_TIL_SAMLING -> "TILLISTRS"
+            TILTAKSPENGER -> "TILTPENG"
             else -> this.kode
         }
 
