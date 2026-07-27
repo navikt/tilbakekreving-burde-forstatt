@@ -1,18 +1,16 @@
-import '@navikt/ds-css';
-
 import type { FC, JSX } from 'react';
 import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 import type { Ytelse as TYtelse } from './typer/ytelse';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Checkbox, Link } from '@navikt/ds-react';
-import { Alert } from '@navikt/ds-react/Alert';
+import { ArrowRightIcon, ReceiptIcon } from '@navikt/aksel-icons';
+import { Box, Checkbox, Heading, InlineMessage } from '@navikt/ds-react';
 import { Button } from '@navikt/ds-react/Button';
 import { HStack, VStack } from '@navikt/ds-react/Stack';
 import { TextField } from '@navikt/ds-react/TextField';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import {
     Controller,
     type ControllerRenderProps,
@@ -61,9 +59,6 @@ const postTilbakekreving = async (data: TilbakeRequest): Promise<TilbakekrevingR
 const App: FC = () => {
     const svarMeldingRef = useRef<HTMLDivElement>(null);
     const endreKravgrunnlagModalRef = useRef<HTMLDialogElement>(null);
-    const [sisteSendtInnData, setSisteSendtInnData] = useState<TilbakeRequest | undefined>(
-        undefined
-    );
 
     const metoder = useForm<TilbakeFormData>({
         resolver: zodResolver(tilbakeFormDataSchema),
@@ -112,7 +107,6 @@ const App: FC = () => {
                     };
                 }),
             };
-            setSisteSendtInnData(requestObject);
             return postTilbakekreving(requestObject);
         },
         onMutate: () => {
@@ -130,129 +124,166 @@ const App: FC = () => {
     const resetSkjema = (): void => {
         reset();
         mutation.reset();
-        setSisteSendtInnData(undefined);
     };
 
     return (
-        <>
+        <div className="flex min-h-dvh flex-col">
             <Header />
-            <VStack gap="space-16" className="max-w-3xl mx-auto p-4">
-                <h2 className="text-8xl font-bold text-pink-500">Burde forstått 🤔</h2>
-                <h3 className="text-xl font-bold">Opprett testdata for tilbakekreving</h3>
-                <p>Laget i hackatonet 2025 🌞</p>
-
-                <FormProvider {...metoder}>
-                    <form onSubmit={handleSubmit(data => mutation.mutate(data))}>
-                        <VStack gap="space-16">
-                            <HStack gap="space-16">
-                                <Controller
-                                    name="ytelse"
-                                    control={metoder.control}
-                                    render={({
-                                        field,
-                                    }: {
-                                        field: ControllerRenderProps<TilbakeFormData, 'ytelse'>;
-                                    }): JSX.Element => (
-                                        <Ytelse
-                                            setValgtYtelse={(nyYtelse: TYtelse | undefined): void =>
-                                                field.onChange(nyYtelse)
-                                            }
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name="personIdent"
-                                    control={metoder.control}
-                                    rules={{ pattern: /^[0-9]{11}$/ }}
-                                    render={({
-                                        field,
-                                    }: {
-                                        field: ControllerRenderProps<
-                                            TilbakeFormData,
-                                            'personIdent'
-                                        >;
-                                    }): JSX.Element => (
-                                        <TextField
-                                            label="Fødselsnummer eller D-nummer"
-                                            size="small"
-                                            description="Skal være fra Dolly"
-                                            {...field}
-                                            pattern="[0-9]{11}"
-                                            error={metoder.formState.errors.personIdent?.message}
-                                        />
-                                    )}
-                                />
-                            </HStack>
-
-                            <Checkbox {...metoder.register('sendKravgrunnlag')} size="small">
-                                Send kravgrunnlag
-                            </Checkbox>
-
-                            {watchedYtelse && <Perioder />}
-
-                            {mutation.isError && (
-                                <div
-                                    ref={svarMeldingRef}
-                                    className="p-4 bg-red-50 border border-red-200 text-red-700 rounded"
-                                >
-                                    <p className="font-bold">Feil ved innsending:</p>
-                                    <p>{mutation.error.message}</p>
-                                    {sisteSendtInnData && (
-                                        <div className="mt-4">
-                                            <p className="font-bold">Data som ble forsøkt sendt:</p>
-                                            <pre className="bg-slate-100 p-3 mt-2 rounded overflow-auto max-h-96 text-xs">
-                                                {JSON.stringify(sisteSendtInnData, null, 2)}
-                                            </pre>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            <HStack justify="space-between" align="center">
-                                <HStack gap="space-16">
-                                    <Button
-                                        type="submit"
-                                        size="small"
-                                        loading={mutation.isPending || isSubmitting}
-                                    >
-                                        Opprett tilbakekreving
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        size="small"
-                                        onClick={resetSkjema}
-                                    >
-                                        Tilbakestill skjemaet
-                                    </Button>
-                                </HStack>
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="small"
-                                    onClick={(): void =>
-                                        endreKravgrunnlagModalRef.current?.showModal()
-                                    }
-                                >
-                                    Endre kravgrunnlag
-                                </Button>
-                            </HStack>
+            <VStack padding="space-16" className="w-full grow bg-ax-bg-neutral-soft">
+                <VStack
+                    gap="space-16"
+                    padding="space-24"
+                    className="w-full grow rounded-xl border border-ax-border-neutral-subtle bg-ax-bg-default"
+                >
+                    <HStack justify="space-between" align="end">
+                        <VStack gap="space-8">
+                            <Heading size="medium">Burde forstått 🤔</Heading>
+                            <InlineMessage status="info">
+                                Dette er en testapplikasjon for oppretting av tilbakekrevingssaker
+                            </InlineMessage>
                         </VStack>
-                    </form>
-                </FormProvider>
+                        <Button
+                            data-color="neutral"
+                            type="button"
+                            variant="secondary"
+                            icon={<ReceiptIcon aria-hidden />}
+                            onClick={(): void => endreKravgrunnlagModalRef.current?.showModal()}
+                        >
+                            Rediger kravgrunnlag
+                        </Button>
+                    </HStack>
 
-                {mutation.isSuccess && (
-                    <Alert ref={svarMeldingRef} variant="success" className="mb-4" size="small">
-                        <h3>Suksess! 🎉</h3>
-                        <Link href={mutation.data.data} target="_blank" rel="noopener noreferrer">
-                            Opprettet tilbakekreving her
-                        </Link>
-                    </Alert>
-                )}
+                    <FormProvider {...metoder}>
+                        <Box
+                            borderWidth="1"
+                            borderColor="neutral-subtle"
+                            borderRadius="12"
+                            padding="space-16"
+                            className="flex grow flex-col"
+                        >
+                            <form
+                                onSubmit={handleSubmit(data => mutation.mutate(data))}
+                                className="flex grow flex-col"
+                            >
+                                <Heading size="small" spacing>
+                                    Opprett testdata
+                                </Heading>
+                                <VStack justify="space-between" gap="space-16" className="grow">
+                                    <VStack>
+                                        <HStack gap="space-16" align="end">
+                                            <Controller
+                                                name="ytelse"
+                                                control={metoder.control}
+                                                render={({
+                                                    field,
+                                                }: {
+                                                    field: ControllerRenderProps<
+                                                        TilbakeFormData,
+                                                        'ytelse'
+                                                    >;
+                                                }): JSX.Element => (
+                                                    <Ytelse
+                                                        className="w-80"
+                                                        setValgtYtelse={(
+                                                            nyYtelse: TYtelse | undefined
+                                                        ): void => field.onChange(nyYtelse)}
+                                                    />
+                                                )}
+                                            />
+                                            <Controller
+                                                name="personIdent"
+                                                control={metoder.control}
+                                                rules={{ pattern: /^[0-9]{11}$/ }}
+                                                render={({
+                                                    field,
+                                                }: {
+                                                    field: ControllerRenderProps<
+                                                        TilbakeFormData,
+                                                        'personIdent'
+                                                    >;
+                                                }): JSX.Element => (
+                                                    <TextField
+                                                        label="Fødsels- eller D-nummer fra Dolly"
+                                                        size="small"
+                                                        className="w-80"
+                                                        {...field}
+                                                        pattern="[0-9]{11}"
+                                                        error={
+                                                            metoder.formState.errors.personIdent
+                                                                ?.message
+                                                        }
+                                                    />
+                                                )}
+                                            />
+                                            <Checkbox
+                                                {...metoder.register('sendKravgrunnlag')}
+                                                size="small"
+                                            >
+                                                Send kravgrunnlag
+                                            </Checkbox>
+                                        </HStack>
+
+                                        {watchedYtelse && <Perioder />}
+                                    </VStack>
+
+                                    <HStack
+                                        gap="space-16"
+                                        className="sticky bottom-0 -mx-4 -mb-4 rounded-b-xl bg-ax-bg-default p-4"
+                                    >
+                                        <HStack gap="space-16" className="grow">
+                                            <Button
+                                                type="submit"
+                                                variant={
+                                                    mutation.isSuccess ? 'secondary' : 'primary'
+                                                }
+                                                loading={mutation.isPending || isSubmitting}
+                                            >
+                                                Opprett tilbakekreving
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="tertiary"
+                                                onClick={resetSkjema}
+                                            >
+                                                Tøm skjema
+                                            </Button>
+                                        </HStack>
+                                        {mutation.isSuccess && (
+                                            <HStack gap="space-24" align="center">
+                                                <InlineMessage status="success">
+                                                    Tilbakekrevingen er opprettet
+                                                </InlineMessage>
+                                                <Button
+                                                    as="a"
+                                                    href={mutation.data.data}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    type="button"
+                                                    icon={<ArrowRightIcon />}
+                                                    iconPosition="right"
+                                                    onClick={resetSkjema}
+                                                >
+                                                    Start behandling
+                                                </Button>
+                                            </HStack>
+                                        )}
+                                        {mutation.isError && (
+                                            <InlineMessage status="error">
+                                                {mutation.error instanceof Error
+                                                    ? mutation.error.message
+                                                    : 'Opprettingen av tilbakekrevingen feilet'}
+                                            </InlineMessage>
+                                        )}
+                                    </HStack>
+                                </VStack>
+                            </form>
+                        </Box>
+                    </FormProvider>
+                </VStack>
             </VStack>
 
             <EndreKravgrunnlagModal ref={endreKravgrunnlagModalRef} />
-        </>
+        </div>
     );
 };
 
