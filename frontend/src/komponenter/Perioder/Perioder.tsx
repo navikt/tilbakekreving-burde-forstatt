@@ -1,8 +1,8 @@
 import type { FC, JSX } from 'react';
 import type { TilbakeFormData } from '../../typer/formData';
 
-import { PlusIcon, TrashIcon } from '@navikt/aksel-icons';
-import { Button, HStack, TextField, VStack } from '@navikt/ds-react';
+import { PlusIcon, XMarkOctagonIcon } from '@navikt/aksel-icons';
+import { BodyShort, Box, Button, HStack, TextField } from '@navikt/ds-react';
 import { useCallback, useState } from 'react';
 import {
     Controller,
@@ -31,9 +31,10 @@ const erDatoYtelse = (ytelse: string): boolean => {
 
 interface PeriodeInputProps {
     indeks: number;
+    onFjern?: () => void;
 }
 
-const Periode: FC<PeriodeInputProps> = ({ indeks }: PeriodeInputProps) => {
+const Periode: FC<PeriodeInputProps> = ({ indeks, onFjern }: PeriodeInputProps) => {
     const {
         control,
         getValues,
@@ -41,8 +42,29 @@ const Periode: FC<PeriodeInputProps> = ({ indeks }: PeriodeInputProps) => {
     } = useFormContext<TilbakeFormData>();
     const { ytelse } = getValues();
     return (
-        <VStack className="border-4 p-5 border-purple-500 rounded-lg" gap="space-16">
-            <h3 className="font-bold text-blue-700">Periode {indeks + 1}</h3>
+        <Box
+            borderWidth="1"
+            borderColor="neutral-subtle"
+            padding="space-16"
+            borderRadius="12"
+            className="w-80 space-y-4"
+        >
+            <HStack justify="space-between" align="center">
+                <BodyShort size="large" weight="semibold">
+                    Periode {indeks + 1}
+                </BodyShort>
+                {onFjern && (
+                    <Button
+                        variant="tertiary"
+                        size="small"
+                        icon={<XMarkOctagonIcon aria-hidden />}
+                        onClick={onFjern}
+                        type="button"
+                    >
+                        Fjern
+                    </Button>
+                )}
+            </HStack>
             {erMånedsytelse(ytelse) ? (
                 <Maanedsvelger indeks={indeks} />
             ) : erDatoYtelse(ytelse) ? (
@@ -95,7 +117,7 @@ const Periode: FC<PeriodeInputProps> = ({ indeks }: PeriodeInputProps) => {
                     />
                 )}
             />
-        </VStack>
+        </Box>
     );
 };
 
@@ -134,37 +156,32 @@ const Perioder: FC = () => {
 
     return (
         <section>
-            <h2 className="text-xl font-semibold mb-4">Perioder</h2>
-            <VStack gap="space-16">
+            <HStack gap="space-16" paddingBlock="space-16">
                 {fields.map((_, index) => (
-                    <HStack key={stableKeys[index]} gap="space-16" align="center">
-                        <Periode indeks={index} />
-
-                        {fields.length > 1 && (
-                            <Button
-                                variant="tertiary"
-                                size="small"
-                                icon={<TrashIcon aria-hidden />}
-                                onClick={(): void => fjernPeriode(index)}
-                                type="button"
-                                className="self-center"
-                            >
-                                Fjern
-                            </Button>
-                        )}
-                    </HStack>
+                    <Periode
+                        key={stableKeys[index]}
+                        indeks={index}
+                        onFjern={fields.length > 1 ? (): void => fjernPeriode(index) : undefined}
+                    />
                 ))}
-                <Button
-                    variant="secondary"
-                    size="small"
-                    icon={<PlusIcon aria-hidden />}
-                    onClick={leggTilPeriode}
-                    type="button"
-                    className="self-start"
+                <Box
+                    borderWidth="1"
+                    borderColor="neutral-subtle"
+                    borderRadius="12"
+                    padding="space-16"
+                    className="w-80 flex items-center justify-center border-dashed justify-self-stretch"
                 >
-                    Legg til periode
-                </Button>
-            </VStack>
+                    <Button
+                        variant="secondary"
+                        size="small"
+                        icon={<PlusIcon aria-hidden />}
+                        onClick={leggTilPeriode}
+                        type="button"
+                    >
+                        Legg til periode
+                    </Button>
+                </Box>
+            </HStack>
         </section>
     );
 };

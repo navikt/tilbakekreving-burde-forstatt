@@ -8,9 +8,10 @@ import { ytelseGrupper } from '../typer/ytelse';
 
 interface Props {
     setValgtYtelse: (ytelse: TYtelse | undefined) => void;
+    className?: string;
 }
 
-const Ytelse: FC<Props> = ({ setValgtYtelse }: Props) => {
+const Ytelse: FC<Props> = ({ setValgtYtelse, className }: Props) => {
     const {
         getValues,
         formState: { errors },
@@ -20,7 +21,7 @@ const Ytelse: FC<Props> = ({ setValgtYtelse }: Props) => {
         <Select
             label="Ytelse"
             size="small"
-            description="Ytelser for felles løsning"
+            className={className}
             value={ytelse || ''}
             onChange={(e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>): void =>
                 setValgtYtelse(e.target.value as TYtelse)

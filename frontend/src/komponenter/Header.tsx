@@ -14,7 +14,7 @@ export const Header: FC = () => {
     return (
         <header>
             <InternalHeader>
-                <InternalHeader.Title as="h1">Burde forstått 🤔</InternalHeader.Title>
+                <InternalHeader.Title>Nav Tilbakekreving</InternalHeader.Title>
                 <Spacer />
                 <Dropdown>
                     <InternalHeader.UserButton
