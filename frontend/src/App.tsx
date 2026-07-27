@@ -261,7 +261,6 @@ const App: FC = () => {
                                                     type="button"
                                                     icon={<ArrowRightIcon />}
                                                     iconPosition="right"
-                                                    onClick={resetSkjema}
                                                 >
                                                     Start behandling
                                                 </Button>
