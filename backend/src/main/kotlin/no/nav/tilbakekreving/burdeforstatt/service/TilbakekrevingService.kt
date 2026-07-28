@@ -97,6 +97,7 @@ class TilbakekrevingService(
                 log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
             }
         }
+        repository.lagre(mapTilTidligereInnsendtKrav(kravgrunnlagDto))
         return Ressurs.success(
             data =
                 "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/" +
