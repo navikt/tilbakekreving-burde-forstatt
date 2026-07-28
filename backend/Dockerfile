@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/java21-debian12:nonroot
+FROM gcr.io/distroless/java25-debian12:nonroot
 
 COPY --chown=nonroot:nonroot build/libs/tilbakekreving-burde-forstatt-backend-all.jar /app/app.jar
 
