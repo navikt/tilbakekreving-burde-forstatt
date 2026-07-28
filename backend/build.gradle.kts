@@ -64,3 +64,7 @@ application {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
+
+tasks.shadowJar {
+    mergeServiceFiles()
+}
