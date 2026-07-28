@@ -66,5 +66,6 @@ tasks.named<Test>("test") {
 }
 
 tasks.shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
 }
