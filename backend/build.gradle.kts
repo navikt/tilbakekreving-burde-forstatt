@@ -43,12 +43,17 @@ dependencies {
 
     implementation("org.apache.kafka:kafka-clients:4.2.0")
 
+    implementation("com.zaxxer:HikariCP:7.1.0")
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("org.flywaydb:flyway-core:13.0.0")
+    implementation("org.flywaydb:flyway-database-postgresql:13.0.0")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.0.0-M2")
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 

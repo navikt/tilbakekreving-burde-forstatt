@@ -55,6 +55,14 @@ spec:
         - host: b27apvl220.preprod.local
           ports:
             - port: 1413
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        name: burde-forstatt
+        tier: db-f1-micro
+        diskSize: 10
+        databases:
+          - name: burde-forstatt
   env:
     - name: POST_LOGIN_REDIRECT_URL
       value: /

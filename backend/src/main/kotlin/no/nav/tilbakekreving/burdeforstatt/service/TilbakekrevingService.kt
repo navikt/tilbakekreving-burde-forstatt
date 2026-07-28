@@ -13,6 +13,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKrav
+import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKravPeriode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
@@ -26,6 +28,7 @@ import no.nav.tilbakekreving.burdeforstatt.kontrakter.Varsel
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ytelsestype
 import no.nav.tilbakekreving.burdeforstatt.modell.OpprettTilbakekrevingRequest
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
+import no.nav.tilbakekreving.burdeforstatt.repository.Repository
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
@@ -45,6 +48,7 @@ class TilbakekrevingService(
     private val httpClient: HttpClient,
     private val mqService: MQService,
     private val tilbakekrevingUrl: String,
+    private val repository: Repository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val mqGammelModell = System.getenv("MQ_GAMMEL_MODELL")
@@ -420,14 +424,10 @@ class TilbakekrevingService(
         }
     }
 
-    suspend fun hentKravgrunnlag(
-        eksternFagsakId: String,
-        ytelsestype: String,
-        token: String,
-    ): Ressurs<KravgrunnlagInfoForOppdatering> {
+    suspend fun hentKravgrunnlag(eksternFagsakId: String): Ressurs<KravgrunnlagInfoForOppdatering> {
         log.info("Henter kravgrunnlag for fagsystemId: {}", eksternFagsakId)
-        val dto =
-            hentDetaljertKravgrunnlagDto(eksternFagsakId, hentYtelsesType(ytelsestype), token).data
+        val tidligereInnsendtKrav =
+            repository.hent(eksternFagsakId)
                 ?: return Ressurs(
                     data = null,
                     status = Ressurs.Status.FEILET,
@@ -435,7 +435,7 @@ class TilbakekrevingService(
                     frontendFeilmelding = "Kunne ikke hente kravgrunnlag",
                     stacktrace = null,
                 )
-        val perioder = mapTilKravgrunnlagInfo(dto)
+        val perioder = mapTilKravgrunnlagInfo(tidligereInnsendtKrav)
         return Ressurs(
             data = perioder,
             status = Ressurs.Status.SUKSESS,
@@ -445,20 +445,14 @@ class TilbakekrevingService(
         )
     }
 
-    private fun mapTilKravgrunnlagInfo(dto: DetaljertKravgrunnlagDto): KravgrunnlagInfoForOppdatering =
+    private fun mapTilKravgrunnlagInfo(tidligereInnsendtKrav: TidligereInnsendtKrav): KravgrunnlagInfoForOppdatering =
         KravgrunnlagInfoForOppdatering(
             perioder =
-                dto.tilbakekrevingsPeriode.map { periode ->
-                    val belop =
-                        periode.tilbakekrevingsBelop
-                            .firstOrNull { it.typeKlasse == TypeKlasseDto.YTEL }
-                            ?.belopTilbakekreves
-                            ?: BigDecimal.ZERO
-
+                tidligereInnsendtKrav.tilbakekrevingsPeriode.map { periode ->
                     OppdatertPeriode(
-                        fom = periode.periode.fom,
-                        tom = periode.periode.tom,
-                        belopTilbakekreves = belop,
+                        fom = periode.fom,
+                        tom = periode.tom,
+                        belopTilbakekreves = periode.belopTilbakekreves,
                     )
                 },
         )
@@ -538,8 +532,39 @@ class TilbakekrevingService(
             mqNyModell,
         )
 
+        repository.lagre(mapTilTidligereInnsendtKrav(oppdatertKravgrunnlag))
+
         return true
     }
+
+    private fun mapTilTidligereInnsendtKrav(dto: DetaljertKravgrunnlagDto): TidligereInnsendtKrav =
+        TidligereInnsendtKrav(
+            kravgrunnlagId = dto.kravgrunnlagId,
+            vedtakId = dto.vedtakId,
+            kodeFagomraade = dto.kodeFagomraade,
+            fagsystemId = dto.fagsystemId,
+            vedtakIdOmgjort = dto.vedtakIdOmgjort,
+            vedtakGjelderId = dto.vedtakGjelderId,
+            typeGjelderId = dto.typeGjelderId,
+            utbetalesTilId = dto.utbetalesTilId,
+            typeUtbetId = dto.typeUtbetId,
+            enhetAnsvarlig = dto.enhetAnsvarlig,
+            enhetBosted = dto.enhetBosted,
+            enhetBehandl = dto.enhetBehandl,
+            saksbehId = dto.saksbehId,
+            tilbakekrevingsPeriode =
+                dto.tilbakekrevingsPeriode.map { periode ->
+                    TidligereInnsendtKravPeriode(
+                        fom = periode.periode.fom,
+                        tom = periode.periode.tom,
+                        belopTilbakekreves =
+                            periode.tilbakekrevingsBelop
+                                .firstOrNull { it.typeKlasse == TypeKlasseDto.YTEL }
+                                ?.belopTilbakekreves
+                                ?: BigDecimal.ZERO,
+                    )
+                },
+        )
 
     companion object {
         val NY_MODELL_YTELSER =

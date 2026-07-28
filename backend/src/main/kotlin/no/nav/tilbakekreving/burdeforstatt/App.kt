@@ -35,11 +35,14 @@ import no.nav.tilbakekreving.burdeforstatt.auth.TexasAuthenticationProvider
 import no.nav.tilbakekreving.burdeforstatt.auth.TexasPrincipal
 import no.nav.tilbakekreving.burdeforstatt.auth.TokenResponse
 import no.nav.tilbakekreving.burdeforstatt.config.AppConfig
+import no.nav.tilbakekreving.burdeforstatt.config.DbConfig
 import no.nav.tilbakekreving.burdeforstatt.config.KafkaConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
+import no.nav.tilbakekreving.burdeforstatt.repository.PostgresRepository
+import no.nav.tilbakekreving.burdeforstatt.repository.Repository
 import no.nav.tilbakekreving.burdeforstatt.service.FagsystemKafkaConsumer
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.service.TilbakekrevingService
@@ -94,13 +97,23 @@ fun main() {
         )
     val mqService = MQService(mqConfig)
 
+    val dbConfig =
+        DbConfig(
+            jdbcUrl = System.getenv("NAIS_DATABASE_BURDE_FORSTATT_BURDE_FORSTATT_JDBC_URL"),
+            username = System.getenv("NAIS_DATABASE_BURDE_FORSTATT_BURDE_FORSTATT_USERNAME"),
+            password = System.getenv("NAIS_DATABASE_BURDE_FORSTATT_BURDE_FORSTATT_PASSWORD"),
+        )
+    val dataSource = dbConfig.createDataSource()
+    dbConfig.migrate(dataSource)
+    val repository: Repository = PostgresRepository(dataSource)
+
     Thread(fagsystemKafkaConsumer).start()
     val server =
         embeddedServer(Netty, port = 8080) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter(objectMapper))
             }
-            registerApiRoutes(appConfig, httpClient, mqService)
+            registerApiRoutes(appConfig, httpClient, mqService, repository)
         }
     server.addShutdownHook { fagsystemKafkaConsumer.stop() }
     server.start(wait = true)
@@ -110,6 +123,7 @@ private fun Application.registerApiRoutes(
     appConfig: AppConfig,
     httpClient: HttpClient,
     mqService: MQService,
+    repository: Repository,
 ) {
     val authClient =
         AuthClient(
@@ -122,7 +136,7 @@ private fun Application.registerApiRoutes(
 
     val tilbakekrevingUrl = "http://tilbakekreving-backend"
     val scope = "api://dev-gcp.tilbake.tilbakekreving-backend/.default"
-    val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl)
+    val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl, repository)
 
     routing {
         get("/liveness") {
@@ -181,16 +195,6 @@ private fun Application.registerApiRoutes(
                         return@get
                     }
 
-                    val userToken =
-                        call.request.headers["Authorization"]
-                            ?.removePrefix("Bearer ")
-                            ?.trim()
-                    if (userToken.isNullOrBlank()) {
-                        log.error("Mangler bearer token i Authorization-header.")
-                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
-                        return@get
-                    }
-
                     val ytelsestype = call.parameters["ytelsestype"]
                     val eksternFagsakId = call.parameters["eksternFagsakId"]
                     if (ytelsestype.isNullOrBlank() || eksternFagsakId.isNullOrBlank()) {
@@ -198,21 +202,11 @@ private fun Application.registerApiRoutes(
                         return@get
                     }
 
-                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
-                        is TokenResponse.Success ->
-                            hentKravgrunnlag(
-                                tilbakekrevingService = tilbakekrevingService,
-                                call = call,
-                                accessToken = tokenResponse.accessToken,
-                                ytelsestype = ytelsestype,
-                                eksternFagsakId = eksternFagsakId,
-                            )
-
-                        is TokenResponse.Error -> {
-                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
-                            handleError(call, tokenResponse)
-                        }
-                    }
+                    hentKravgrunnlag(
+                        tilbakekrevingService = tilbakekrevingService,
+                        call = call,
+                        eksternFagsakId = eksternFagsakId,
+                    )
                 }
 
                 post("/kravgrunnlag/{ytelsestype}/{eksternFagsakId}") {
@@ -282,11 +276,9 @@ private suspend fun handleSuccess(
 private suspend fun hentKravgrunnlag(
     tilbakekrevingService: TilbakekrevingService,
     call: ApplicationCall,
-    accessToken: String,
-    ytelsestype: String,
     eksternFagsakId: String,
 ) {
-    val response = tilbakekrevingService.hentKravgrunnlag(eksternFagsakId = eksternFagsakId, ytelsestype = ytelsestype, token = accessToken)
+    val response = tilbakekrevingService.hentKravgrunnlag(eksternFagsakId = eksternFagsakId)
     val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
     call.respond(status, response)
 }
