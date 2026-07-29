@@ -17,7 +17,6 @@ const tilbakeRequest = z.object({
         z.object({
             fom: z.string(),
             tom: z.string(),
-            simulertBelop: z.number(),
             kravgrunnlagBelop: z.number(),
         })
     ),

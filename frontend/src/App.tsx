@@ -67,7 +67,6 @@ const App: FC = () => {
                 {
                     fom: undefined,
                     tom: undefined,
-                    simulertBeløp: '',
                     kravgrunnlagBeløp: '',
                 },
             ],
@@ -97,7 +96,6 @@ const App: FC = () => {
                     const periodeUtenId = {
                         fom: periode.fom,
                         tom: periode.tom,
-                        simulertBelop: Number(periode.simulertBeløp),
                         kravgrunnlagBelop: Number(periode.kravgrunnlagBeløp),
                     };
                     return {

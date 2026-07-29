@@ -76,27 +76,6 @@ const Periode: FC<PeriodeInputProps> = ({ indeks, onFjern }: PeriodeInputProps) 
             )}
 
             <Controller
-                name={`perioder.${indeks}.simulertBeløp`}
-                control={control}
-                render={({
-                    field,
-                }: {
-                    field: ControllerRenderProps<
-                        TilbakeFormData,
-                        `perioder.${number}.simulertBeløp`
-                    >;
-                }): JSX.Element => (
-                    <TextField
-                        label="Simulert feilutbetalt månedsbeløp"
-                        {...field}
-                        type="text"
-                        size="small"
-                        inputMode="text"
-                        error={errors.perioder?.[indeks]?.simulertBeløp?.message}
-                    />
-                )}
-            />
-            <Controller
                 name={`perioder.${indeks}.kravgrunnlagBeløp`}
                 control={control}
                 render={({
@@ -141,7 +120,6 @@ const Perioder: FC = () => {
         append({
             fom: undefined as unknown as Date,
             tom: undefined as unknown as Date,
-            simulertBeløp: '',
             kravgrunnlagBeløp: '',
         });
     }, [append, nextId]);
