@@ -6,6 +6,5 @@ import java.time.LocalDate
 data class PeriodeIRequest(
     val fom: LocalDate,
     val tom: LocalDate,
-    val simulertBelop: BigDecimal,
     val kravgrunnlagBelop: BigDecimal,
 )
