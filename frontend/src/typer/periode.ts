@@ -13,7 +13,6 @@ export const periodeSchema = z
         tom: z.date({ message: 'Til-dato er påkrevd' }).refine(dato => dato <= sluttenAvIDag, {
             message: 'Til-dato kan ikke være i fremtiden',
         }),
-        simulertBeløp: beløpSchema,
         kravgrunnlagBeløp: beløpSchema,
     })
     .refine(periode => periode.tom && periode.fom && periode.tom >= periode.fom, {
