@@ -177,7 +177,7 @@ class TilbakekrevingService(
         val varsel =
             Varsel(
                 varseltekst = "Varsel tekst",
-                sumFeilutbetaling = request.perioder.sumOf { periode -> periode.simulertBelop },
+                sumFeilutbetaling = request.perioder.sumOf { periode -> periode.kravgrunnlagBelop },
             )
         periodeFraRequest.forEach { periode ->
             varsel.perioder.add(Periode(fom = periode.fom, tom = periode.tom))
@@ -319,7 +319,7 @@ class TilbakekrevingService(
                     DetaljertKravgrunnlagBelopDto().apply {
                         kodeKlasse = opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().ytelsesKlassekode
                         typeKlasse = TypeKlasseDto.YTEL
-                        belopOpprUtbet = opprettTilbakekrevingRequest.varsel?.sumFeilutbetaling
+                        belopOpprUtbet = belop
                         belopNy = BigDecimal(0.00)
                         belopTilbakekreves = belop
                         belopUinnkrevd = BigDecimal(0.00)
