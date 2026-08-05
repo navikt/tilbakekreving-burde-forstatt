@@ -54,24 +54,22 @@ export const Maanedsvelger: FC<Props> = ({ indeks }: Props) => {
     });
 
     return (
-        <HStack align="center" gap="space-16">
-            <MonthPicker
-                {...fromMonthpickerProps}
-                dropdownCaption
-                wrapperClassName="flex-1 min-w-0"
-            >
+        <HStack align="center" gap="space-12">
+            <MonthPicker {...fromMonthpickerProps} dropdownCaption>
                 <MonthPicker.Input
                     {...fromInputProps}
                     label="Fra og med måned"
                     size="small"
+                    className="[&_.aksel-date\_\_field-wrapper]:w-34 [&_input]:min-w-0"
                     error={errors.perioder?.[indeks]?.fom?.message}
                 />
             </MonthPicker>
-            <MonthPicker {...toMonthpickerProps} dropdownCaption wrapperClassName="flex-1 min-w-0">
+            <MonthPicker {...toMonthpickerProps} dropdownCaption>
                 <MonthPicker.Input
                     {...toInputProps}
                     label="Til og med måned"
                     size="small"
+                    className="[&_.aksel-date\_\_field-wrapper]:w-34 [&_input]:min-w-0"
                     error={errors.perioder?.[indeks]?.tom?.message}
                 />
             </MonthPicker>
