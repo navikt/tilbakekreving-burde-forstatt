@@ -29,7 +29,7 @@ dependencies {
     implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
+    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:10.0.0.0")
     implementation("org.messaginghub:pooled-jms:3.2.2")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
