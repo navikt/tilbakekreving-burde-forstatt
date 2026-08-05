@@ -1,6 +1,9 @@
 import type { EndreKravgrunnlagPeriode } from '../typer/endreKravgrunnlag';
 
-import { kravgrunnlagResponsSchema } from '../typer/endreKravgrunnlag';
+import {
+    kravgrunnlagResponsSchema,
+    lagreKravgrunnlagResponsSchema,
+} from '../typer/endreKravgrunnlag';
 
 export const hentKravgrunnlagMutationKey = ['hentKravgrunnlag'] as const;
 
@@ -82,11 +85,16 @@ export const tilLagreKravgrunnlagBody = (
     })),
 });
 
+export const tilBehandlingUrl = (json: unknown): string | undefined => {
+    const respons = lagreKravgrunnlagResponsSchema.safeParse(json);
+    return respons.success ? (respons.data.data ?? undefined) : undefined;
+};
+
 export const lagreKravgrunnlag = async ({
     ytelse,
     eksternFagsystemId,
     perioder,
-}: LagreKravgrunnlagVariabler): Promise<void> => {
+}: LagreKravgrunnlagVariabler): Promise<string | undefined> => {
     const encodedYtelse = encodeURIComponent(ytelse.trim());
     const encodedEksternFagsystemId = encodeURIComponent(eksternFagsystemId.trim());
 
@@ -103,4 +111,6 @@ export const lagreKravgrunnlag = async ({
     if (!response.ok) {
         throw new Error(`Klarte ikke lagre kravgrunnlag (status ${response.status})`);
     }
+
+    return tilBehandlingUrl(await response.json().catch(() => null));
 };

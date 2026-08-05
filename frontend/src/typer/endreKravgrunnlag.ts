@@ -42,3 +42,7 @@ export const kravgrunnlagResponsSchema = z.object({
 });
 
 export type KravgrunnlagRespons = z.infer<typeof kravgrunnlagResponsSchema>;
+
+export const lagreKravgrunnlagResponsSchema = z.object({
+    data: z.string().nullable(),
+});
