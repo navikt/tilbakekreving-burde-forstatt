@@ -41,7 +41,7 @@ export const DagVelger: FC<Props> = ({ indeks }: Props) => {
         <DatePicker {...datepickerProps} dropdownCaption>
             <DatePicker.Input
                 {...inputProps}
-                label="Velg til og fra dato"
+                label="Fra og til dato"
                 size="small"
                 error={errors.perioder?.[indeks]?.fom?.message}
             />

@@ -15,7 +15,7 @@ type HentKravgrunnlag = (
     variabler: HentKravgrunnlagVariabler
 ) => Promise<EndreKravgrunnlagPeriode[]>;
 
-type LagreKravgrunnlag = (variabler: LagreKravgrunnlagVariabler) => Promise<void>;
+type LagreKravgrunnlag = (variabler: LagreKravgrunnlagVariabler) => Promise<string | undefined>;
 
 const enPeriode: EndreKravgrunnlagPeriode[] = [
     { datoFra: '2024-01-01', datoTil: '2024-01-31', feilutbetalt: '1500' },
@@ -48,7 +48,7 @@ const lagTestQueryClient = (
         mutationFn: hentKravgrunnlag as (variabler: unknown) => Promise<EndreKravgrunnlagPeriode[]>,
     });
     queryClient.setMutationDefaults(lagreKravgrunnlagMutationKey, {
-        mutationFn: lagreKravgrunnlag as (variabler: unknown) => Promise<void>,
+        mutationFn: lagreKravgrunnlag as (variabler: unknown) => Promise<string | undefined>,
     });
     return queryClient;
 };
@@ -65,6 +65,16 @@ const renderModal = (
 };
 
 const modal = (): HTMLElement => screen.getByRole('dialog', { name: 'Endre kravgrunnlaget' });
+const ventPåBekreftelsemodal = (): Promise<HTMLElement> =>
+    screen.findByRole('dialog', { name: 'Kravgrunnlaget redigert' });
+const finnBekreftelsemodal = (): HTMLElement | null =>
+    screen.queryByRole('dialog', { name: 'Kravgrunnlaget redigert' });
+const gåTilBehandlingKnapp = (bekreftelse: HTMLElement): HTMLElement =>
+    within(bekreftelse).getByRole('button', { name: 'Gå til behandling' });
+const lukkKnappIKvittering = (bekreftelse: HTMLElement): HTMLElement => {
+    const knapper = within(bekreftelse).getAllByRole('button', { name: 'Lukk' });
+    return knapper[knapper.length - 1];
+};
 
 const eksternFagsystemIdFelt = (): HTMLElement =>
     within(modal()).getByLabelText('Ekstern fagsystem id');
@@ -197,14 +207,14 @@ describe('Endre kravgrunnlag', () => {
         expect(endreKravgrunnlagetKnapp()).toBeInTheDocument();
     });
 
-    test('bruker lagrer et hentet kravgrunnlag og modalen lukkes', async () => {
+    test('bruker lagrer et hentet kravgrunnlag og får bekreftelse i modalen', async () => {
         renderModal();
-        const dialog = modal();
 
         await hentKravgrunnlag(user);
         await user.click(endreKravgrunnlagetKnapp());
 
-        await waitFor(() => expect(dialog).not.toBeVisible());
+        expect(await ventPåBekreftelsemodal()).toBeVisible();
+        expect(screen.queryByRole('button', { name: 'Endre kravgrunnlaget' })).toBeNull();
     });
 
     test('sender periodene til lagring ved submit', async () => {
@@ -304,5 +314,31 @@ describe('Endre kravgrunnlag', () => {
         await user.click(avbrytKnapp());
 
         expect(dialog).not.toBeVisible();
+    });
+
+    test('bruker får bekreftelse med lenke til behandlingen når kravgrunnlaget er lagret', async () => {
+        renderModal(undefined, async () => 'https://tilbakekreving.test/behandling/1');
+
+        await hentKravgrunnlag(user);
+        await user.click(endreKravgrunnlagetKnapp());
+
+        const bekreftelse = await ventPåBekreftelsemodal();
+        expect(within(bekreftelse).getByText('Du kan starte behandlingen')).toBeInTheDocument();
+        expect(gåTilBehandlingKnapp(bekreftelse)).toHaveAttribute(
+            'href',
+            'https://tilbakekreving.test/behandling/1'
+        );
+
+        await user.click(lukkKnappIKvittering(bekreftelse));
+
+        expect(bekreftelse).not.toBeVisible();
+    });
+
+    test('bekreftelsen vises ikke før kravgrunnlaget er lagret', async () => {
+        renderModal();
+
+        await hentKravgrunnlag(user);
+
+        expect(finnBekreftelsemodal()).not.toBeInTheDocument();
     });
 });

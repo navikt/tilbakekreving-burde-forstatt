@@ -265,7 +265,7 @@ const App: FC = () => {
                                             </HStack>
                                         )}
                                         {mutation.isError && (
-                                            <InlineMessage status="error">
+                                            <InlineMessage status="error" className="self-center">
                                                 {mutation.error instanceof Error
                                                     ? mutation.error.message
                                                     : 'Opprettingen av tilbakekrevingen feilet'}
