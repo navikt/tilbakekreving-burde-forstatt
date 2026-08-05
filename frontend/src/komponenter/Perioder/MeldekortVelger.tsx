@@ -1,6 +1,6 @@
 import type { TilbakeFormData } from '../../typer/formData';
 
-import { DatePicker, HStack, useDatepicker } from '@navikt/ds-react';
+import { DatePicker, useDatepicker, VStack } from '@navikt/ds-react';
 import { format } from 'date-fns';
 import { type FC, useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -50,23 +50,23 @@ export const MeldekortVelger: FC<Props> = ({ indeks }: Props) => {
 
     return (
         <DatePicker {...datepickerProps}>
-            <HStack gap="space-16" wrap={false}>
+            <VStack gap="space-16">
                 <DatePicker.Input
                     {...inputProps}
                     size="small"
                     label="Startdato for meldekortperioden"
-                    className="flex-1 min-w-0"
+                    className="[&_.aksel-date\_\_field-wrapper]:w-45 [&_input]:grow [&_input]:min-w-0"
                     error={errors.perioder?.[indeks]?.fom?.message}
                 />
                 <DatePicker.Input
                     size="small"
                     label="Sluttdato for meldekortperioden"
                     readOnly
-                    className="flex-1 min-w-0"
                     value={tom ? format(tom, 'dd.MM.yyyy') : ''}
+                    className="[&_.aksel-date\_\_field-wrapper]:w-45 [&_input]:grow [&_input]:min-w-0"
                     error={errors.perioder?.[indeks]?.tom?.message}
                 />
-            </HStack>
+            </VStack>
         </DatePicker>
     );
 };
