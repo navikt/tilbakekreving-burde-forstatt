@@ -26,13 +26,14 @@ export const MeldekortVelger: FC<Props> = ({ indeks }: Props) => {
 
     const tom = useWatch({ control, name: `perioder.${indeks}.tom` });
 
-    const dagensDato = useMemo(() => {
-        return new Date();
-    }, []);
+    const sisteGyldigeStartdato = useMemo(
+        () => leggTilDager(new Date(), -DAGER_I_MELDEKORTPERIODE),
+        []
+    );
 
     const { datepickerProps, inputProps } = useDatepicker({
         fromDate: new Date('2015-01-01'),
-        toDate: dagensDato,
+        toDate: sisteGyldigeStartdato,
         disabled: [{ dayOfWeek: ALLE_DAGER_UNNTATT_MANDAG }],
         onDateChange: (dato: Date | undefined) => {
             if (dato) {
