@@ -39,18 +39,18 @@ sealed interface Periodetype {
             beløp: Long,
         ): List<PeriodeOgBeløp> {
             val fomMåned = YearMonth.from(periode.fom)
-            val tomMåned = YearMonth.from(periode.fom)
+            val tomMåned = YearMonth.from(periode.tom)
             return buildList {
                 var cursor = fomMåned
-                while (cursor in fomMåned.rangeUntil(tomMåned)) {
-                    add(cursor)
-                    cursor = fomMåned.plusMonths(1)
+                while (cursor in fomMåned.rangeTo(tomMåned)) {
+                    add(
+                        PeriodeOgBeløp(
+                            periode = Periode(fom = cursor.atDay(1), tom = cursor.atEndOfMonth()),
+                            beløp = beløp,
+                        ),
+                    )
+                    cursor = cursor.plusMonths(1)
                 }
-            }.map {
-                PeriodeOgBeløp(
-                    periode = Periode(it.atDay(1), it.atEndOfMonth()),
-                    beløp = beløp,
-                )
             }
         }
     }
