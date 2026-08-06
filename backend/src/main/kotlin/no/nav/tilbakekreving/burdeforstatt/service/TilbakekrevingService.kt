@@ -41,8 +41,9 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
-import kotlin.collections.firstOrNull
+import java.time.format.DateTimeFormatter
 
 class TilbakekrevingService(
     private val httpClient: HttpClient,
@@ -50,6 +51,7 @@ class TilbakekrevingService(
     private val tilbakekrevingUrl: String,
     private val repository: Repository,
 ) {
+    private val kontrollfeltFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
     private val log = LoggerFactory.getLogger(this::class.java)
     private val mqGammelModell = System.getenv("MQ_GAMMEL_MODELL")
     private val mqNyModell = System.getenv("MQ_NY_MODELL")
@@ -288,7 +290,7 @@ class TilbakekrevingService(
                 enhetAnsvarlig = "8020"
                 enhetBosted = "8020"
                 enhetBehandl = "8020"
-                kontrollfelt = "2021-03-02-18.50.15.236316"
+                kontrollfelt = kontrollfeltFormatter.format(LocalDateTime.now())
                 saksbehId = "K231B433"
                 referanse = "1"
             }
@@ -366,65 +368,6 @@ class TilbakekrevingService(
         return perioder
     }
 
-    private suspend fun hentDetaljertKravgrunnlagDto(
-        eksternFagsakId: String,
-        ytelsestype: Ytelsestype,
-        token: String,
-    ): Ressurs<DetaljertKravgrunnlagDto> {
-        log.info("Henter kravgrunnlag for fagsystemId: {}", eksternFagsakId)
-
-        return try {
-            val uri =
-                URLBuilder(tilbakekrevingUrl)
-                    .apply {
-                        appendPathSegments(
-                            "api",
-                            "forvaltning",
-                            "kravgrunnlag",
-                            when (ytelsestype) {
-                                in TILLEGGSSTØNAD_YTELSER -> Ytelsestype.TILLEGGSSTØNAD.name
-                                else -> ytelsestype.name
-                            },
-                            eksternFagsakId,
-                            "burde-forstått",
-                        )
-                    }.buildString()
-
-            val response: HttpResponse =
-                httpClient.get(uri) {
-                    contentType(ContentType.Application.Json)
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
-
-            if (response.status != HttpStatusCode.OK) {
-                return Ressurs(
-                    data = null,
-                    status = Ressurs.Status.FEILET,
-                    melding = "Feil ved henting av kravgrunnlag: ${response.status}",
-                    frontendFeilmelding = "Kunne ikke hente kravgrunnlag",
-                    stacktrace = null,
-                )
-            }
-            val dto: DetaljertKravgrunnlagDto = response.body()
-            return Ressurs(
-                data = dto,
-                status = Ressurs.Status.SUKSESS,
-                melding = "Kravgrunnlag hentet",
-                frontendFeilmelding = null,
-                stacktrace = null,
-            )
-        } catch (e: Exception) {
-            log.error("Feilet under henting av kravgrunnlag. FagsystemId: {}", eksternFagsakId, e)
-            Ressurs(
-                data = null,
-                status = Ressurs.Status.FEILET,
-                melding = "Exception: ${e.message}",
-                frontendFeilmelding = "En feil oppstod under henting av kravgrunnlag",
-                stacktrace = e.stackTraceToString(),
-            )
-        }
-    }
-
     suspend fun hentKravgrunnlag(eksternFagsakId: String): Ressurs<KravgrunnlagInfoForOppdatering> {
         log.info("Henter kravgrunnlag for fagsystemId: {}", eksternFagsakId)
         val tidligereInnsendtKrav =
@@ -467,9 +410,8 @@ class TilbakekrevingService(
         log.info("Oppdaterer kravgrunnlag for fagsystemId: $eksternFagsakId")
         val ytelsestype = hentYtelsesType(ytelsestype)
         val gammelKravgrunnlag =
-            hentDetaljertKravgrunnlagDto(eksternFagsakId, ytelsestype, token).data
+            repository.hent(eksternFagsakId)
                 ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for oppdatering")
-
         val oppdatertKravgrunnlag =
             DetaljertKravgrunnlagDto().apply {
                 kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId
@@ -485,9 +427,9 @@ class TilbakekrevingService(
                 enhetAnsvarlig = gammelKravgrunnlag.enhetAnsvarlig
                 enhetBosted = gammelKravgrunnlag.enhetBosted
                 enhetBehandl = gammelKravgrunnlag.enhetBehandl
-                kontrollfelt = gammelKravgrunnlag.kontrollfelt
+                kontrollfelt = kontrollfeltFormatter.format(LocalDateTime.now())
                 saksbehId = gammelKravgrunnlag.saksbehId
-                referanse = gammelKravgrunnlag.referanse
+                referanse = "1"
             }
         kravgrunnlagInfo.perioder.forEach {
             val detaljertKravgrunnlagPeriodeDto =

@@ -29,7 +29,7 @@ dependencies {
     implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:9.4.3.0")
+    implementation("com.ibm.mq:com.ibm.mq.jakarta.client:10.0.0.0")
     implementation("org.messaginghub:pooled-jms:3.2.2")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
@@ -39,7 +39,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.1")
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.9")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20250425112447_49835df")
+    implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")
 
     implementation("org.apache.kafka:kafka-clients:4.3.1")
 
