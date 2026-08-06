@@ -13,6 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import kotlinx.coroutines.time.delay
 import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKrav
 import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKravPeriode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
@@ -22,7 +23,6 @@ import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdate
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Kravstatuskode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.OppdatertPeriode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Periode
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.PeriodeIRequest
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Varsel
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ytelsestype
@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.security.SecureRandom
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 class TilbakekrevingService(
@@ -75,7 +75,7 @@ class TilbakekrevingService(
                 detaljertKravgrunnlagMelding,
                 mqNyModell,
             )
-            Thread.sleep(5000)
+            delay(Duration.ofSeconds(5))
             behandlingId =
                 hentBehandlingId(
                     opprettTilbakekrevingRequest.ytelsestype,
@@ -275,6 +275,7 @@ class TilbakekrevingService(
         requestFraBurdeForstatt: RequestFraBurdeForstatt,
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
     ): DetaljertKravgrunnlagDto {
+        val ytelse = hentYtelsesType(requestFraBurdeForstatt.ytelse)
         val detaljertKravgrunnlagDto =
             DetaljertKravgrunnlagDto().apply {
                 kravgrunnlagId = BigInteger(63, SecureRandom())
@@ -293,79 +294,52 @@ class TilbakekrevingService(
                 kontrollfelt = kontrollfeltFormatter.format(LocalDateTime.now())
                 saksbehId = "K231B433"
                 referanse = "1"
-            }
+                tilbakekrevingsPeriode.addAll(
+                    requestFraBurdeForstatt.perioder.flatMap { periode ->
+                        ytelse.periodetype
+                            .splitt(Periode(periode.fom, periode.tom), periode.kravgrunnlagBelop.toLong())
+                            .map { splittetPeriode ->
+                                val detaljertKravgrunnlagPeriodeDto =
+                                    DetaljertKravgrunnlagPeriodeDto().apply {
+                                        this.periode =
+                                            PeriodeDto().apply {
+                                                fom = splittetPeriode.periode.fom
+                                                tom = splittetPeriode.periode.tom
+                                            }
+                                        belopSkattMnd = BigDecimal(0.00)
+                                    }
 
-        requestFraBurdeForstatt.perioder.forEach {
-            val perioder =
-                if (erSammeMåned(it)) {
-                    listOf(
-                        PeriodeDto().apply {
-                            fom = it.fom
-                            tom = it.tom
-                        },
-                    )
-                } else {
-                    splittPeriodeHvisFlereMåneder(it)
-                }
-
-            val belop = it.kravgrunnlagBelop
-
-            perioder.forEach {
-                val detaljertKravgrunnlagPeriodeDto =
-                    DetaljertKravgrunnlagPeriodeDto().apply {
-                        periode = it
-                        belopSkattMnd = BigDecimal(0.00)
-                    }
-
-                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
-                    DetaljertKravgrunnlagBelopDto().apply {
-                        kodeKlasse = opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().ytelsesKlassekode
-                        typeKlasse = TypeKlasseDto.YTEL
-                        belopOpprUtbet = belop
-                        belopNy = BigDecimal(0.00)
-                        belopTilbakekreves = belop
-                        belopUinnkrevd = BigDecimal(0.00)
-                        skattProsent = BigDecimal(0.00)
+                                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                                    DetaljertKravgrunnlagBelopDto().apply {
+                                        kodeKlasse =
+                                            opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().ytelsesKlassekode
+                                        typeKlasse = TypeKlasseDto.YTEL
+                                        belopOpprUtbet = splittetPeriode.beløp.toBigDecimal()
+                                        belopNy = BigDecimal(0.00)
+                                        belopTilbakekreves = splittetPeriode.beløp.toBigDecimal()
+                                        belopUinnkrevd = BigDecimal(0.00)
+                                        skattProsent = BigDecimal(0.00)
+                                    },
+                                )
+                                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                                    DetaljertKravgrunnlagBelopDto().apply {
+                                        kodeKlasse =
+                                            opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().feilutbetalingKlassekose
+                                        typeKlasse = TypeKlasseDto.FEIL
+                                        belopOpprUtbet = BigDecimal(0)
+                                        belopNy = splittetPeriode.beløp.toBigDecimal()
+                                        belopTilbakekreves = BigDecimal(0)
+                                        belopUinnkrevd = BigDecimal(0.00)
+                                        skattProsent = BigDecimal(0.00)
+                                    },
+                                )
+                                detaljertKravgrunnlagPeriodeDto
+                            }
                     },
                 )
-                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
-                    DetaljertKravgrunnlagBelopDto().apply {
-                        kodeKlasse = opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().feilutbetalingKlassekose
-                        typeKlasse = TypeKlasseDto.FEIL
-                        belopOpprUtbet = BigDecimal(0)
-                        belopNy = belop
-                        belopTilbakekreves = BigDecimal(0)
-                        belopUinnkrevd = BigDecimal(0.00)
-                        skattProsent = BigDecimal(0.00)
-                    },
-                )
-
-                detaljertKravgrunnlagDto.tilbakekrevingsPeriode.add(detaljertKravgrunnlagPeriodeDto)
             }
-        }
+
         return detaljertKravgrunnlagDto
-    }
-
-    private fun erSammeMåned(periode: PeriodeIRequest): Boolean =
-        periode.fom.year == periode.tom.year && periode.fom.month == periode.tom.month
-
-    private fun splittPeriodeHvisFlereMåneder(periode: PeriodeIRequest): List<PeriodeDto> {
-        val perioder = mutableListOf<PeriodeDto>()
-
-        var fomMåned = YearMonth.of(periode.fom.year, periode.fom.month)
-        val tomMåned = YearMonth.of(periode.tom.year, periode.tom.month)
-
-        while (fomMåned <= tomMåned) {
-            perioder.add(
-                PeriodeDto().apply {
-                    fom = fomMåned.atDay(1)
-                    tom = fomMåned.atEndOfMonth()
-                },
-            )
-            fomMåned = fomMåned.plusMonths(1)
-        }
-
-        return perioder
     }
 
     suspend fun hentKravgrunnlag(eksternFagsakId: String): Ressurs<KravgrunnlagInfoForOppdatering> {

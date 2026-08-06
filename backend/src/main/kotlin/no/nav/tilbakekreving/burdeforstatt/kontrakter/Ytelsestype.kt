@@ -1,8 +1,11 @@
 package no.nav.tilbakekreving.burdeforstatt.kontrakter
 
+import no.nav.tilbakekreving.burdeforstatt.Periodetype
+
 enum class Ytelsestype(
     val kode: String,
     val navn: Map<Språkkode, String>,
+    val periodetype: Periodetype,
 ) {
     BARNETRYGD(
         "BA",
@@ -10,6 +13,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Barnetrygd",
             Språkkode.NN to "Barnetrygd",
         ),
+        Periodetype.Måned,
     ),
     OVERGANGSSTØNAD(
         "EFOG",
@@ -17,6 +21,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Overgangsstønad",
             Språkkode.NN to "Overgangsstønad",
         ),
+        Periodetype.Måned,
     ),
     BARNETILSYN(
         "EFBT",
@@ -24,6 +29,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Stønad til barnetilsyn",
             Språkkode.NN to "Stønad til barnetilsyn",
         ),
+        Periodetype.Måned,
     ),
     SKOLEPENGER(
         "EFSP",
@@ -31,6 +37,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Stønad til skolepenger",
             Språkkode.NN to "Stønad til skulepengar",
         ),
+        Periodetype.Måned,
     ),
     KONTANTSTØTTE(
         "KS",
@@ -38,6 +45,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Kontantstøtte",
             Språkkode.NN to "Kontantstøtte",
         ),
+        Periodetype.Måned,
     ),
     TILLEGGSSTØNAD(
         "TS",
@@ -45,6 +53,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Tilleggsstønad",
             Språkkode.NN to "Tilleggsstønad",
         ),
+        Periodetype.Meldekort,
     ),
     BOLIG_OG_OVERNATTING(
         "TS",
@@ -52,6 +61,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Bolig og overordning",
             Språkkode.NN to "Bustad og overnatting",
         ),
+        Periodetype.Meldekort,
     ),
     DAGLIG_REGISE(
         "TS",
@@ -59,6 +69,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Daglig regise",
             Språkkode.NN to "Dagleg reise",
         ),
+        Periodetype.Meldekort,
     ),
     FLYTTING(
         "TS",
@@ -66,6 +77,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Flytting",
             Språkkode.NN to "Flytting",
         ),
+        Periodetype.Meldekort,
     ),
     LÆREMIDLER(
         "TS",
@@ -73,6 +85,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Læremidler",
             Språkkode.NN to "Læremiddel",
         ),
+        Periodetype.Meldekort,
     ),
     PASS_AV_BARN(
         "TS",
@@ -80,6 +93,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Barnepass",
             Språkkode.NN to "Barnepass",
         ),
+        Periodetype.Meldekort,
     ),
     REISE_FOR_Å_KOMME_I_ARBEID(
         "TS",
@@ -87,6 +101,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Reise for å komme i arbeid",
             Språkkode.NN to "Reise for å kome i arbeid",
         ),
+        Periodetype.Meldekort,
     ),
     REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE(
         "TS",
@@ -94,6 +109,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Reise ved oppstart, avslutning eller hjemreise",
             Språkkode.NN to "Reise ved oppstart, avslutning eller heimreise",
         ),
+        Periodetype.Meldekort,
     ),
     REISE_TIL_SAMLING(
         "TS",
@@ -101,6 +117,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Reise til samling",
             Språkkode.NN to "Reise til samling",
         ),
+        Periodetype.Meldekort,
     ),
 
     ARBEIDSAVKLARINGSPENGER(
@@ -109,6 +126,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Arbeidsavklaringspenger",
             Språkkode.NN to "Arbeidsavklaringspengar",
         ),
+        Periodetype.Meldekort,
     ),
     TILTAKSPENGER(
         "TP",
@@ -116,6 +134,7 @@ enum class Ytelsestype(
             Språkkode.NB to "Tiltakspenger",
             Språkkode.NN to "Tiltakspengar",
         ),
+        Periodetype.Meldekort,
     ),
     ;
 
