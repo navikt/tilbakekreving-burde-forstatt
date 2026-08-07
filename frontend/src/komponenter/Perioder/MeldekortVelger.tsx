@@ -13,7 +13,6 @@ function leggTilDager(dato: Date, dager: number): Date {
     return new Date(dato.getFullYear(), dato.getMonth(), dato.getDate() + dager);
 }
 
-const ALLE_DAGER_UNNTATT_MANDAG = [0, 2, 3, 4, 5, 6];
 const DAGER_I_MELDEKORTPERIODE = 13;
 
 export const MeldekortVelger: FC<Props> = ({ indeks }: Props) => {
@@ -34,7 +33,6 @@ export const MeldekortVelger: FC<Props> = ({ indeks }: Props) => {
     const { datepickerProps, inputProps } = useDatepicker({
         fromDate: new Date('2015-01-01'),
         toDate: sisteGyldigeStartdato,
-        disabled: [{ dayOfWeek: ALLE_DAGER_UNNTATT_MANDAG }],
         onDateChange: (dato: Date | undefined) => {
             if (dato) {
                 setValue(`perioder.${indeks}.fom`, dato, {
