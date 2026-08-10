@@ -1,4 +1,4 @@
-val ktorVersion = "3.5.1"
+val ktorVersion = "3.5.2"
 val logbackVersion = "1.6.1"
 
 plugins {
@@ -30,7 +30,7 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:10.0.0.0")
-    implementation("org.messaginghub:pooled-jms:3.2.2")
+    implementation("org.messaginghub:pooled-jms:3.2.3")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -45,8 +45,8 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:7.1.0")
     implementation("org.postgresql:postgresql:42.7.13")
-    implementation("org.flywaydb:flyway-core:13.0.0")
-    implementation("org.flywaydb:flyway-database-postgresql:13.0.0")
+    implementation("org.flywaydb:flyway-core:13.2.0")
+    implementation("org.flywaydb:flyway-database-postgresql:13.2.0")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.2")
 }
