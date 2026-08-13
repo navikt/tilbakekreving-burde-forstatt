@@ -168,7 +168,7 @@ const App: FC = () => {
                                 </Heading>
                                 <VStack justify="space-between" gap="space-16" className="grow">
                                     <VStack>
-                                        <HStack gap="space-16" align="end">
+                                        <HStack gap="space-16" align="start">
                                             <Controller
                                                 name="ytelse"
                                                 control={metoder.control}
@@ -216,6 +216,7 @@ const App: FC = () => {
                                             <Checkbox
                                                 {...metoder.register('sendKravgrunnlag')}
                                                 size="small"
+                                                className="mt-7"
                                             >
                                                 Send kravgrunnlag
                                             </Checkbox>
