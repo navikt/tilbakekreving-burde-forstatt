@@ -8,7 +8,7 @@ import type { Ytelse as TYtelse } from '../../typer/ytelse.ts';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon } from '@navikt/aksel-icons';
-import { Alert, BodyLong, Button, Loader, Modal, TextField, VStack } from '@navikt/ds-react';
+import { Alert, BodyLong, Button, HGrid, Loader, Modal, TextField, VStack } from '@navikt/ds-react';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -157,7 +157,7 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <Modal.Body>
                             <VStack gap="space-24">
-                                <div className="flex items-end gap-4">
+                                <HGrid columns={3} align="start" gap="space-16">
                                     <TextField
                                         label="Ekstern fagsystem id"
                                         size="small"
@@ -187,14 +187,14 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                                         type="button"
                                         variant="secondary"
                                         size="small"
+                                        className="mt-7"
                                         icon={<PlusIcon aria-hidden />}
                                         onClick={håndterHentKravgrunnlag}
                                         loading={hentKravgrunnlagMutation.isPending}
-                                        className="shrink-0"
                                     >
                                         Hent kravgrunnlag
                                     </Button>
-                                </div>
+                                </HGrid>
 
                                 {hentKravgrunnlagMutation.isError && (
                                     <Alert variant="error" size="small">

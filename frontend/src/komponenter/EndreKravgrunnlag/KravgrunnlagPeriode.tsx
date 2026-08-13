@@ -88,9 +88,9 @@ export const KravgrunnlagPeriode: FC<Props> = ({
                     </Button>
                 )}
             </HStack>
-            <HStack gap="space-16" align="end">
+            <HStack gap="space-16" align="start">
                 <DatePicker {...datepickerProps} dropdownCaption>
-                    <HStack gap="space-16">
+                    <HStack gap="space-16" align="start">
                         <DatePicker.Input
                             {...fromInputProps}
                             label="Dato fra"
