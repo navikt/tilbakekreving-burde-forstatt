@@ -41,4 +41,8 @@ enum class Klassekoder(
         "TILTPENG",
         "KL_KODE_FEIL_ARBYT",
     ),
+    DAGPENGER(
+        "DP",
+        "KL_KODE_FEIL_ARBYT",
+    ),
 }

@@ -41,6 +41,7 @@ data class KafkaConfig(
                 "tilbake.privat-tilbakekreving-tilleggsstonad",
                 "tilbake.privat-tilbakekreving-arbeidsavklaringspenger",
                 "tilbake.privat-tilbakekreving-tiltakspenger",
+                "tilbake.privat-tilbakekreving-dagpenger",
             ),
         )
         return consumer

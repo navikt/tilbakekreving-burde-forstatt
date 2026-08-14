@@ -136,6 +136,14 @@ enum class Ytelsestype(
         ),
         Periodetype.Meldekort,
     ),
+    DAGPENGER(
+        "DP",
+        mapOf(
+            Språkkode.NB to "Dagpenger",
+            Språkkode.NN to "Dagpengar",
+        ),
+        Periodetype.Meldekort,
+    ),
     ;
 
     fun tilTema(): Tema =
@@ -155,6 +163,7 @@ enum class Ytelsestype(
             -> Tema.TSO
             ARBEIDSAVKLARINGSPENGER -> Tema.AAP
             TILTAKSPENGER -> Tema.IND
+            DAGPENGER -> Tema.DAG
         }
 
     fun tilKodeFagområdet(): String =
@@ -169,6 +178,7 @@ enum class Ytelsestype(
             REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE -> "TILLSTRO"
             REISE_TIL_SAMLING -> "TILLISTRS"
             TILTAKSPENGER -> "TILTPENG"
+            DAGPENGER -> "DP"
             else -> this.kode
         }
 
@@ -189,6 +199,7 @@ enum class Ytelsestype(
 
             ARBEIDSAVKLARINGSPENGER -> Klassekoder.ARBEIDSAVKLARINGSPENGER
             TILTAKSPENGER -> Klassekoder.TILTAKSPENGER
+            DAGPENGER -> Klassekoder.DAGPENGER
             OVERGANGSSTØNAD -> Klassekoder.OVERGANGSSTØNAD
             BARNETILSYN -> Klassekoder.BARNETILSYN
             SKOLEPENGER -> Klassekoder.SKOLEPENGER

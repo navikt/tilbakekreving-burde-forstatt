@@ -151,6 +151,7 @@ class TilbakekrevingService(
 
             "Arbeidsavklaringspenger" -> Fagsystem.AAP
             "Tiltakspenger" -> Fagsystem.TP
+            "Dagpenger" -> Fagsystem.DP
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
 
@@ -170,6 +171,7 @@ class TilbakekrevingService(
             "ReiseTilSamling" -> Ytelsestype.REISE_TIL_SAMLING
             "Arbeidsavklaringspenger" -> Ytelsestype.ARBEIDSAVKLARINGSPENGER
             "Tiltakspenger" -> Ytelsestype.TILTAKSPENGER
+            "Dagpenger" -> Ytelsestype.DAGPENGER
             else -> throw IllegalArgumentException("Ukjent ytelse: $ytelseFraRequest")
         }
 
@@ -497,6 +499,7 @@ class TilbakekrevingService(
                 "ReiseTilSamling",
                 "Arbeidsavklaringspenger",
                 "Tiltakspenger",
+                "Dagpenger",
             )
 
         val TILLEGGSSTØNAD_YTELSER =
