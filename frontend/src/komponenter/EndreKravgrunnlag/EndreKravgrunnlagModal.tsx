@@ -157,7 +157,7 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <Modal.Body>
                             <VStack gap="space-24">
-                                <HGrid columns={3} align="start" gap="space-16">
+                                <HGrid columns="0.5fr 1fr auto" align="start" gap="space-16">
                                     <TextField
                                         label="Ekstern fagsystem id"
                                         size="small"
