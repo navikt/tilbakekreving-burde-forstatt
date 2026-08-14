@@ -102,8 +102,11 @@ class TilbakekrevingService(
         repository.lagre(mapTilTidligereInnsendtKrav(kravgrunnlagDto))
         return Ressurs.success(
             data =
-                "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/${opprettTilbakekrevingRequest.fagsystem}/fagsak/" +
-                    "${opprettTilbakekrevingRequest.eksternFagsakId}/behandling/$behandlingId",
+                byggBehandlingUrl(
+                    opprettTilbakekrevingRequest.fagsystem,
+                    opprettTilbakekrevingRequest.eksternFagsakId,
+                    behandlingId,
+                ),
             melding = "Behandling og kravgrunnlag er sendt til tilbakekreving-backend",
         )
     }
@@ -382,8 +385,9 @@ class TilbakekrevingService(
         token: String,
         ytelsestype: String,
         kravgrunnlagInfo: KravgrunnlagInfoForOppdatering,
-    ): Boolean {
+    ): Ressurs<String> {
         log.info("Oppdaterer kravgrunnlag for fagsystemId: $eksternFagsakId")
+        val fagsystem = hentFagsystem(ytelsestype)
         val ytelsestype = hentYtelsesType(ytelsestype)
         val gammelKravgrunnlag =
             repository.hent(eksternFagsakId)
@@ -453,8 +457,18 @@ class TilbakekrevingService(
 
         repository.lagre(mapTilTidligereInnsendtKrav(oppdatertKravgrunnlag))
 
-        return true
+        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
+        return Ressurs.success(
+            data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
+            melding = "Kravgrunnlag oppdatert",
+        )
     }
+
+    private fun byggBehandlingUrl(
+        fagsystem: Fagsystem,
+        eksternFagsakId: String,
+        behandlingId: String,
+    ): String = "https://tilbakekreving.ansatt.dev.nav.no/fagsystem/$fagsystem/fagsak/$eksternFagsakId/behandling/$behandlingId"
 
     private fun mapTilTidligereInnsendtKrav(dto: DetaljertKravgrunnlagDto): TidligereInnsendtKrav =
         TidligereInnsendtKrav(
