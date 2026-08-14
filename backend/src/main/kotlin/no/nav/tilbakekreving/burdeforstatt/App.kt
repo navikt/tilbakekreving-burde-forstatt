@@ -291,7 +291,7 @@ private suspend fun oppdaterKravgrunnlag(
     eksternFagsakId: String,
     requestBody: KravgrunnlagInfoForOppdatering,
 ) {
-    val ok =
+    val response =
         tilbakekrevingService.oppdaterKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
             token = accessToken,
@@ -299,8 +299,8 @@ private suspend fun oppdaterKravgrunnlag(
             kravgrunnlagInfo = requestBody,
         )
 
-    val status = if (ok) HttpStatusCode.OK else HttpStatusCode.InternalServerError
-    call.respond(status)
+    val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status, response)
 }
 
 private suspend fun handleError(
