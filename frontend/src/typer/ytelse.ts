@@ -57,6 +57,10 @@ export const ytelseGrupper = [
         fagsystem: 'Tiltakspenger',
         ytelser: [ytelseSchema.enum.Tiltakspenger],
     },
+    {
+        fagsystem: 'Dagpenger',
+        ytelser: [ytelseSchema.enum.Dagpenger],
+    },
 ] as const;
 
 export const månedsytelser = [

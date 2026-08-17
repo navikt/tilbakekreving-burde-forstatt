@@ -11,4 +11,5 @@ enum class Tema(
     TSO("TSO", "B287"),
     AAP("AAP", "B287"),
     IND("TILTAKSPENGER", "B470"),
+    DAG("DAGPENGER", "B286"),
 }

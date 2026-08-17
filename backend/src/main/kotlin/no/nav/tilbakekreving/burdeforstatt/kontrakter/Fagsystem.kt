@@ -16,4 +16,5 @@ enum class Fagsystem(
     TS("Tilleggsstønad", "TSO"),
     AAP("Arbeidsavklaringspenger", "AAP"),
     TP("Tiltakspenger", "IND"),
+    DP("Dagpenger", "DAG"),
 }
