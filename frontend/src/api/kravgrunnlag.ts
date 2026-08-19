@@ -8,7 +8,6 @@ import {
 export const hentKravgrunnlagMutationKey = ['hentKravgrunnlag'] as const;
 
 export type HentKravgrunnlagVariabler = {
-    ytelse: string;
     eksternFagsystemId: string;
 };
 
@@ -34,20 +33,15 @@ export const tilEndreKravgrunnlagPerioder = (json: unknown): EndreKravgrunnlagPe
 };
 
 export const hentKravgrunnlagFraApi = async ({
-    ytelse,
     eksternFagsystemId,
 }: HentKravgrunnlagVariabler): Promise<EndreKravgrunnlagPeriode[]> => {
-    const encodedYtelse = encodeURIComponent(ytelse.trim());
     const encodedEksternFagsystemId = encodeURIComponent(eksternFagsystemId.trim());
 
-    const response = await fetch(
-        `/api/kravgrunnlag/${encodedYtelse}/${encodedEksternFagsystemId}`,
-        {
-            method: 'GET',
-            headers: { Accept: 'application/json' },
-            credentials: 'include',
-        }
-    );
+    const response = await fetch(`/api/kravgrunnlag/${encodedEksternFagsystemId}`, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error(`Klarte ikke hente kravgrunnlag (status ${response.status})`);
@@ -59,7 +53,6 @@ export const hentKravgrunnlagFraApi = async ({
 export const lagreKravgrunnlagMutationKey = ['lagreKravgrunnlag'] as const;
 
 export type LagreKravgrunnlagVariabler = {
-    ytelse: string;
     eksternFagsystemId: string;
     perioder: EndreKravgrunnlagPeriode[];
 };
@@ -91,22 +84,17 @@ export const tilBehandlingUrl = (json: unknown): string | undefined => {
 };
 
 export const lagreKravgrunnlag = async ({
-    ytelse,
     eksternFagsystemId,
     perioder,
 }: LagreKravgrunnlagVariabler): Promise<string | undefined> => {
-    const encodedYtelse = encodeURIComponent(ytelse.trim());
     const encodedEksternFagsystemId = encodeURIComponent(eksternFagsystemId.trim());
 
-    const response = await fetch(
-        `/api/kravgrunnlag/${encodedYtelse}/${encodedEksternFagsystemId}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(tilLagreKravgrunnlagBody(perioder)),
-        }
-    );
+    const response = await fetch(`/api/kravgrunnlag/${encodedEksternFagsystemId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(tilLagreKravgrunnlagBody(perioder)),
+    });
 
     if (!response.ok) {
         throw new Error(`Klarte ikke lagre kravgrunnlag (status ${response.status})`);

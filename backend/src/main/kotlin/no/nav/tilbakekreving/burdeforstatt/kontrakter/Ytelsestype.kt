@@ -206,7 +206,31 @@ enum class Ytelsestype(
             KONTANTSTØTTE -> Klassekoder.KONTANTSTØTTE
         }
 
+    fun tilFagsystem(): Fagsystem =
+        when (this) {
+            BARNETRYGD -> Fagsystem.BA
+            OVERGANGSSTØNAD, BARNETILSYN, SKOLEPENGER -> Fagsystem.EF
+            KONTANTSTØTTE -> Fagsystem.KONT
+            TILLEGGSSTØNAD,
+            BOLIG_OG_OVERNATTING,
+            DAGLIG_REGISE,
+            FLYTTING,
+            LÆREMIDLER,
+            PASS_AV_BARN,
+            REISE_FOR_Å_KOMME_I_ARBEID,
+            REISE_VED_OPPSTART_AVSLUTNING_HJEMREISE,
+            REISE_TIL_SAMLING,
+            -> Fagsystem.TS
+            ARBEIDSAVKLARINGSPENGER -> Fagsystem.AAP
+            TILTAKSPENGER -> Fagsystem.TP
+            DAGPENGER -> Fagsystem.DP
+        }
+
     companion object {
+        fun fraKodeFagområdet(kodeFagområde: String): Ytelsestype =
+            entries.firstOrNull { it.tilKodeFagområdet() == kodeFagområde }
+                ?: throw IllegalArgumentException("Ukjent kodeFagområde: $kodeFagområde")
+
         fun tilYtelsestype(kode: String): Ytelsestype =
             when (kode) {
                 "BA" -> BARNETRYGD

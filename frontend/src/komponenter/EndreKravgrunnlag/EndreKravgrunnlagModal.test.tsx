@@ -78,7 +78,6 @@ const lukkKnappIKvittering = (bekreftelse: HTMLElement): HTMLElement => {
 
 const eksternFagsystemIdFelt = (): HTMLElement =>
     within(modal()).getByLabelText('Ekstern fagsystem id');
-const ytelseVelger = (): HTMLElement => within(modal()).getByLabelText('Ytelse');
 const datoFraVelger = (): HTMLElement => within(modal()).getByLabelText('Dato fra');
 const datoTilVelger = (): HTMLElement => within(modal()).getByLabelText('Dato til');
 const feilutbetaltFelt = (): HTMLElement => within(modal()).getByLabelText('Feilutbetalt');
@@ -106,7 +105,7 @@ const ventPåPeriodeOverskrift = (nr: number): Promise<HTMLElement> =>
 
 const hentKravgrunnlag = async (user: UserEvent): Promise<void> => {
     await user.type(eksternFagsystemIdFelt(), 'FAGSAK-123');
-    await user.selectOptions(ytelseVelger(), 'Barnetrygd');
+
     await user.click(hentKravgrunnlagKnapp());
     await ventPåPeriodeOverskrift(1);
 };
@@ -138,7 +137,6 @@ describe('Endre kravgrunnlag', () => {
         renderModal();
 
         expect(eksternFagsystemIdFelt()).toHaveValue('');
-        expect(ytelseVelger()).toBeInTheDocument();
         expect(hentKravgrunnlagKnapp()).toBeInTheDocument();
 
         expect(finnPeriodeOverskrift(1)).not.toBeInTheDocument();
@@ -156,7 +154,6 @@ describe('Endre kravgrunnlag', () => {
         await user.click(hentKravgrunnlagKnapp());
 
         expect(within(modal()).getByText('Ekstern fagsystem id er påkrevd')).toBeInTheDocument();
-        expect(within(modal()).getByText('Ytelsestype er påkrevd')).toBeInTheDocument();
         expect(antallKall).toBe(0);
     });
 
@@ -186,7 +183,6 @@ describe('Endre kravgrunnlag', () => {
         });
 
         await user.type(eksternFagsystemIdFelt(), 'FAGSAK-123');
-        await user.selectOptions(ytelseVelger(), 'Barnetrygd');
         await user.click(hentKravgrunnlagKnapp());
 
         expect(
@@ -228,7 +224,6 @@ describe('Endre kravgrunnlag', () => {
 
         await waitFor(() => expect(sendteVariabler).toBeDefined());
         expect(sendteVariabler).toEqual({
-            ytelse: 'Barnetrygd',
             eksternFagsystemId: 'FAGSAK-123',
             perioder: enPeriode,
         });
