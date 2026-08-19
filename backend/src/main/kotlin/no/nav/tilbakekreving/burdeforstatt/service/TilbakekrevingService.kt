@@ -383,15 +383,14 @@ class TilbakekrevingService(
     suspend fun oppdaterKravgrunnlag(
         eksternFagsakId: String,
         token: String,
-        ytelsestype: String,
         kravgrunnlagInfo: KravgrunnlagInfoForOppdatering,
     ): Ressurs<String> {
         log.info("Oppdaterer kravgrunnlag for fagsystemId: $eksternFagsakId")
-        val fagsystem = hentFagsystem(ytelsestype)
-        val ytelsestype = hentYtelsesType(ytelsestype)
         val gammelKravgrunnlag =
             repository.hent(eksternFagsakId)
                 ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for oppdatering")
+        val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
+        val fagsystem = ytelsestype.tilFagsystem()
         val oppdatertKravgrunnlag =
             DetaljertKravgrunnlagDto().apply {
                 kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId

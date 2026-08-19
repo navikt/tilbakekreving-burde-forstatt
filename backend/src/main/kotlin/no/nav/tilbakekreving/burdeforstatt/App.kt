@@ -186,7 +186,7 @@ private fun Application.registerApiRoutes(
                     }
                 }
 
-                get("/kravgrunnlag/{ytelsestype}/{eksternFagsakId}") {
+                get("/kravgrunnlag/{eksternFagsakId}") {
                     val principal = call.principal<TexasPrincipal>()
                     val navIdent = principal?.userinfo?.ident
                     if (navIdent == null) {
@@ -195,10 +195,9 @@ private fun Application.registerApiRoutes(
                         return@get
                     }
 
-                    val ytelsestype = call.parameters["ytelsestype"]
                     val eksternFagsakId = call.parameters["eksternFagsakId"]
-                    if (ytelsestype.isNullOrBlank() || eksternFagsakId.isNullOrBlank()) {
-                        call.respond(HttpStatusCode.BadRequest, "Mangler fagsystem eller eksternFagsakId i path")
+                    if (eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler eksternFagsakId i path")
                         return@get
                     }
 
@@ -209,7 +208,7 @@ private fun Application.registerApiRoutes(
                     )
                 }
 
-                post("/kravgrunnlag/{ytelsestype}/{eksternFagsakId}") {
+                post("/kravgrunnlag/{eksternFagsakId}") {
                     val principal = call.principal<TexasPrincipal>()
                     val navIdent = principal?.userinfo?.ident
                     if (navIdent == null) {
@@ -228,10 +227,9 @@ private fun Application.registerApiRoutes(
                         return@post
                     }
 
-                    val ytelsestype = call.parameters["ytelsestype"]
                     val eksternFagsakId = call.parameters["eksternFagsakId"]
-                    if (ytelsestype.isNullOrBlank() || eksternFagsakId.isNullOrBlank()) {
-                        call.respond(HttpStatusCode.BadRequest, "Mangler fagsystem eller eksternFagsakId i path")
+                    if (eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler eksternFagsakId i path")
                         return@post
                     }
                     val requestBody = call.receive<KravgrunnlagInfoForOppdatering>()
@@ -241,7 +239,6 @@ private fun Application.registerApiRoutes(
                                 tilbakekrevingService = tilbakekrevingService,
                                 call = call,
                                 accessToken = tokenResponse.accessToken,
-                                ytelsestype = ytelsestype,
                                 eksternFagsakId = eksternFagsakId,
                                 requestBody = requestBody,
                             )
@@ -287,7 +284,6 @@ private suspend fun oppdaterKravgrunnlag(
     tilbakekrevingService: TilbakekrevingService,
     call: ApplicationCall,
     accessToken: String,
-    ytelsestype: String,
     eksternFagsakId: String,
     requestBody: KravgrunnlagInfoForOppdatering,
 ) {
@@ -295,7 +291,6 @@ private suspend fun oppdaterKravgrunnlag(
         tilbakekrevingService.oppdaterKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
             token = accessToken,
-            ytelsestype = ytelsestype,
             kravgrunnlagInfo = requestBody,
         )
 

@@ -4,25 +4,16 @@ import type {
     EndreKravgrunnlagFormData,
     EndreKravgrunnlagPeriode,
 } from '../../typer/endreKravgrunnlag';
-import type { Ytelse as TYtelse } from '../../typer/ytelse.ts';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon } from '@navikt/aksel-icons';
 import { Alert, BodyLong, Button, HGrid, Loader, Modal, TextField, VStack } from '@navikt/ds-react';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import {
-    Controller,
-    type ControllerRenderProps,
-    FormProvider,
-    type SubmitHandler,
-    useFieldArray,
-    useForm,
-} from 'react-hook-form';
+import { FormProvider, type SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 
 import { hentKravgrunnlagMutationKey, lagreKravgrunnlagMutationKey } from '../../api/kravgrunnlag';
 import { endreKravgrunnlagSchema } from '../../typer/endreKravgrunnlag';
-import Ytelse from '../Ytelse.tsx';
 import { KravgrunnlagPeriode } from './KravgrunnlagPeriode';
 
 interface Props {
@@ -40,7 +31,6 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
         resolver: zodResolver(endreKravgrunnlagSchema),
         defaultValues: {
             eksternFagsystemId: '',
-            ytelse: '',
             perioder: [],
         },
         reValidateMode: 'onChange',
@@ -67,7 +57,7 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
     const hentKravgrunnlagMutation = useMutation<
         EndreKravgrunnlagPeriode[],
         Error,
-        { ytelse: string; eksternFagsystemId: string }
+        { eksternFagsystemId: string }
     >({
         mutationKey: hentKravgrunnlagMutationKey,
         onSuccess: (perioder: EndreKravgrunnlagPeriode[]): void => {
@@ -78,13 +68,13 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
     });
 
     const håndterHentKravgrunnlag = async (): Promise<void> => {
-        const erGyldig = await trigger(['eksternFagsystemId', 'ytelse']);
+        const erGyldig = await trigger(['eksternFagsystemId']);
         if (!erGyldig) {
             return;
         }
 
-        const { eksternFagsystemId, ytelse } = getValues();
-        hentKravgrunnlagMutation.mutate({ eksternFagsystemId, ytelse });
+        const { eksternFagsystemId } = getValues();
+        hentKravgrunnlagMutation.mutate({ eksternFagsystemId });
     };
 
     const lagreKravgrunnlagMutation = useMutation<
@@ -116,7 +106,6 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
         data: EndreKravgrunnlagFormData
     ): void => {
         lagreKravgrunnlagMutation.mutate({
-            ytelse: data.ytelse,
             eksternFagsystemId: data.eksternFagsystemId,
             perioder: data.perioder,
         });
@@ -157,31 +146,13 @@ export const EndreKravgrunnlagModal = ({ ref }: Props): JSX.Element => {
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <Modal.Body>
                             <VStack gap="space-24">
-                                <HGrid columns="0.5fr 1fr auto" align="start" gap="space-16">
+                                <HGrid columns="1fr auto" align="start" gap="space-16">
                                     <TextField
                                         label="Ekstern fagsystem id"
                                         size="small"
                                         className="flex-1"
                                         {...register('eksternFagsystemId')}
                                         error={errors.eksternFagsystemId?.message}
-                                    />
-                                    <Controller
-                                        name="ytelse"
-                                        control={control}
-                                        render={({
-                                            field,
-                                        }: {
-                                            field: ControllerRenderProps<
-                                                EndreKravgrunnlagFormData,
-                                                'ytelse'
-                                            >;
-                                        }): JSX.Element => (
-                                            <Ytelse
-                                                setValgtYtelse={(
-                                                    nyYtelse: TYtelse | undefined
-                                                ): void => field.onChange(nyYtelse ?? '')}
-                                            />
-                                        )}
                                     />
                                     <Button
                                         type="button"
