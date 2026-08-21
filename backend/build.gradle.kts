@@ -1,5 +1,5 @@
-val ktorVersion = "3.5.1"
-val logbackVersion = "1.6.1"
+val ktorVersion = "3.5.2"
+val logbackVersion = "1.6.3"
 
 plugins {
     kotlin("jvm") version "2.4.10"
@@ -30,13 +30,13 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("com.ibm.mq:com.ibm.mq.jakarta.client:10.0.0.0")
-    implementation("org.messaginghub:pooled-jms:3.2.2")
+    implementation("org.messaginghub:pooled-jms:3.2.4")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.1")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.9")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")
@@ -45,10 +45,10 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:7.1.0")
     implementation("org.postgresql:postgresql:42.7.13")
-    implementation("org.flywaydb:flyway-core:13.0.0")
-    implementation("org.flywaydb:flyway-database-postgresql:13.0.0")
+    implementation("org.flywaydb:flyway-core:13.3.0")
+    implementation("org.flywaydb:flyway-database-postgresql:13.3.0")
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.3")
 }
 
 java {
