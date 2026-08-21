@@ -130,8 +130,8 @@ const App: FC = () => {
             <VStack padding="space-16" className="w-full grow bg-ax-bg-neutral-soft">
                 <VStack
                     gap="space-16"
-                    padding="space-24"
-                    className="w-full grow rounded-xl border border-ax-border-neutral-subtle bg-ax-bg-default"
+                    padding="space-16"
+                    className="mx-auto w-full max-w-[1600px] grow rounded-xl border border-ax-border-neutral-subtle bg-ax-bg-default"
                 >
                     <HStack justify="space-between" align="end">
                         <VStack gap="space-8">
