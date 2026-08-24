@@ -133,7 +133,7 @@ const App: FC = () => {
                     padding="space-16"
                     className="mx-auto w-full max-w-[1600px] grow rounded-xl border border-ax-border-neutral-subtle bg-ax-bg-default"
                 >
-                    <HStack justify="space-between" align="end">
+                    <HStack gap="space-16" justify="space-between" align="end">
                         <VStack gap="space-8">
                             <Heading size="medium">Burde forstått 🤔</Heading>
                             <InlineMessage status="info">
@@ -147,7 +147,7 @@ const App: FC = () => {
                             icon={<ReceiptIcon aria-hidden />}
                             onClick={(): void => endreKravgrunnlagModalRef.current?.showModal()}
                         >
-                            Rediger kravgrunnlag
+                            Endre kravgrunnlag
                         </Button>
                     </HStack>
 
@@ -167,7 +167,7 @@ const App: FC = () => {
                                     Opprett testdata
                                 </Heading>
                                 <VStack justify="space-between" gap="space-16" className="grow">
-                                    <VStack>
+                                    <VStack gap="space-16" className="grow">
                                         <HStack gap="space-16" align="start">
                                             <Controller
                                                 name="ytelse"
@@ -216,7 +216,7 @@ const App: FC = () => {
                                             <Checkbox
                                                 {...metoder.register('sendKravgrunnlag')}
                                                 size="small"
-                                                className="mt-7"
+                                                className="self-end"
                                             >
                                                 Send kravgrunnlag
                                             </Checkbox>
