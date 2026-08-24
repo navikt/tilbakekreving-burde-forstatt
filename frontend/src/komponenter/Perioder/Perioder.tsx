@@ -53,17 +53,17 @@ const Periode: FC<PeriodeInputProps> = ({ indeks, onFjern }: PeriodeInputProps) 
                 <BodyShort size="large" weight="semibold">
                     Periode {indeks + 1}
                 </BodyShort>
-                {onFjern && (
-                    <Button
-                        variant="tertiary"
-                        size="small"
-                        icon={<XMarkOctagonIcon aria-hidden />}
-                        onClick={onFjern}
-                        type="button"
-                    >
-                        Fjern
-                    </Button>
-                )}
+                <Button
+                    variant="tertiary"
+                    size="small"
+                    icon={<XMarkOctagonIcon aria-hidden />}
+                    onClick={onFjern}
+                    type="button"
+                    className={onFjern ? '' : 'invisible'}
+                    aria-hidden={onFjern ? 'false' : 'true'}
+                >
+                    Fjern
+                </Button>
             </HStack>
             {erMånedsytelse(ytelse) ? (
                 <Maanedsvelger indeks={indeks} />
