@@ -4,7 +4,7 @@ import type { Ytelse as TYtelse } from './typer/ytelse';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRightIcon, ReceiptIcon } from '@navikt/aksel-icons';
-import { Box, Checkbox, Heading, InlineMessage } from '@navikt/ds-react';
+import { Box, Checkbox, Heading, HGrid, InlineMessage } from '@navikt/ds-react';
 import { Button } from '@navikt/ds-react/Button';
 import { HStack, VStack } from '@navikt/ds-react/Stack';
 import { TextField } from '@navikt/ds-react/TextField';
@@ -168,7 +168,12 @@ const App: FC = () => {
                                 </Heading>
                                 <VStack justify="space-between" gap="space-16" className="grow">
                                     <VStack gap="space-16" className="grow">
-                                        <HStack gap="space-16" align="start">
+                                        <HGrid
+                                            columns={{ lg: '20rem 20rem auto' }}
+                                            gap="space-16"
+                                            align="start"
+                                            className="lg:min-h-20"
+                                        >
                                             <Controller
                                                 name="ytelse"
                                                 control={metoder.control}
@@ -216,11 +221,11 @@ const App: FC = () => {
                                             <Checkbox
                                                 {...metoder.register('sendKravgrunnlag')}
                                                 size="small"
-                                                className="self-end"
+                                                className="lg:min-h-20 lg:mt-7"
                                             >
                                                 Send kravgrunnlag
                                             </Checkbox>
-                                        </HStack>
+                                        </HGrid>
 
                                         {watchedYtelse && <Perioder />}
                                     </VStack>
