@@ -134,7 +134,7 @@ const Perioder: FC = () => {
 
     return (
         <section>
-            <HStack gap="space-16" paddingBlock="space-16">
+            <HStack gap="space-16" paddingBlock="space-0 space-16">
                 {fields.map((_, index) => (
                     <Periode
                         key={stableKeys[index]}
