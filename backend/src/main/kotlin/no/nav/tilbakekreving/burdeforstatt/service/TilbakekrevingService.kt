@@ -300,47 +300,48 @@ class TilbakekrevingService(
                 saksbehId = "K231B433"
                 referanse = "1"
                 tilbakekrevingsPeriode.addAll(
-                    requestFraBurdeForstatt.perioder.flatMap { periode ->
-                        ytelse.periodetype
-                            .splitt(Periode(periode.fom, periode.tom), periode.kravgrunnlagBelop.toLong())
-                            .map { splittetPeriode ->
-                                val detaljertKravgrunnlagPeriodeDto =
-                                    DetaljertKravgrunnlagPeriodeDto().apply {
-                                        this.periode =
-                                            PeriodeDto().apply {
-                                                fom = splittetPeriode.periode.fom
-                                                tom = splittetPeriode.periode.tom
-                                            }
-                                        belopSkattMnd = BigDecimal(0.00)
-                                    }
+                    requestFraBurdeForstatt.perioder
+                        .flatMap { periode ->
+                            ytelse.periodetype
+                                .splitt(Periode(periode.fom, periode.tom), periode.kravgrunnlagBelop.toLong())
+                                .map { splittetPeriode ->
+                                    val detaljertKravgrunnlagPeriodeDto =
+                                        DetaljertKravgrunnlagPeriodeDto().apply {
+                                            this.periode =
+                                                PeriodeDto().apply {
+                                                    fom = splittetPeriode.periode.fom
+                                                    tom = splittetPeriode.periode.tom
+                                                }
+                                            belopSkattMnd = BigDecimal(0.00)
+                                        }
 
-                                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
-                                    DetaljertKravgrunnlagBelopDto().apply {
-                                        kodeKlasse =
-                                            opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().ytelsesKlassekode
-                                        typeKlasse = TypeKlasseDto.YTEL
-                                        belopOpprUtbet = splittetPeriode.beløp.toBigDecimal()
-                                        belopNy = BigDecimal(0.00)
-                                        belopTilbakekreves = splittetPeriode.beløp.toBigDecimal()
-                                        belopUinnkrevd = BigDecimal(0.00)
-                                        skattProsent = BigDecimal(0.00)
-                                    },
-                                )
-                                detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
-                                    DetaljertKravgrunnlagBelopDto().apply {
-                                        kodeKlasse =
-                                            opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().feilutbetalingKlassekose
-                                        typeKlasse = TypeKlasseDto.FEIL
-                                        belopOpprUtbet = BigDecimal(0)
-                                        belopNy = splittetPeriode.beløp.toBigDecimal()
-                                        belopTilbakekreves = BigDecimal(0)
-                                        belopUinnkrevd = BigDecimal(0.00)
-                                        skattProsent = BigDecimal(0.00)
-                                    },
-                                )
-                                detaljertKravgrunnlagPeriodeDto
-                            }
-                    },
+                                    detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                                        DetaljertKravgrunnlagBelopDto().apply {
+                                            kodeKlasse =
+                                                opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().ytelsesKlassekode
+                                            typeKlasse = TypeKlasseDto.YTEL
+                                            belopOpprUtbet = splittetPeriode.beløp.toBigDecimal()
+                                            belopNy = BigDecimal(0.00)
+                                            belopTilbakekreves = splittetPeriode.beløp.toBigDecimal()
+                                            belopUinnkrevd = BigDecimal(0.00)
+                                            skattProsent = BigDecimal(0.00)
+                                        },
+                                    )
+                                    detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
+                                        DetaljertKravgrunnlagBelopDto().apply {
+                                            kodeKlasse =
+                                                opprettTilbakekrevingRequest.ytelsestype.tilKlassekoder().feilutbetalingKlassekose
+                                            typeKlasse = TypeKlasseDto.FEIL
+                                            belopOpprUtbet = BigDecimal(0)
+                                            belopNy = splittetPeriode.beløp.toBigDecimal()
+                                            belopTilbakekreves = BigDecimal(0)
+                                            belopUinnkrevd = BigDecimal(0.00)
+                                            skattProsent = BigDecimal(0.00)
+                                        },
+                                    )
+                                    detaljertKravgrunnlagPeriodeDto
+                                }
+                        }.sortedBy { it.periode.fom },
                 )
             }
 
