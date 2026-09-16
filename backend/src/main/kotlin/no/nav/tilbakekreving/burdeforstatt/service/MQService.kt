@@ -7,7 +7,6 @@ import jakarta.jms.Session
 import jakarta.jms.TextMessage
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.util.Marshaller
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import org.slf4j.LoggerFactory
 
 class MQService(
@@ -16,7 +15,7 @@ class MQService(
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun sendKravgrunnlag(
-        detaljertKravgrunnlagMelding: DetaljertKravgrunnlagMelding,
+        kravgrunnlag: Any?,
         kø: String,
     ) {
         try {
@@ -25,22 +24,21 @@ class MQService(
             val queue: Queue = session.createQueue(kø)
             val producer: MessageProducer = session.createProducer(queue)
 
-            val dtoXml = Marshaller.marshall(detaljertKravgrunnlagMelding)
+            val dtoXml = Marshaller.marshall(kravgrunnlag)
+
             val message: TextMessage = session.createTextMessage(dtoXml)
             producer.send(message)
 
             connection.close()
         } catch (e: JMSException) {
             log.warn(
-                "Kunne ikke sende kravgrunnlag med id {} til MQ",
-                detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId,
+                "Kunne ikke sende kravgrunnlag til MQ",
                 e,
             )
             throw e
         } catch (e: Exception) {
             log.warn(
-                "Kunne ikke sende kravgrunnlag med id {} til MQ",
-                detaljertKravgrunnlagMelding.detaljertKravgrunnlag?.kravgrunnlagId,
+                "Kunne ikke sende kravgrunnlag til MQ",
                 e,
             )
             throw e

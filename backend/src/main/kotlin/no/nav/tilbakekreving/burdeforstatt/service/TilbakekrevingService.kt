@@ -33,6 +33,8 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDt
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagMelding
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
+import no.nav.tilbakekreving.status.v1.EndringKravOgVedtakstatus
+import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import no.nav.tilbakekreving.typer.v1.TypeKlasseDto
@@ -392,6 +394,88 @@ class TilbakekrevingService(
                 ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for oppdatering")
         val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
         val fagsystem = ytelsestype.tilFagsystem()
+
+        enderKravgrunnlag(eksternFagsakId, kravgrunnlagInfo, gammelKravgrunnlag)
+
+        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
+        return Ressurs.success(
+            data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
+            melding = "Kravgrunnlag oppdatert",
+        )
+    }
+
+    suspend fun bortfallAvKravgrunnlag(
+        eksternFagsakId: String,
+        token: String,
+    ): Ressurs<String> {
+        val gammelKravgrunnlag =
+            repository.hent(eksternFagsakId)
+                ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for avslutting")
+        val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
+        val fagsystem = ytelsestype.tilFagsystem()
+        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
+
+        val oppdaterKravOgVedtakstatuss =
+            KravOgVedtakstatus().apply {
+                vedtakId = gammelKravgrunnlag.vedtakId
+                kodeStatusKrav = Kravstatuskode.AVSLUTTET.oppdragKode
+                kodeFagomraade = gammelKravgrunnlag.kodeFagomraade
+                fagsystemId = gammelKravgrunnlag.fagsystemId
+                vedtakGjelderId = gammelKravgrunnlag.vedtakGjelderId
+                typeGjelderId = gammelKravgrunnlag.typeGjelderId
+                referanse = "1"
+            }
+        sendKravgrunnlagEllerKravOgVedtakstatus(
+            EndringKravOgVedtakstatus().apply {
+                kravOgVedtakstatus = oppdaterKravOgVedtakstatuss
+            },
+        )
+
+        repository.lager(kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId, kravOgVedtakstatus = oppdaterKravOgVedtakstatuss)
+        return Ressurs.success(
+            data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
+            melding = "Kravgrunnlag avsluttet",
+        )
+    }
+
+    suspend fun sperreKravgrunnlag(
+        eksternFagsakId: String,
+        token: String,
+    ): Ressurs<String> {
+        val gammelKravgrunnlag =
+            repository.hent(eksternFagsakId)
+                ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for sperring")
+        val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
+        val fagsystem = ytelsestype.tilFagsystem()
+        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
+        val oppdatertKravOgVedtakstatus =
+            KravOgVedtakstatus().apply {
+                vedtakId = gammelKravgrunnlag.vedtakId
+                kodeStatusKrav = Kravstatuskode.SPERRET.oppdragKode
+                kodeFagomraade = gammelKravgrunnlag.kodeFagomraade
+                fagsystemId = gammelKravgrunnlag.fagsystemId
+                vedtakGjelderId = gammelKravgrunnlag.vedtakGjelderId
+                typeGjelderId = gammelKravgrunnlag.typeGjelderId
+                referanse = "1"
+            }
+        sendKravgrunnlagEllerKravOgVedtakstatus(
+            EndringKravOgVedtakstatus().apply {
+                kravOgVedtakstatus = oppdatertKravOgVedtakstatus
+            },
+        )
+        repository.lager(kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId, kravOgVedtakstatus = oppdatertKravOgVedtakstatus)
+        return Ressurs.success(
+            data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
+            melding = "Kravgrunnlag sperret",
+        )
+    }
+
+    private suspend fun enderKravgrunnlag(
+        eksternFagsakId: String,
+        kravgrunnlagInfo: KravgrunnlagInfoForOppdatering,
+        gammelKravgrunnlag: TidligereInnsendtKrav,
+    ) {
+        val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
         val oppdatertKravgrunnlag =
             DetaljertKravgrunnlagDto().apply {
                 kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId
@@ -448,19 +532,19 @@ class TilbakekrevingService(
 
         log.info("Sender oppdatert kravgrunnlag for fagsystemId: $eksternFagsakId")
 
-        mqService.sendKravgrunnlag(
+        sendKravgrunnlagEllerKravOgVedtakstatus(
             DetaljertKravgrunnlagMelding().apply {
                 detaljertKravgrunnlag = oppdatertKravgrunnlag
             },
-            mqNyModell,
         )
 
         repository.lagre(mapTilTidligereInnsendtKrav(oppdatertKravgrunnlag))
+    }
 
-        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
-        return Ressurs.success(
-            data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
-            melding = "Kravgrunnlag oppdatert",
+    private fun sendKravgrunnlagEllerKravOgVedtakstatus(krav: Any) {
+        mqService.sendKravgrunnlag(
+            krav,
+            mqNyModell,
         )
     }
 

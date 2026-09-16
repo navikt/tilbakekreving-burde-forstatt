@@ -7,4 +7,6 @@ enum class Kravstatuskode(
     NY("NY", "Nytt kravgrunnlag"),
     ENDRET("ENDR", "Endret kravgrunnlag"),
     ANNULERT("ANNU", "Kravgrunnlag annullert"),
+    AVSLUTTET("AVSL", "Avsluttet kravgrunnlag"),
+    SPERRET("SPER", "Kravgrunnlag sperret"),
 }

@@ -27,6 +27,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -250,6 +251,86 @@ private fun Application.registerApiRoutes(
                     }
                 }
 
+                patch("/kravgrunnlag/{eksternFagsakId}/bortfalt") {
+                    val principal = call.principal<TexasPrincipal>()
+                    val navIdent = principal?.userinfo?.ident
+                    if (navIdent == null) {
+                        log.error("Kunne ikke hente NAVident.")
+                        call.respond(HttpStatusCode.Unauthorized, "Kunne ikke hente NAVident")
+                        return@patch
+                    }
+
+                    val userToken =
+                        call.request.headers["Authorization"]
+                            ?.removePrefix("Bearer ")
+                            ?.trim()
+                    if (userToken.isNullOrBlank()) {
+                        log.error("Mangler bearer token i Authorization-header.")
+                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
+                        return@patch
+                    }
+
+                    val eksternFagsakId = call.parameters["eksternFagsakId"]
+                    if (eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler eksternFagsakId i path")
+                        return@patch
+                    }
+                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
+                        is TokenResponse.Success ->
+                            bortfallAvKravgrunnlag(
+                                tilbakekrevingService = tilbakekrevingService,
+                                call = call,
+                                accessToken = tokenResponse.accessToken,
+                                eksternFagsakId = eksternFagsakId,
+                            )
+
+                        is TokenResponse.Error -> {
+                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
+                            handleError(call, tokenResponse)
+                        }
+                    }
+                }
+
+                patch("/kravgrunnlag/{eksternFagsakId}/sperr") {
+                    val principal = call.principal<TexasPrincipal>()
+                    val navIdent = principal?.userinfo?.ident
+                    if (navIdent == null) {
+                        log.error("Kunne ikke hente NAVident.")
+                        call.respond(HttpStatusCode.Unauthorized, "Kunne ikke hente NAVident")
+                        return@patch
+                    }
+
+                    val userToken =
+                        call.request.headers["Authorization"]
+                            ?.removePrefix("Bearer ")
+                            ?.trim()
+                    if (userToken.isNullOrBlank()) {
+                        log.error("Mangler bearer token i Authorization-header.")
+                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
+                        return@patch
+                    }
+
+                    val eksternFagsakId = call.parameters["eksternFagsakId"]
+                    if (eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler eksternFagsakId i path")
+                        return@patch
+                    }
+                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
+                        is TokenResponse.Success ->
+                            sperreKravgrunnlag(
+                                tilbakekrevingService = tilbakekrevingService,
+                                call = call,
+                                accessToken = tokenResponse.accessToken,
+                                eksternFagsakId = eksternFagsakId,
+                            )
+
+                        is TokenResponse.Error -> {
+                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
+                            handleError(call, tokenResponse)
+                        }
+                    }
+                }
+
                 get("/redirect") {
                     call.respondRedirect(appConfig.loginRedirectUrl)
                 }
@@ -292,6 +373,38 @@ private suspend fun oppdaterKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
             token = accessToken,
             kravgrunnlagInfo = requestBody,
+        )
+
+    val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status, response)
+}
+
+private suspend fun bortfallAvKravgrunnlag(
+    tilbakekrevingService: TilbakekrevingService,
+    call: ApplicationCall,
+    accessToken: String,
+    eksternFagsakId: String,
+) {
+    val response =
+        tilbakekrevingService.bortfallAvKravgrunnlag(
+            eksternFagsakId = eksternFagsakId,
+            token = accessToken,
+        )
+
+    val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status, response)
+}
+
+private suspend fun sperreKravgrunnlag(
+    tilbakekrevingService: TilbakekrevingService,
+    call: ApplicationCall,
+    accessToken: String,
+    eksternFagsakId: String,
+) {
+    val response =
+        tilbakekrevingService.sperreKravgrunnlag(
+            eksternFagsakId = eksternFagsakId,
+            token = accessToken,
         )
 
     val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError

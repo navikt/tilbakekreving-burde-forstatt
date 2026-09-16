@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKrav
 import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKravPeriode
+import no.nav.tilbakekreving.status.v1.KravOgVedtakstatus
 import no.nav.tilbakekreving.typer.v1.TypeGjelderDto
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -22,6 +23,24 @@ class PostgresRepository(
                 try {
                     val kravId = lagreKrav(connection, tidligereInnsendtKrav)
                     lagrePerioder(connection, kravId, tidligereInnsendtKrav)
+                    connection.commit()
+                } catch (e: Exception) {
+                    connection.rollback()
+                    throw e
+                }
+            }
+        }
+    }
+
+    override suspend fun lager(
+        kravgrunnlagId: BigInteger,
+        kravOgVedtakstatus: KravOgVedtakstatus,
+    ) {
+        withContext(Dispatchers.IO) {
+            dataSource.connection.use { connection ->
+                connection.autoCommit = false
+                try {
+                    lagreStatusmelding(connection, kravOgVedtakstatus, kravgrunnlagId)
                     connection.commit()
                 } catch (e: Exception) {
                     connection.rollback()
@@ -158,6 +177,36 @@ class PostgresRepository(
                 statement.addBatch()
             }
             statement.executeBatch()
+        }
+    }
+
+    private fun lagreStatusmelding(
+        connection: Connection,
+        kravOgVedtakstatus: KravOgVedtakstatus,
+        kravgrunnlagId: BigInteger,
+    ): Long {
+        val sql =
+            """
+            INSERT INTO innsendt_statusmelding (
+                kravgrunnlag_id, vedtak_id, kode_status_krav, kode_fagomraade, fagsystem_id,
+                vedtak_gjelder_id, type_gjelder_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent()
+
+        connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { statement ->
+            statement.setString(1, kravgrunnlagId.toString())
+            statement.setString(2, kravOgVedtakstatus.vedtakId.toString())
+            statement.setString(5, kravOgVedtakstatus.kodeStatusKrav.toString())
+            statement.setString(3, kravOgVedtakstatus.kodeFagomraade)
+            statement.setString(4, kravOgVedtakstatus.fagsystemId)
+            statement.setString(6, kravOgVedtakstatus.vedtakGjelderId)
+            statement.setString(7, kravOgVedtakstatus.typeGjelderId.name)
+            statement.executeUpdate()
+
+            statement.generatedKeys.use { keys ->
+                check(keys.next()) { "Fikk ingen generert id ved lagring av tidligere innsendt krav" }
+                return keys.getLong(1)
+            }
         }
     }
 }
