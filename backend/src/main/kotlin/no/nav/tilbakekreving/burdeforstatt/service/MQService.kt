@@ -32,13 +32,13 @@ class MQService(
             connection.close()
         } catch (e: JMSException) {
             log.warn(
-                "Kunne ikke sende kravgrunnlag til MQ",
+                "Kunne ikke sende kravgrunnlag eller statusmelding til MQ",
                 e,
             )
             throw e
         } catch (e: Exception) {
             log.warn(
-                "Kunne ikke sende kravgrunnlag til MQ",
+                "Kunne ikke sende kravgrunnlag eller statusmelding til MQ",
                 e,
             )
             throw e
