@@ -3,8 +3,14 @@ import type { TilbakeFormData, TilbakeRequest } from './typer/formData';
 import type { Ytelse as TYtelse } from './typer/ytelse';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRightIcon, ReceiptIcon } from '@navikt/aksel-icons';
-import { Box, Checkbox, Heading, HGrid, InlineMessage } from '@navikt/ds-react';
+import {
+    ArrowRightIcon,
+    ChevronDownIcon,
+    PadlockLockedIcon,
+    PencilIcon,
+    XMarkOctagonIcon,
+} from '@navikt/aksel-icons';
+import { ActionMenu, Box, Checkbox, Heading, HGrid, InlineMessage } from '@navikt/ds-react';
 import { Button } from '@navikt/ds-react/Button';
 import { HStack, VStack } from '@navikt/ds-react/Stack';
 import { TextField } from '@navikt/ds-react/TextField';
@@ -21,6 +27,7 @@ import {
 
 import { EndreKravgrunnlagModal } from './komponenter/EndreKravgrunnlag/EndreKravgrunnlagModal';
 import { Header } from './komponenter/Header';
+import { OppdaterKravstatusModal } from './komponenter/OppdaterKravstatus/OppdaterKravstatusModal';
 import Perioder from './komponenter/Perioder/Perioder';
 import Ytelse from './komponenter/Ytelse';
 import { tilbakeFormDataSchema } from './typer/formData';
@@ -59,6 +66,8 @@ const postTilbakekreving = async (data: TilbakeRequest): Promise<TilbakekrevingR
 const App: FC = () => {
     const svarMeldingRef = useRef<HTMLDivElement>(null);
     const endreKravgrunnlagModalRef = useRef<HTMLDialogElement>(null);
+    const bortfaltModalRef = useRef<HTMLDialogElement>(null);
+    const sperrModalRef = useRef<HTMLDialogElement>(null);
 
     const metoder = useForm<TilbakeFormData>({
         resolver: zodResolver(tilbakeFormDataSchema),
@@ -140,15 +149,46 @@ const App: FC = () => {
                                 Dette er en testapplikasjon for oppretting av tilbakekrevingssaker
                             </InlineMessage>
                         </VStack>
-                        <Button
-                            data-color="neutral"
-                            type="button"
-                            variant="secondary"
-                            icon={<ReceiptIcon aria-hidden />}
-                            onClick={(): void => endreKravgrunnlagModalRef.current?.showModal()}
-                        >
-                            Endre kravgrunnlag
-                        </Button>
+                        <ActionMenu>
+                            <ActionMenu.Trigger>
+                                <Button
+                                    data-color="neutral"
+                                    type="button"
+                                    variant="secondary"
+                                    icon={<ChevronDownIcon aria-hidden />}
+                                    iconPosition="right"
+                                >
+                                    Eksisterende behandling
+                                </Button>
+                            </ActionMenu.Trigger>
+                            <ActionMenu.Content>
+                                <ActionMenu.Group label="Kravgrunnlag">
+                                    <ActionMenu.Item
+                                        icon={<PencilIcon aria-hidden />}
+                                        onSelect={(): void =>
+                                            endreKravgrunnlagModalRef.current?.showModal()
+                                        }
+                                    >
+                                        Endre kravgrunnlag
+                                    </ActionMenu.Item>
+                                </ActionMenu.Group>
+                                <ActionMenu.Divider />
+                                <ActionMenu.Group label="Statusoppdatering">
+                                    <ActionMenu.Item
+                                        icon={<XMarkOctagonIcon aria-hidden />}
+                                        onSelect={(): void => bortfaltModalRef.current?.showModal()}
+                                    >
+                                        Meld bortfalt
+                                    </ActionMenu.Item>
+                                    <ActionMenu.Item
+                                        icon={<PadlockLockedIcon aria-hidden />}
+                                        onSelect={(): void => sperrModalRef.current?.showModal()}
+                                    >
+                                        Sperr behandling
+                                    </ActionMenu.Item>
+                                </ActionMenu.Group>
+                            </ActionMenu.Content>
+                        </ActionMenu>
                     </HStack>
 
                     <FormProvider {...metoder}>
@@ -286,6 +326,8 @@ const App: FC = () => {
             </VStack>
 
             <EndreKravgrunnlagModal ref={endreKravgrunnlagModalRef} />
+            <OppdaterKravstatusModal ref={bortfaltModalRef} statustype="bortfalt" />
+            <OppdaterKravstatusModal ref={sperrModalRef} statustype="sperr" />
         </div>
     );
 };

@@ -12,6 +12,7 @@ import {
     lagreKravgrunnlag,
     lagreKravgrunnlagMutationKey,
 } from './api/kravgrunnlag.ts';
+import { oppdaterKravstatus, oppdaterKravstatusMutationKey } from './api/kravstatus.ts';
 import { AuthProvider } from './hooks/AuthProvider.tsx';
 
 const queryClient = new QueryClient({
@@ -29,6 +30,10 @@ queryClient.setMutationDefaults(hentKravgrunnlagMutationKey, {
 
 queryClient.setMutationDefaults(lagreKravgrunnlagMutationKey, {
     mutationFn: lagreKravgrunnlag,
+});
+
+queryClient.setMutationDefaults(oppdaterKravstatusMutationKey, {
+    mutationFn: oppdaterKravstatus,
 });
 
 const container = document.getElementById('root');
