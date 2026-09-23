@@ -282,6 +282,11 @@ class TilbakekrevingService(
         requestFraBurdeForstatt: RequestFraBurdeForstatt,
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
     ): DetaljertKravgrunnlagDto {
+        val skatt =
+            when (opprettTilbakekrevingRequest.ytelsestype.skatt) {
+                true -> SKATT_PROSENT
+                false -> BigDecimal.ZERO
+            }
         val ytelse = hentYtelsesType(requestFraBurdeForstatt.ytelse)
         val detaljertKravgrunnlagDto =
             DetaljertKravgrunnlagDto().apply {
@@ -326,7 +331,7 @@ class TilbakekrevingService(
                                             belopNy = BigDecimal(0.00)
                                             belopTilbakekreves = splittetPeriode.beløp.toBigDecimal()
                                             belopUinnkrevd = BigDecimal(0.00)
-                                            skattProsent = BigDecimal(0.00)
+                                            skattProsent = skatt
                                         },
                                     )
                                     detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
@@ -476,6 +481,11 @@ class TilbakekrevingService(
         gammelKravgrunnlag: TidligereInnsendtKrav,
     ) {
         val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
+        val skatt =
+            when (ytelsestype.skatt) {
+                true -> SKATT_PROSENT
+                false -> BigDecimal.ZERO
+            }
         val oppdatertKravgrunnlag =
             DetaljertKravgrunnlagDto().apply {
                 kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId
@@ -513,7 +523,7 @@ class TilbakekrevingService(
                     belopNy = BigDecimal(0.00)
                     belopTilbakekreves = it.belopTilbakekreves
                     belopUinnkrevd = BigDecimal(0.00)
-                    skattProsent = BigDecimal(0.00)
+                    skattProsent = skatt
                 },
             )
             detaljertKravgrunnlagPeriodeDto.tilbakekrevingsBelop.add(
@@ -584,6 +594,7 @@ class TilbakekrevingService(
         )
 
     companion object {
+        val SKATT_PROSENT = BigDecimal(10.00)
         val NY_MODELL_YTELSER =
             setOf(
                 "Tilleggsstønad",
