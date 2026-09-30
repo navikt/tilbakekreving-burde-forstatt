@@ -24,6 +24,7 @@ import no.nav.tilbakekreving.burdeforstatt.kontrakter.Kravstatuskode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.OppdatertPeriode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Periode
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Revurdering
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Varsel
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ytelsestype
 import no.nav.tilbakekreving.burdeforstatt.modell.OpprettTilbakekrevingRequest
@@ -592,6 +593,72 @@ class TilbakekrevingService(
                     )
                 },
         )
+
+    suspend fun opprettRevurdering(
+        token: String,
+        revurdering: Revurdering,
+    ): Ressurs<String> {
+        log.info("Oppretter revurdering for behandlingId: ${revurdering.originalBehandlingId}")
+        try {
+            val uri =
+                URLBuilder(tilbakekrevingUrl)
+                    .apply {
+                        appendPathSegments(
+                            "api",
+                            "v1",
+                            "behandling",
+                            revurdering.originalBehandlingId.toString(),
+                            "revurdering",
+                        )
+                    }.buildString()
+            val response: HttpResponse =
+                httpClient.post(uri) {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(revurdering)
+                }
+            if (response.status == HttpStatusCode.OK) {
+                val behandlingId =
+                    hentBehandlingId(
+                        hentYtelsesType(revurdering.ytelse),
+                        revurdering.fagsakId,
+                        token,
+                    )
+
+                val url =
+                    byggBehandlingUrl(
+                        hentFagsystem(revurdering.ytelse),
+                        revurdering.fagsakId,
+                        behandlingId,
+                    )
+
+                println("=====>>> revurdering url: $url")
+
+                return Ressurs.success(
+                    data = url,
+                    melding = "Behandling og kravgrunnlag er sendt til tilbakekreving-backend",
+                )
+            } else {
+                log.warn("Kunne ikke opprette revurdering i tilbakekreving: {}", response.status)
+                return Ressurs(
+                    data = null,
+                    status = Ressurs.Status.FEILET,
+                    melding = "Feil ved oppretting av revurdering: ${response.status}",
+                    frontendFeilmelding = "Kunne ikke opprette revurdering i tilbakekreving",
+                    stacktrace = null,
+                )
+            }
+        } catch (e: Exception) {
+            log.error("Error sending REST request for revurdering", e)
+            return Ressurs(
+                data = null,
+                status = Ressurs.Status.FEILET,
+                melding = "Exception: ${e.message}",
+                frontendFeilmelding = "En feil oppstod under oppretting av revurdering i tilbakekreving",
+                stacktrace = e.stackTraceToString(),
+            )
+        }
+    }
 
     companion object {
         val SKATT_PROSENT = BigDecimal(10.00)

@@ -41,6 +41,7 @@ import no.nav.tilbakekreving.burdeforstatt.config.KafkaConfig
 import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
+import no.nav.tilbakekreving.burdeforstatt.kontrakter.Revurdering
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
 import no.nav.tilbakekreving.burdeforstatt.repository.PostgresRepository
 import no.nav.tilbakekreving.burdeforstatt.repository.Repository
@@ -331,6 +332,47 @@ private fun Application.registerApiRoutes(
                     }
                 }
 
+                post("/revurdering") {
+                    val principal = call.principal<TexasPrincipal>()
+                    val navIdent = principal?.userinfo?.ident
+                    if (navIdent == null) {
+                        log.error("Kunne ikke hente NAVident.")
+                        call.respond(HttpStatusCode.Unauthorized, "Kunne ikke hente NAVident")
+                        return@post
+                    }
+
+                    val userToken =
+                        call.request.headers["Authorization"]
+                            ?.removePrefix("Bearer ")
+                            ?.trim()
+                    if (userToken.isNullOrBlank()) {
+                        log.error("Mangler bearer token i Authorization-header.")
+                        call.respond(HttpStatusCode.Unauthorized, "Mangler bearer token")
+                        return@post
+                    }
+
+                    val eksternFagsakId = call.parameters["eksternFagsakId"]
+                    if (eksternFagsakId.isNullOrBlank()) {
+                        call.respond(HttpStatusCode.BadRequest, "Mangler eksternFagsakId i path")
+                        return@post
+                    }
+                    val requestBody = call.receive<Revurdering>()
+                    when (val tokenResponse = authClient.exchange(scope, userToken)) {
+                        is TokenResponse.Success ->
+                            opprettRevurdering(
+                                tilbakekrevingService = tilbakekrevingService,
+                                call = call,
+                                accessToken = tokenResponse.accessToken,
+                                requestBody = requestBody,
+                            )
+
+                        is TokenResponse.Error -> {
+                            log.error("Kunne ikke hente systemtoken: ${tokenResponse.error}, Status: ${tokenResponse.status}")
+                            handleError(call, tokenResponse)
+                        }
+                    }
+                }
+
                 get("/redirect") {
                     call.respondRedirect(appConfig.loginRedirectUrl)
                 }
@@ -373,6 +415,22 @@ private suspend fun oppdaterKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
             token = accessToken,
             kravgrunnlagInfo = requestBody,
+        )
+
+    val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
+    call.respond(status, response)
+}
+
+private suspend fun opprettRevurdering(
+    tilbakekrevingService: TilbakekrevingService,
+    call: ApplicationCall,
+    accessToken: String,
+    requestBody: Revurdering,
+) {
+    val response =
+        tilbakekrevingService.opprettRevurdering(
+            token = accessToken,
+            revurdering = requestBody,
         )
 
     val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
