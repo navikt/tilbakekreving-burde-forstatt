@@ -57,15 +57,16 @@ class PostgresRepository(
                     """
                     SELECT id, kravgrunnlag_id, vedtak_id, kode_fagomraade, fagsystem_id, vedtak_id_omgjort,
                            vedtak_gjelder_id, type_gjelder_id, utbetales_til_id, type_utbet_id,
-                           enhet_ansvarlig, enhet_bosted, enhet_behandl, saksbeh_id
+                           enhet_ansvarlig, enhet_bosted, enhet_behandl, saksbeh_id, tilbakekreving_id
                     FROM tidligere_innsendt_krav
-                    WHERE fagsystem_id = ?
+                    WHERE fagsystem_id = ? OR tilbakekreving_id = ?
                     ORDER BY id DESC
                     LIMIT 1
                     """.trimIndent()
 
                 connection.prepareStatement(sql).use { statement ->
                     statement.setString(1, fagsystemId)
+                    statement.setString(2, fagsystemId)
                     statement.executeQuery().use { resultSet ->
                         if (!resultSet.next()) return@withContext null
 
@@ -83,6 +84,7 @@ class PostgresRepository(
                             enhetBosted = resultSet.getString("enhet_bosted"),
                             enhetBehandl = resultSet.getString("enhet_behandl"),
                             saksbehId = resultSet.getString("saksbeh_id"),
+                            tilbakekrevingId = resultSet.getString("tilbakekreving_id"),
                             tilbakekrevingsPeriode = hentPerioder(connection, resultSet.getLong("id")),
                         )
                     }
@@ -129,8 +131,8 @@ class PostgresRepository(
             INSERT INTO tidligere_innsendt_krav (
                 kravgrunnlag_id, vedtak_id, kode_fagomraade, fagsystem_id, vedtak_id_omgjort,
                 vedtak_gjelder_id, type_gjelder_id, utbetales_til_id, type_utbet_id,
-                enhet_ansvarlig, enhet_bosted, enhet_behandl, saksbeh_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                enhet_ansvarlig, enhet_bosted, enhet_behandl, saksbeh_id, tilbakekreving_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """.trimIndent()
 
         connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { statement ->
@@ -147,6 +149,7 @@ class PostgresRepository(
             statement.setString(11, tidligereInnsendtKrav.enhetBosted)
             statement.setString(12, tidligereInnsendtKrav.enhetBehandl)
             statement.setString(13, tidligereInnsendtKrav.saksbehId)
+            statement.setString(14, tidligereInnsendtKrav.tilbakekrevingId)
             statement.executeUpdate()
 
             statement.generatedKeys.use { keys ->

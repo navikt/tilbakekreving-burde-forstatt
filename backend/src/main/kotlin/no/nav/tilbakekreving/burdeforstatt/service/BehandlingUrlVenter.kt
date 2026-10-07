@@ -1,37 +1,31 @@
 package no.nav.tilbakekreving.burdeforstatt.service
 
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import no.nav.tilbakekreving.burdeforstatt.repository.BehandlingUrlRepository
-import java.util.UUID
+import no.nav.tilbakekreving.burdeforstatt.repository.BehandlingInfoRepository
+import kotlin.time.Duration.Companion.milliseconds
 
 class BehandlingUrlVenter(
-    private val repository: BehandlingUrlRepository,
+    private val repository: BehandlingInfoRepository,
     private val timeoutMillis: Long = 60_000,
     private val pollIntervallMillis: Long = 500,
 ) {
+    suspend fun hentEksisterendeUrl(eksternFagsakId: String): String =
+        repository.hent(eksternFagsakId)?.saksbehandlingUrl
+            ?: throw IllegalStateException("Fant ikke lagret behandlings-URL for fagsak $eksternFagsakId")
+
     suspend fun ventPåUrl(
         eksternFagsakId: String,
         opprettBehandling: suspend () -> Unit,
     ): String? {
-        val foresporselId = UUID.randomUUID()
-        try {
-            check(repository.registrer(eksternFagsakId, foresporselId)) {
-                "Venter allerede på behandling for fagsak $eksternFagsakId"
+        opprettBehandling()
+        return withTimeoutOrNull(timeoutMillis.milliseconds) {
+            var behandlingInfo = repository.hent(eksternFagsakId)
+            while (behandlingInfo?.saksbehandlingUrl == null) {
+                delay(pollIntervallMillis.milliseconds)
+                behandlingInfo = repository.hent(eksternFagsakId)
             }
-            opprettBehandling()
-            return withTimeoutOrNull(timeoutMillis) {
-                var url = repository.hent(foresporselId)
-                while (url == null) {
-                    delay(pollIntervallMillis)
-                    url = repository.hent(foresporselId)
-                }
-                url
-            }
-        } finally {
-            withContext(NonCancellable) { repository.fjern(foresporselId) }
+            behandlingInfo.saksbehandlingUrl
         }
     }
 

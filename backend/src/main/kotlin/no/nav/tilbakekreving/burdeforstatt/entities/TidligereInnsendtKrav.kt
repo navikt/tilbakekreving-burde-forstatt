@@ -19,6 +19,7 @@ data class TidligereInnsendtKrav(
     val enhetBosted: String,
     val enhetBehandl: String,
     val saksbehId: String,
+    val tilbakekrevingId: String?,
     val tilbakekrevingsPeriode: List<TidligereInnsendtKravPeriode>,
 )
 

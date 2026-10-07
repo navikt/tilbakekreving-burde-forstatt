@@ -42,7 +42,7 @@ import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
-import no.nav.tilbakekreving.burdeforstatt.repository.PostgresBehandlingUrlRepository
+import no.nav.tilbakekreving.burdeforstatt.repository.PostgresBehandlingInfoRepository
 import no.nav.tilbakekreving.burdeforstatt.repository.PostgresRepository
 import no.nav.tilbakekreving.burdeforstatt.repository.Repository
 import no.nav.tilbakekreving.burdeforstatt.service.BehandlingUrlVenter
@@ -105,7 +105,7 @@ fun main() {
     dbConfig.migrate(dataSource)
     val repository: Repository = PostgresRepository(dataSource)
 
-    val behandlingUrlVenter = BehandlingUrlVenter(PostgresBehandlingUrlRepository(dataSource))
+    val behandlingUrlVenter = BehandlingUrlVenter(PostgresBehandlingInfoRepository(dataSource))
     val fagsystemKafkaConsumer =
         FagsystemKafkaConsumer(
             kafkaConsumer = kafkaConfig.createConsumer(),
