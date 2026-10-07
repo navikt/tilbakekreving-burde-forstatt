@@ -13,10 +13,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
-import kotlinx.coroutines.time.delay
 import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKrav
 import no.nav.tilbakekreving.burdeforstatt.entities.TidligereInnsendtKravPeriode
-import no.nav.tilbakekreving.burdeforstatt.kontrakter.Behandlingsinfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Fagsystem
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Faktainfo
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.security.SecureRandom
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -52,6 +49,7 @@ class TilbakekrevingService(
     private val mqService: MQService,
     private val tilbakekrevingUrl: String,
     private val repository: Repository,
+    private val behandlingUrlVenter: BehandlingUrlVenter,
 ) {
     private val kontrollfeltFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -63,7 +61,6 @@ class TilbakekrevingService(
         token: String,
         navIdent: String,
     ): Ressurs<String> {
-        var behandlingId: String
         val opprettTilbakekrevingRequest = hentOpprettTilbakekrevingRequest(requestFraBurdeForstatt, navIdent)
 
         val kravgrunnlagDto = opprettDummyKravgrunnlag(requestFraBurdeForstatt, opprettTilbakekrevingRequest)
@@ -72,43 +69,49 @@ class TilbakekrevingService(
                 detaljertKravgrunnlag = kravgrunnlagDto
             }
 
-        if (requestFraBurdeForstatt.ytelse in NY_MODELL_YTELSER) {
-            mqService.sendKravgrunnlag(
-                detaljertKravgrunnlagMelding,
-                mqNyModell,
-            )
-            delay(Duration.ofSeconds(5))
-            behandlingId =
-                hentBehandlingId(
-                    opprettTilbakekrevingRequest.ytelsestype,
-                    detaljertKravgrunnlagMelding.detaljertKravgrunnlag.fagsystemId,
-                    token,
-                )
-        } else {
-            val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest, token)
+        val behandlingUrl =
+            if (requestFraBurdeForstatt.ytelse in NY_MODELL_YTELSER) {
+                behandlingUrlVenter.ventPåUrl(opprettTilbakekrevingRequest.eksternFagsakId) {
+                    mqService.sendKravgrunnlag(
+                        detaljertKravgrunnlagMelding,
+                        mqNyModell,
+                    )
+                    repository.lagre(mapTilTidligereInnsendtKrav(kravgrunnlagDto))
+                } ?: run {
+                    log.error("Tidsavbrudd ved venting på behandlings-URL for fagsak {}", opprettTilbakekrevingRequest.eksternFagsakId)
+                    return Ressurs(
+                        data = null,
+                        status = Ressurs.Status.FEILET,
+                        melding = "Kravgrunnlag sendt, men behandlings-URL ble ikke mottatt innen tidsfristen",
+                        frontendFeilmelding =
+                            "Kravgrunnlaget er sendt, men lenken til behandlingen er ikke klar. Ikke send kravgrunnlaget på nytt.",
+                        stacktrace = null,
+                    )
+                }
+            } else {
+                val behandling = opprettBehandlingITilbakekreving(opprettTilbakekrevingRequest, token)
 
-            if (behandling.status != Ressurs.Status.SUKSESS) {
-                log.error("Kunne ikke opprette behandling i tilbakekreving-backend. Skipper sending av kravgrunnlag")
-                return behandling
-            }
-            behandlingId = behandling.data!!
+                if (behandling.status != Ressurs.Status.SUKSESS) {
+                    log.error("Kunne ikke opprette behandling i tilbakekreving-backend. Skipper sending av kravgrunnlag")
+                    return behandling
+                }
 
-            if (requestFraBurdeForstatt.sendKravgrunnlag) {
-                mqService.sendKravgrunnlag(
-                    detaljertKravgrunnlagMelding,
-                    mqGammelModell,
-                )
-                log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
-            }
-        }
-        repository.lagre(mapTilTidligereInnsendtKrav(kravgrunnlagDto))
-        return Ressurs.success(
-            data =
+                if (requestFraBurdeForstatt.sendKravgrunnlag) {
+                    mqService.sendKravgrunnlag(
+                        detaljertKravgrunnlagMelding,
+                        mqGammelModell,
+                    )
+                    log.info("Kravgrunnlag med id {} er sendt til MQ: {}", kravgrunnlagDto.kravgrunnlagId, mqGammelModell)
+                }
+                repository.lagre(mapTilTidligereInnsendtKrav(kravgrunnlagDto))
                 byggBehandlingUrl(
                     opprettTilbakekrevingRequest.fagsystem,
                     opprettTilbakekrevingRequest.eksternFagsakId,
-                    behandlingId,
-                ),
+                    behandling.data!!,
+                )
+            }
+        return Ressurs.success(
+            data = behandlingUrl,
             melding = "Behandling og kravgrunnlag er sendt til tilbakekreving-backend",
         )
     }
@@ -238,46 +241,6 @@ class TilbakekrevingService(
             )
         }
 
-    private suspend fun hentBehandlingId(
-        ytelsestype: Ytelsestype,
-        eksternFagsakId: String,
-        token: String,
-    ): String {
-        log.info("henter behandlingId for fagsystemId: $eksternFagsakId og ytelsestype: $ytelsestype")
-        try {
-            val uri =
-                URLBuilder(tilbakekrevingUrl)
-                    .apply {
-                        appendPathSegments(
-                            "api",
-                            "forvaltning",
-                            "ytelsestype",
-                            when (ytelsestype) {
-                                in TILLEGGSSTØNAD_YTELSER -> Ytelsestype.TILLEGGSSTØNAD.name
-                                else -> ytelsestype.name
-                            },
-                            "fagsak",
-                            eksternFagsakId,
-                            "v1",
-                        )
-                    }.buildString()
-
-            val response: HttpResponse =
-                httpClient.get(uri) {
-                    contentType(ContentType.Application.Json)
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
-            val ressurs: Ressurs<List<Behandlingsinfo>> = response.body()
-            val behandlingId =
-                ressurs.data?.firstOrNull()?.behandlingId
-                    ?: throw IllegalStateException("Fant ikke behandlingId i responsen")
-
-            return behandlingId.toString()
-        } catch (e: Exception) {
-            throw Exception("Feilet under henting av behandlingId", e)
-        }
-    }
-
     private fun opprettDummyKravgrunnlag(
         requestFraBurdeForstatt: RequestFraBurdeForstatt,
         opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest,
@@ -390,35 +353,40 @@ class TilbakekrevingService(
 
     suspend fun oppdaterKravgrunnlag(
         eksternFagsakId: String,
-        token: String,
         kravgrunnlagInfo: KravgrunnlagInfoForOppdatering,
     ): Ressurs<String> {
         log.info("Oppdaterer kravgrunnlag for fagsystemId: $eksternFagsakId")
         val gammelKravgrunnlag =
             repository.hent(eksternFagsakId)
                 ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for oppdatering")
-        val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
-        val fagsystem = ytelsestype.tilFagsystem()
 
-        enderKravgrunnlag(eksternFagsakId, kravgrunnlagInfo, gammelKravgrunnlag)
+        val behandlingUrl =
+            behandlingUrlVenter.ventPåUrl(eksternFagsakId) {
+                enderKravgrunnlag(eksternFagsakId, kravgrunnlagInfo, gammelKravgrunnlag)
+            } ?: run {
+                log.error("Tidsavbrudd ved venting på behandlings-URL for fagsak {}", eksternFagsakId)
+                return Ressurs(
+                    data = null,
+                    status = Ressurs.Status.FEILET,
+                    melding = "Nytt kravgrunnlag sendt, men behandlings-URL ble ikke mottatt innen tidsfristen",
+                    frontendFeilmelding =
+                        "Nytt kravgrunnlag er sendt, men lenken til behandlingen er ikke klar. Ikke send kravgrunnlaget på nytt.",
+                    stacktrace = null,
+                )
+            }
 
-        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
         return Ressurs.success(
-            data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
+            data = behandlingUrl,
             melding = "Kravgrunnlag oppdatert",
         )
     }
 
-    suspend fun bortfallAvKravgrunnlag(
-        eksternFagsakId: String,
-        token: String,
-    ): Ressurs<String> {
+    suspend fun bortfallAvKravgrunnlag(eksternFagsakId: String): Ressurs<String> {
         val gammelKravgrunnlag =
             repository.hent(eksternFagsakId)
                 ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for avslutting")
         val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
         val fagsystem = ytelsestype.tilFagsystem()
-        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
 
         val oppdaterKravOgVedtakstatuss =
             KravOgVedtakstatus().apply {
@@ -430,11 +398,25 @@ class TilbakekrevingService(
                 typeGjelderId = gammelKravgrunnlag.typeGjelderId
                 referanse = "1"
             }
-        sendKravgrunnlagEllerKravOgVedtakstatus(
-            EndringKravOgVedtakstatus().apply {
-                kravOgVedtakstatus = oppdaterKravOgVedtakstatuss
-            },
-        )
+
+        val behandlingId =
+            behandlingUrlVenter.ventPåUrl(eksternFagsakId) {
+                sendKravgrunnlagEllerKravOgVedtakstatus(
+                    EndringKravOgVedtakstatus().apply {
+                        kravOgVedtakstatus = oppdaterKravOgVedtakstatuss
+                    },
+                )
+            } ?: run {
+                log.error("Tidsavbrudd ved venting på behandlings-URL for fagsak {}", eksternFagsakId)
+                return Ressurs(
+                    data = null,
+                    status = Ressurs.Status.FEILET,
+                    melding = "Kravgrunnlag avsluttet, men behandlings-URL ble ikke mottatt innen tidsfristen",
+                    frontendFeilmelding =
+                        "Kravgrunnlaget er avsluttet, men lenken til behandlingen er ikke klar. Ikke send på nytt.",
+                    stacktrace = null,
+                )
+            }
 
         repository.lager(kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId, kravOgVedtakstatus = oppdaterKravOgVedtakstatuss)
         return Ressurs.success(
@@ -443,16 +425,12 @@ class TilbakekrevingService(
         )
     }
 
-    suspend fun sperreKravgrunnlag(
-        eksternFagsakId: String,
-        token: String,
-    ): Ressurs<String> {
+    suspend fun sperreKravgrunnlag(eksternFagsakId: String): Ressurs<String> {
         val gammelKravgrunnlag =
             repository.hent(eksternFagsakId)
                 ?: throw IllegalStateException("Kunne ikke hente eksisterende kravgrunnlag for sperring")
         val ytelsestype = Ytelsestype.fraKodeFagområdet(gammelKravgrunnlag.kodeFagomraade)
         val fagsystem = ytelsestype.tilFagsystem()
-        val behandlingId = hentBehandlingId(ytelsestype, eksternFagsakId, token)
         val oppdatertKravOgVedtakstatus =
             KravOgVedtakstatus().apply {
                 vedtakId = gammelKravgrunnlag.vedtakId
@@ -463,11 +441,25 @@ class TilbakekrevingService(
                 typeGjelderId = gammelKravgrunnlag.typeGjelderId
                 referanse = "1"
             }
-        sendKravgrunnlagEllerKravOgVedtakstatus(
-            EndringKravOgVedtakstatus().apply {
-                kravOgVedtakstatus = oppdatertKravOgVedtakstatus
-            },
-        )
+
+        val behandlingId =
+            behandlingUrlVenter.ventPåUrl(eksternFagsakId) {
+                sendKravgrunnlagEllerKravOgVedtakstatus(
+                    EndringKravOgVedtakstatus().apply {
+                        kravOgVedtakstatus = oppdatertKravOgVedtakstatus
+                    },
+                )
+            } ?: run {
+                log.error("Tidsavbrudd ved venting på behandlings-URL for fagsak {}", eksternFagsakId)
+                return Ressurs(
+                    data = null,
+                    status = Ressurs.Status.FEILET,
+                    melding = "Kravgrunnlag sperret, men behandlings-URL ble ikke mottatt innen tidsfristen",
+                    frontendFeilmelding =
+                        "Kravgrunnlaget er sperret, men lenken til behandlingen er ikke klar. Ikke sperr på nytt.",
+                    stacktrace = null,
+                )
+            }
         repository.lager(kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId, kravOgVedtakstatus = oppdatertKravOgVedtakstatus)
         return Ressurs.success(
             data = byggBehandlingUrl(fagsystem, eksternFagsakId, behandlingId),
