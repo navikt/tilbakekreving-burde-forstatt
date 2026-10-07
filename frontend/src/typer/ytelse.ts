@@ -78,10 +78,10 @@ export const datoYtelser = [
     ytelseSchema.enum.ReiseForÅKommeIArbeid,
     ytelseSchema.enum.ReiseVedOppstartAvslutningHjemreise,
     ytelseSchema.enum.ReiseTilSamling,
-    ytelseSchema.enum.Tiltakspenger,
 ] as const;
 
 export const meldekortYtelser = [
     ytelseSchema.enum.Arbeidsavklaringspenger,
     ytelseSchema.enum.Dagpenger,
+    ytelseSchema.enum.Tiltakspenger,
 ] as const;
