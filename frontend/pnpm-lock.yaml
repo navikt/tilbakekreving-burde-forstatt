@@ -12,14 +12,14 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(react-hook-form@7.77.0(react@19.2.8))
       '@navikt/aksel-icons':
-        specifier: 8.16.1
-        version: 8.16.1
+        specifier: 8.18.0
+        version: 8.18.0
       '@navikt/ds-css':
-        specifier: 8.16.1
-        version: 8.16.1
+        specifier: 8.18.0
+        version: 8.18.0
       '@navikt/ds-react':
-        specifier: 8.16.1
-        version: 8.16.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: 8.18.0
+        version: 8.18.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/react-query':
         specifier: 5.101.0
         version: 5.101.0(react@19.2.8)
@@ -46,8 +46,8 @@ importers:
         specifier: 2.4.16
         version: 2.4.16
       '@navikt/ds-tailwind':
-        specifier: 8.16.1
-        version: 8.16.1
+        specifier: 8.18.0
+        version: 8.18.0
       '@tailwindcss/vite':
         specifier: 4.3.0
         version: 4.3.0(vite@8.0.16(jiti@2.7.0)(yaml@2.9.0))
@@ -309,14 +309,14 @@ packages:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
 
-  '@navikt/aksel-icons@8.16.1':
-    resolution: {integrity: sha512-qrvaYi2tr2hClZXGnVMR+kgd3ruV5bPDIVz8dlQqkZ8RNA6Rd14HXZ0pQUvxyvAWS/NxdjaYAO3Cl1MpFRilAA==}
+  '@navikt/aksel-icons@8.18.0':
+    resolution: {integrity: sha512-pN15b6dQxDiPdJbXcL7W9xJ0sPUHo5GKM5ltAQ8kLb3Mf5is6Mf6gfON1nwft+aB8WlehDrTTseXVwu1BEfmQA==}
 
-  '@navikt/ds-css@8.16.1':
-    resolution: {integrity: sha512-UV0Qu0ynV3orcFjwhD17taKll/ZwAcySXLR4unrBzFkaOdvJ78i8L81CVn7YkdpIcyaA68fz2K7QKQZNO/QteA==}
+  '@navikt/ds-css@8.18.0':
+    resolution: {integrity: sha512-y714U2FDmMSETRlxg4k8scsMu6FawVGrcYqXrC/D+fQqpe05WD3wEY4BIymUpsFO+OyMsGK+uV3GPlOqtG9x0w==}
 
-  '@navikt/ds-react@8.16.1':
-    resolution: {integrity: sha512-JU6k3dtjwTTWKR9FYKtBYCXRXvyt6WkVaAoOR0l8E9TjbvxdfUlgpcOZALe59OKDL6WnpGk2ZrfEf1CPohyyMw==}
+  '@navikt/ds-react@8.18.0':
+    resolution: {integrity: sha512-ViuLezUKvJ+p/kIAXUfVSFyccQCuMRyQoLwo9dXUU013fxNXmJG6wQYUBfmC2U3tUfWdBx0SK1hzY63vDjw68Q==}
     peerDependencies:
       '@types/react': ^17.0.30 || ^18 || ^19
       react: ^17 || ^18 || ^19
@@ -325,11 +325,11 @@ packages:
       '@types/react':
         optional: true
 
-  '@navikt/ds-tailwind@8.16.1':
-    resolution: {integrity: sha512-yoiqJ8ZzJTjXPnBjlJmCSL/0m2KOT7BW5JUACE9tvs+2aZxVjre7SBdIPRgphaJqT7JWql8TI+EKxX1kQoNKCQ==}
+  '@navikt/ds-tailwind@8.18.0':
+    resolution: {integrity: sha512-m6qyY0sq7v4kEWQSrKn8K58u0SfLNVt5Z1tssfuN5OHxNKpskgWuAVoKs89kw312BS48YHRV9ci1DRMIjwFKnA==}
 
-  '@navikt/ds-tokens@8.16.1':
-    resolution: {integrity: sha512-PTLN5EWkfprObW3sJfRqcZvYOTMpG2l92VrMYeVX272hPlKn7an9eodZ6ggIMTEeNoQ+MuOhN0wEVk6Cbs77SA==}
+  '@navikt/ds-tokens@8.18.0':
+    resolution: {integrity: sha512-jX+5Kl2oTMX5e5vRoo9nulv/3dRNXH5+8o/VKeWQaAIsBbFzJavkJkXbfI5wCAsl5vGcTnuHoX2Mifwv3cLwFg==}
 
   '@oxc-project/types@0.133.0':
     resolution: {integrity: sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA==}
@@ -1477,16 +1477,16 @@ snapshots:
       '@tybys/wasm-util': 0.10.2
     optional: true
 
-  '@navikt/aksel-icons@8.16.1': {}
+  '@navikt/aksel-icons@8.18.0': {}
 
-  '@navikt/ds-css@8.16.1': {}
+  '@navikt/ds-css@8.18.0': {}
 
-  '@navikt/ds-react@8.16.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@navikt/ds-react@8.18.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@floating-ui/react': 0.27.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@floating-ui/react-dom': 2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@navikt/aksel-icons': 8.16.1
-      '@navikt/ds-tokens': 8.16.1
+      '@navikt/aksel-icons': 8.18.0
+      '@navikt/ds-tokens': 8.18.0
       date-fns: 4.4.0
       react: 19.2.8
       react-day-picker: 10.0.1(@types/react@19.2.18)(react@19.2.8)
@@ -1494,9 +1494,9 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@navikt/ds-tailwind@8.16.1': {}
+  '@navikt/ds-tailwind@8.18.0': {}
 
-  '@navikt/ds-tokens@8.16.1': {}
+  '@navikt/ds-tokens@8.18.0': {}
 
   '@oxc-project/types@0.133.0': {}
 
