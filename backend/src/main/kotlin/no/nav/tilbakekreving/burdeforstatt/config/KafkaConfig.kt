@@ -34,6 +34,7 @@ data class KafkaConfig(
         val properties = Properties()
         properties.setConnectionProperties()
         properties.put("group.id", "burde-forstatt")
+        properties.put("enable.auto.commit", false)
 
         val consumer = KafkaConsumer(properties, StringDeserializer(), StringDeserializer())
         consumer.subscribe(
