@@ -70,12 +70,11 @@ class TilbakekrevingService(
 
         val behandlingUrl =
             if (requestFraBurdeForstatt.ytelse in NY_MODELL_YTELSER) {
-                behandlingUrlVenter.ventPåUrl(opprettTilbakekrevingRequest.eksternFagsakId) {
-                    mqService.sendKravgrunnlag(
-                        detaljertKravgrunnlagMelding,
-                        mqNyModell,
-                    )
-                } ?: run {
+                mqService.sendKravgrunnlag(
+                    detaljertKravgrunnlagMelding,
+                    mqNyModell,
+                )
+                behandlingUrlVenter.ventPåUrl(opprettTilbakekrevingRequest.eksternFagsakId) ?: run {
                     log.error("Tidsavbrudd ved venting på behandlings-URL for fagsak {}", opprettTilbakekrevingRequest.eksternFagsakId)
                     return Ressurs(
                         data = null,

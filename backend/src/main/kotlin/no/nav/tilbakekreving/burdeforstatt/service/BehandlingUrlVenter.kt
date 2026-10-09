@@ -14,12 +14,8 @@ class BehandlingUrlVenter(
         repository.hent(eksternFagsakId)?.saksbehandlingUrl
             ?: throw IllegalStateException("Fant ikke lagret behandlings-URL for fagsak $eksternFagsakId")
 
-    suspend fun ventPåUrl(
-        eksternFagsakId: String,
-        opprettBehandling: suspend () -> Unit,
-    ): String? {
-        opprettBehandling()
-        return withTimeoutOrNull(timeoutMillis.milliseconds) {
+    suspend fun ventPåUrl(eksternFagsakId: String): String? =
+        withTimeoutOrNull(timeoutMillis.milliseconds) {
             var behandlingInfo = repository.hent(eksternFagsakId)
             while (behandlingInfo?.saksbehandlingUrl == null) {
                 delay(pollIntervallMillis.milliseconds)
@@ -27,7 +23,6 @@ class BehandlingUrlVenter(
             }
             behandlingInfo.saksbehandlingUrl
         }
-    }
 
     suspend fun mottaUrl(
         eksternFagsakId: String,
