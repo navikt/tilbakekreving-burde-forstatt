@@ -17,7 +17,7 @@ export const AuthProvider: FC<Props> = ({ children }: Props) => {
     };
 
     const loggUt = (): void => {
-        // TODO: Legg til backend-endepunkt for å logge ut
+        window.location.href = appConfig.logoutUrl;
     };
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: Vil kun kjøre en gang ved innlastning
