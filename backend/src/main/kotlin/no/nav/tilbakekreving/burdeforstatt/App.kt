@@ -42,8 +42,10 @@ import no.nav.tilbakekreving.burdeforstatt.config.MqConfig
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.KravgrunnlagInfoForOppdatering
 import no.nav.tilbakekreving.burdeforstatt.kontrakter.Ressurs
 import no.nav.tilbakekreving.burdeforstatt.modell.RequestFraBurdeForstatt
+import no.nav.tilbakekreving.burdeforstatt.repository.PostgresBehandlingInfoRepository
 import no.nav.tilbakekreving.burdeforstatt.repository.PostgresRepository
 import no.nav.tilbakekreving.burdeforstatt.repository.Repository
+import no.nav.tilbakekreving.burdeforstatt.service.BehandlingUrlVenter
 import no.nav.tilbakekreving.burdeforstatt.service.FagsystemKafkaConsumer
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.service.TilbakekrevingService
@@ -91,11 +93,6 @@ fun main() {
             credstorePassword = System.getenv("KAFKA_CREDSTORE_PASSWORD"),
         )
 
-    val fagsystemKafkaConsumer =
-        FagsystemKafkaConsumer(
-            kafkaConsumer = kafkaConfig.createConsumer(),
-            kafkaProducer = kafkaConfig.createProducer(),
-        )
     val mqService = MQService(mqConfig)
 
     val dbConfig =
@@ -108,13 +105,21 @@ fun main() {
     dbConfig.migrate(dataSource)
     val repository: Repository = PostgresRepository(dataSource)
 
+    val behandlingUrlVenter = BehandlingUrlVenter(PostgresBehandlingInfoRepository(dataSource))
+    val fagsystemKafkaConsumer =
+        FagsystemKafkaConsumer(
+            kafkaConsumer = kafkaConfig.createConsumer(),
+            kafkaProducer = kafkaConfig.createProducer(),
+            behandlingUrlVenter = behandlingUrlVenter,
+        )
+
     Thread(fagsystemKafkaConsumer).start()
     val server =
         embeddedServer(Netty, port = 8080) {
             install(ContentNegotiation) {
                 register(ContentType.Application.Json, JacksonConverter(objectMapper))
             }
-            registerApiRoutes(appConfig, httpClient, mqService, repository)
+            registerApiRoutes(appConfig, httpClient, mqService, repository, behandlingUrlVenter)
         }
     server.addShutdownHook { fagsystemKafkaConsumer.stop() }
     server.start(wait = true)
@@ -125,6 +130,7 @@ private fun Application.registerApiRoutes(
     httpClient: HttpClient,
     mqService: MQService,
     repository: Repository,
+    behandlingUrlVenter: BehandlingUrlVenter,
 ) {
     val authClient =
         AuthClient(
@@ -137,7 +143,7 @@ private fun Application.registerApiRoutes(
 
     val tilbakekrevingUrl = "http://tilbakekreving-backend"
     val scope = "api://dev-gcp.tilbake.tilbakekreving-backend/.default"
-    val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl, repository)
+    val tilbakekrevingService = TilbakekrevingService(httpClient, mqService, tilbakekrevingUrl, repository, behandlingUrlVenter)
 
     routing {
         get("/liveness") {
@@ -239,7 +245,6 @@ private fun Application.registerApiRoutes(
                             oppdaterKravgrunnlag(
                                 tilbakekrevingService = tilbakekrevingService,
                                 call = call,
-                                accessToken = tokenResponse.accessToken,
                                 eksternFagsakId = eksternFagsakId,
                                 requestBody = requestBody,
                             )
@@ -280,7 +285,6 @@ private fun Application.registerApiRoutes(
                             bortfallAvKravgrunnlag(
                                 tilbakekrevingService = tilbakekrevingService,
                                 call = call,
-                                accessToken = tokenResponse.accessToken,
                                 eksternFagsakId = eksternFagsakId,
                             )
 
@@ -320,7 +324,6 @@ private fun Application.registerApiRoutes(
                             sperreKravgrunnlag(
                                 tilbakekrevingService = tilbakekrevingService,
                                 call = call,
-                                accessToken = tokenResponse.accessToken,
                                 eksternFagsakId = eksternFagsakId,
                             )
 
@@ -364,14 +367,12 @@ private suspend fun hentKravgrunnlag(
 private suspend fun oppdaterKravgrunnlag(
     tilbakekrevingService: TilbakekrevingService,
     call: ApplicationCall,
-    accessToken: String,
     eksternFagsakId: String,
     requestBody: KravgrunnlagInfoForOppdatering,
 ) {
     val response =
         tilbakekrevingService.oppdaterKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
-            token = accessToken,
             kravgrunnlagInfo = requestBody,
         )
 
@@ -382,13 +383,11 @@ private suspend fun oppdaterKravgrunnlag(
 private suspend fun bortfallAvKravgrunnlag(
     tilbakekrevingService: TilbakekrevingService,
     call: ApplicationCall,
-    accessToken: String,
     eksternFagsakId: String,
 ) {
     val response =
         tilbakekrevingService.bortfallAvKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
-            token = accessToken,
         )
 
     val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError
@@ -398,13 +397,11 @@ private suspend fun bortfallAvKravgrunnlag(
 private suspend fun sperreKravgrunnlag(
     tilbakekrevingService: TilbakekrevingService,
     call: ApplicationCall,
-    accessToken: String,
     eksternFagsakId: String,
 ) {
     val response =
         tilbakekrevingService.sperreKravgrunnlag(
             eksternFagsakId = eksternFagsakId,
-            token = accessToken,
         )
 
     val status = if (response.status == Ressurs.Status.SUKSESS) HttpStatusCode.OK else HttpStatusCode.InternalServerError

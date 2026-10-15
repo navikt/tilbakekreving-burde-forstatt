@@ -48,6 +48,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:13.0.0")
     implementation("org.flywaydb:flyway-database-postgresql:13.0.0")
 
+    testImplementation(kotlin("test-junit5"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.2")
 }
 
