@@ -16,11 +16,12 @@ import { HStack, VStack } from '@navikt/ds-react/Stack';
 import { TextField } from '@navikt/ds-react/TextField';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
     Controller,
     type ControllerRenderProps,
     FormProvider,
+    type SubmitHandler,
     useForm,
     useWatch,
 } from 'react-hook-form';
@@ -88,11 +89,15 @@ const App: FC = () => {
     });
     const {
         handleSubmit,
+        getValues,
         reset,
         formState: { isSubmitting },
     } = metoder;
 
+    const [innsendteVerdier, settInnsendteVerdier] = useState<string>();
+
     const watchedYtelse = useWatch({ control: metoder.control, name: 'ytelse' });
+    const alleVerdier = useWatch({ control: metoder.control });
 
     const mutation = useMutation({
         mutationFn: (formData: TilbakeFormData) => {
@@ -128,9 +133,18 @@ const App: FC = () => {
         },
     });
 
+    const erOpprettetOgUendret =
+        mutation.isSuccess && JSON.stringify(alleVerdier) === innsendteVerdier;
+
+    const opprettTilbakekreving: SubmitHandler<TilbakeFormData> = (data: TilbakeFormData) => {
+        settInnsendteVerdier(JSON.stringify(getValues()));
+        mutation.mutate(data);
+    };
+
     const resetSkjema = (): void => {
         reset();
         mutation.reset();
+        settInnsendteVerdier(undefined);
     };
 
     return (
@@ -200,7 +214,7 @@ const App: FC = () => {
                             className="flex grow flex-col"
                         >
                             <form
-                                onSubmit={handleSubmit(data => mutation.mutate(data))}
+                                onSubmit={handleSubmit(opprettTilbakekreving)}
                                 className="flex grow flex-col"
                             >
                                 <Heading size="small" spacing>
@@ -278,7 +292,7 @@ const App: FC = () => {
                                             <Button
                                                 type="submit"
                                                 variant={
-                                                    mutation.isSuccess ? 'secondary' : 'primary'
+                                                    erOpprettetOgUendret ? 'secondary' : 'primary'
                                                 }
                                                 loading={mutation.isPending || isSubmitting}
                                             >
@@ -303,6 +317,11 @@ const App: FC = () => {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     type="button"
+                                                    variant={
+                                                        erOpprettetOgUendret
+                                                            ? 'primary'
+                                                            : 'secondary'
+                                                    }
                                                     icon={<ArrowRightIcon />}
                                                     iconPosition="right"
                                                 >
