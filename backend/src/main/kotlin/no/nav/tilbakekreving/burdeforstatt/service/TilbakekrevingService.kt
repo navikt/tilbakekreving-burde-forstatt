@@ -401,7 +401,7 @@ class TilbakekrevingService(
 
         repository.lager(kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId, kravOgVedtakstatus = oppdaterKravOgVedtakstatuss)
         return Ressurs.success(
-            data = "Kravgrunnlag er avsluttet for fagsystemId: $eksternFagsakId",
+            data = behandlingUrlVenter.hentEksisterendeUrl(gammelKravgrunnlag.fagsystemId),
             melding = "Kravgrunnlag avsluttet",
         )
     }
@@ -427,7 +427,7 @@ class TilbakekrevingService(
         )
         repository.lager(kravgrunnlagId = gammelKravgrunnlag.kravgrunnlagId, kravOgVedtakstatus = oppdatertKravOgVedtakstatus)
         return Ressurs.success(
-            data = "Kravgrunnlag er sperret for fagsystemId: $eksternFagsakId",
+            data = behandlingUrlVenter.hentEksisterendeUrl(gammelKravgrunnlag.fagsystemId),
             melding = "Kravgrunnlag sperret",
         )
     }
