@@ -18,7 +18,7 @@ export const endreKravgrunnlagSchema = z.object({
 export type EndreKravgrunnlagPeriode = z.infer<typeof endreKravgrunnlagPeriodeSchema>;
 export type EndreKravgrunnlagFormData = z.infer<typeof endreKravgrunnlagSchema>;
 
-const kravgrunnlagDatoSchema = z.tuple([z.number(), z.number(), z.number()]);
+const kravgrunnlagDatoSchema = z.iso.date();
 
 export const kravgrunnlagResponsSchema = z.object({
     data: z

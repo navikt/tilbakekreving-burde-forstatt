@@ -1,16 +1,9 @@
 package no.nav.tilbakekreving.burdeforstatt
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
@@ -49,17 +42,24 @@ import no.nav.tilbakekreving.burdeforstatt.service.BehandlingUrlVenter
 import no.nav.tilbakekreving.burdeforstatt.service.FagsystemKafkaConsumer
 import no.nav.tilbakekreving.burdeforstatt.service.MQService
 import no.nav.tilbakekreving.burdeforstatt.service.TilbakekrevingService
+import tools.jackson.core.util.DefaultIndenter
+import tools.jackson.core.util.DefaultPrettyPrinter
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.module.kotlin.jacksonMapperBuilder
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 val objectMapper: ObjectMapper =
-    jacksonObjectMapper()
+    jacksonMapperBuilder()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .configure(SerializationFeature.INDENT_OUTPUT, true)
-        .setDefaultPrettyPrinter(
+        .defaultPrettyPrinter(
             DefaultPrettyPrinter().apply {
-                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance())
                 indentObjectsWith(DefaultIndenter("  ", "\n"))
             },
-        ).registerModule(JavaTimeModule())
+        ).build()
 
 fun main() {
     val httpClient = defaultHttpClient()

@@ -1,6 +1,5 @@
 package no.nav.tilbakekreving.burdeforstatt.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.tilbakekreving.burdeforstatt.objectMapper
@@ -8,6 +7,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.sql.SQLException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,8 +27,8 @@ class FagsystemKafkaConsumer(
         fnr: String,
         behov: JsonNode,
     ) {
-        val fagsystemId = behov["eksternFagsakId"].asText()
-        val kravgrunnlagReferanse = behov["kravgrunnlagReferanse"].asText()
+        val fagsystemId = behov["eksternFagsakId"].asString()
+        val kravgrunnlagReferanse = behov["kravgrunnlagReferanse"].asString()
         if (!fagsystemId.startsWith("BF")) return
 
         log.info("Svarer på fagsysteminfo_behov for fagsystemId $fagsystemId", keyValue("fagsystemId", fagsystemId))
@@ -67,20 +67,20 @@ class FagsystemKafkaConsumer(
                     runBlocking {
                         records.forEach {
                             val jsonObject = objectMapper.readTree(it.value())
-                            val hendelsestype = jsonObject["hendelsestype"]?.asText()
+                            val hendelsestype = jsonObject["hendelsestype"]?.asString()
                             if (hendelsestype == "fagsysteminfo_behov") {
                                 svarPåBehov(it.topic(), it.key(), jsonObject)
                             }
                             if (hendelsestype == "behandling_endret") {
                                 val eksternFagsakId = jsonObject["eksternFagsakId"]
                                 val saksbehandlingUrl = jsonObject["tilbakekreving"]?.get("saksbehandlingURL")
-                                require(eksternFagsakId?.isTextual == true && eksternFagsakId.asText().isNotBlank()) {
+                                require(eksternFagsakId?.isString == true && eksternFagsakId.asString().isNotBlank()) {
                                     "behandling_endret mangler eksternFagsakId"
                                 }
-                                require(saksbehandlingUrl?.isTextual == true && saksbehandlingUrl.asText().isNotBlank()) {
+                                require(saksbehandlingUrl?.isString == true && saksbehandlingUrl.asString().isNotBlank()) {
                                     "behandling_endret mangler saksbehandlingURL"
                                 }
-                                behandlingUrlVenter.mottaUrl(eksternFagsakId.asText(), saksbehandlingUrl.asText())
+                                behandlingUrlVenter.mottaUrl(eksternFagsakId.asString(), saksbehandlingUrl.asString())
                             }
                         }
                     }

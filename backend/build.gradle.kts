@@ -1,5 +1,6 @@
 val ktorVersion = "3.6.0"
 val logbackVersion = "1.6.5"
+val jacksonVersion = "3.2.4"
 
 plugins {
     kotlin("jvm") version "2.4.21"
@@ -24,7 +25,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-jackson3:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
@@ -34,9 +35,8 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.5")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.4")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.4")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.4")
+    implementation("tools.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("tools.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.9")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("no.nav.familie.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:1.0_20260611160851_f0e234f")

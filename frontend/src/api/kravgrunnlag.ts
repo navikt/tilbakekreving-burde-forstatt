@@ -11,9 +11,6 @@ export type HentKravgrunnlagVariabler = {
     eksternFagsystemId: string;
 };
 
-const tilDatoStreng = ([år, måned, dag]: [number, number, number]): string =>
-    `${år}-${String(måned).padStart(2, '0')}-${String(dag).padStart(2, '0')}`;
-
 export const tilEndreKravgrunnlagPerioder = (json: unknown): EndreKravgrunnlagPeriode[] => {
     const respons = kravgrunnlagResponsSchema.parse(json);
 
@@ -26,8 +23,8 @@ export const tilEndreKravgrunnlagPerioder = (json: unknown): EndreKravgrunnlagPe
     }
 
     return respons.data.perioder.map(periode => ({
-        datoFra: tilDatoStreng(periode.fom),
-        datoTil: tilDatoStreng(periode.tom),
+        datoFra: periode.fom,
+        datoTil: periode.tom,
         feilutbetalt: String(periode.belopTilbakekreves),
     }));
 };
@@ -57,23 +54,18 @@ export type LagreKravgrunnlagVariabler = {
     perioder: EndreKravgrunnlagPeriode[];
 };
 
-const tilDatoArray = (dato: string): [number, number, number] => {
-    const [år, måned, dag] = dato.split('-');
-    return [Number(år), Number(måned), Number(dag)];
-};
-
 export const tilLagreKravgrunnlagBody = (
     perioder: EndreKravgrunnlagPeriode[]
 ): {
     perioder: {
-        fom: [number, number, number];
-        tom: [number, number, number];
+        fom: string;
+        tom: string;
         belopTilbakekreves: number;
     }[];
 } => ({
     perioder: perioder.map(periode => ({
-        fom: tilDatoArray(periode.datoFra),
-        tom: tilDatoArray(periode.datoTil),
+        fom: periode.datoFra,
+        tom: periode.datoTil,
         belopTilbakekreves: Number(periode.feilutbetalt.replace(',', '.')),
     })),
 });
