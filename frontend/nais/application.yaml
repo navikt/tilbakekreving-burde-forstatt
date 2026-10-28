@@ -30,10 +30,10 @@ spec:
       memory: 128Mi
       cpu: 25m
   filesFrom:
-    - mountPath: /var/cache/nginx
+    - mountPath: /var/lib/nginx/tmp
       emptyDir:
         medium: Memory
-    - mountPath: /var/run
+    - mountPath: /run
       emptyDir:
         medium: Memory
   ingresses:
