@@ -1,5 +1,5 @@
 val ktorVersion = "3.6.0"
-val logbackVersion = "1.6.5"
+val logbackVersion = "1.6.6"
 val jacksonVersion = "3.2.4"
 
 plugins {
