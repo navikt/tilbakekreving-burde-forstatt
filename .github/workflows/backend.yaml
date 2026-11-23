@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
         working-directory: backend
         run: ./gradlew shadowJar
-      - uses: nais/docker-build-push@v0
+      - uses: nais/docker-build-push@v1
         id: docker-push
         with:
           team: tilbake
